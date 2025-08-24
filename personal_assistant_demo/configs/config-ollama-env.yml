@@ -51,6 +51,8 @@ functions:
     _type: personal_assistant/add_client_note
   get_client_details:
     _type: personal_assistant/get_client_details
+  find_client_by_name:
+    _type: personal_assistant/find_client_by_name
 
   # Weather Tools (uncomment if you have OPENWEATHERMAP_API_KEY)
   # weather_info:
@@ -74,9 +76,11 @@ workflow:
     add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
     current_time, current_date,
     schedule_meeting, list_meetings, cancel_meeting,
-    add_client, list_clients, add_client_note, get_client_details
+    add_client, list_clients, add_client_note, get_client_details, find_client_by_name
     # weather_info, weather_condition  # Uncomment if using weather tools
   ]
   llm_name: ollama_llm
   verbose: true
   parse_agent_response_max_retries: 3
+  max_tool_calls: 60
+  recursion_limit: 150

@@ -29,6 +29,8 @@ functions:
     _type: personal_assistant/multiply_numbers
   divide_numbers:
     _type: personal_assistant/divide_numbers
+  calculate_percentage:
+    _type: personal_assistant/calculate_percentage
 
   # Date/Time Tools
   current_time:
@@ -51,6 +53,8 @@ functions:
     _type: personal_assistant/add_client_note
   get_client_details:
     _type: personal_assistant/get_client_details
+  find_client_by_name:
+    _type: personal_assistant/find_client_by_name
 
   # Weather Tools (uncomment if you have OPENWEATHERMAP_API_KEY)
   # weather_info:
@@ -64,19 +68,21 @@ llms:
     api_key: "ollama"  # Ollama doesn't require a real API key
     base_url: "http://localhost:11434/v1"  # Ollama's default OpenAI-compatible endpoint
     model_name: "qwen2.5:7b"  # Recommended: excellent for agents, tool calling, and reasoning
-    temperature: 0.1
-    max_tokens: 1000
+    temperature: 0.2
+    max_tokens: 1200
 
 workflow:
   _type: react_agent
   tool_names: [
     add_task, list_tasks, complete_task, delete_task,
-    add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
+    add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage,
     current_time, current_date,
     schedule_meeting, list_meetings, cancel_meeting,
-    add_client, list_clients, add_client_note, get_client_details
+    add_client, list_clients, add_client_note, get_client_details, find_client_by_name
     # weather_info, weather_condition  # Uncomment if using weather tools
   ]
   llm_name: ollama_llm
   verbose: true
-  parse_agent_response_max_retries: 3
+  parse_agent_response_max_retries: 5
+  max_tool_calls: 80
+  recursion_limit: 200

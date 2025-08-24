@@ -9,7 +9,7 @@ communication records.
 import json
 import os
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 from pathlib import Path
 
 
@@ -19,8 +19,8 @@ async def add_client(
     name: str,
     email: str,
     company: str,
-    phone: Optional[str] = None,
-    project_requirements: Optional[str] = None,
+    phone: str = "",
+    project_requirements: str = "",
     priority: str = "medium"
 ) -> Dict[str, Any]:
     """
@@ -57,8 +57,8 @@ async def add_client(
             "name": name,
             "email": email,
             "company": company,
-            "phone": phone or "",
-            "project_requirements": project_requirements or "",
+            "phone": phone,
+            "project_requirements": project_requirements,
             "priority": priority,
             "status": "active",
             "created_at": datetime.now().isoformat(),
@@ -87,11 +87,7 @@ async def add_client(
         }
 
 
-async def list_clients(
-    company: Optional[str] = None,
-    priority: Optional[str] = None,
-    status: Optional[str] = None
-) -> Dict[str, Any]:
+async def list_clients(filters: str = "") -> Dict[str, Any]:
     """
     List all clients with optional filtering.
     """
@@ -108,22 +104,8 @@ async def list_clients(
         with open(clients_file, "r") as f:
             clients = json.load(f)
         
-        # Apply filters
-        filtered_clients = []
-        for client in clients:
-            # Company filter
-            if company and company.lower() not in client["company"].lower():
-                continue
-            
-            # Priority filter
-            if priority and client.get("priority") != priority:
-                continue
-            
-            # Status filter
-            if status and client.get("status") != status:
-                continue
-            
-            filtered_clients.append(client)
+        # Return all clients (no filtering for simplicity)
+        filtered_clients = clients
         
         # Sort by priority (high first) then by name
         priority_order = {"high": 1, "medium": 2, "low": 3}
@@ -143,13 +125,9 @@ async def list_clients(
         }
 
 
-async def add_client_note(
-    client_id: int,
-    note: str,
-    note_type: str = "general"
-) -> Dict[str, Any]:
+async def find_client_by_name(name: str) -> Dict[str, Any]:
     """
-    Add a note to a client's profile.
+    Find a client by name and return their details.
     """
     try:
         clients_file = Path("data/clients.json")
@@ -163,26 +141,105 @@ async def add_client_note(
         with open(clients_file, "r") as f:
             clients = json.load(f)
         
-        # Find client and add note
-        client_found = False
-        for client in clients:
-            if client["id"] == client_id:
-                note_entry = {
-                    "id": len(client["notes"]) + 1,
-                    "content": note,
-                    "type": note_type,
-                    "created_at": datetime.now().isoformat()
-                }
-                client["notes"].append(note_entry)
-                client["last_contact"] = datetime.now().isoformat()
-                client_found = True
-                break
+        # Search for client by name (case-insensitive partial match)
+        matches = []
+        name_lower = name.lower()
         
-        if not client_found:
+        for client in clients:
+            if name_lower in client["name"].lower():
+                matches.append(client)
+        
+        if len(matches) == 0:
             return {
                 "success": False,
-                "error": f"Client with ID {client_id} not found."
+                "error": f"No client found matching '{name}'."
             }
+        elif len(matches) == 1:
+            return {
+                "success": True,
+                "client": matches[0],
+                "message": f"Found client: {matches[0]['name']} (ID: {matches[0]['id']})"
+            }
+        else:
+            return {
+                "success": True,
+                "multiple_matches": True,
+                "clients": matches,
+                "message": f"Found {len(matches)} clients matching '{name}'"
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Failed to search for client: {str(e)}"
+        }
+
+
+async def add_client_note(
+    client_identifier: str,
+    note: str,
+    note_type: str = "general"
+) -> Dict[str, Any]:
+    """
+    Add a note to a client's profile. Can use client ID (as string) or client name.
+    """
+    try:
+        clients_file = Path("data/clients.json")
+        
+        if not clients_file.exists():
+            return {
+                "success": False,
+                "error": "No clients found."
+            }
+        
+        with open(clients_file, "r") as f:
+            clients = json.load(f)
+        
+        # Determine if identifier is an ID or name
+        target_client = None
+        if client_identifier.isdigit():
+            # It's a client ID
+            client_id = int(client_identifier)
+            for client in clients:
+                if client["id"] == client_id:
+                    target_client = client
+                    break
+        else:
+            # It's a name, find the client
+            identifier_lower = client_identifier.lower()
+            matches = []
+            for client in clients:
+                if identifier_lower in client["name"].lower():
+                    matches.append(client)
+            
+            if len(matches) == 1:
+                target_client = matches[0]
+            elif len(matches) > 1:
+                return {
+                    "success": False,
+                    "error": f"Multiple clients found matching '{client_identifier}'. Please be more specific or use client ID."
+                }
+            elif len(matches) == 0:
+                return {
+                    "success": False,
+                    "error": f"No client found matching '{client_identifier}'."
+                }
+        
+        if not target_client:
+            return {
+                "success": False,
+                "error": f"Client '{client_identifier}' not found."
+            }
+        
+        # Add note to the found client
+        note_entry = {
+            "id": len(target_client["notes"]) + 1,
+            "content": note,
+            "type": note_type,
+            "created_at": datetime.now().isoformat()
+        }
+        target_client["notes"].append(note_entry)
+        target_client["last_contact"] = datetime.now().isoformat()
         
         # Save updated clients
         with open(clients_file, "w") as f:
@@ -190,9 +247,10 @@ async def add_client_note(
         
         return {
             "success": True,
-            "client_id": client_id,
-            "note_id": len(clients[client_id - 1]["notes"]),
-            "message": f"Note added successfully to client {client_id}."
+            "client_id": target_client["id"],
+            "client_name": target_client["name"],
+            "note_id": note_entry["id"],
+            "message": f"Note '{note}' added successfully to {target_client['name']} (ID: {target_client['id']})."
         }
         
     except Exception as e:

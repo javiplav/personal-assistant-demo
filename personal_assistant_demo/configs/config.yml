@@ -42,6 +42,9 @@ functions:
   divide_numbers:
     _type: personal_assistant/divide_numbers
     
+  calculate_percentage:
+    _type: personal_assistant/calculate_percentage
+    
   # Task Management Functions
   add_task:
     _type: personal_assistant/add_task
@@ -51,6 +54,9 @@ functions:
     
   complete_task:
     _type: personal_assistant/complete_task
+    
+  delete_task:
+    _type: personal_assistant/delete_task
 
   # Enterprise Solutions Architect Tools
   schedule_meeting:
@@ -67,16 +73,22 @@ functions:
     _type: personal_assistant/add_client_note
   get_client_details:
     _type: personal_assistant/get_client_details
+  find_client_by_name:
+    _type: personal_assistant/find_client_by_name
 
-# LLM Configuration - Using Nemotron 70B (optimized for tool calling)
+# LLM Configuration - NIM Cloud Models (excellent for function calling and agents)
+# Popular model options (just change the model field):
+# - meta/llama-3.1-70b-instruct (recommended - best balance of performance and speed)
+# - meta/llama-3.1-8b-instruct (faster, more cost-effective)
+# - mistralai/mistral-7b-instruct-v0.3 (excellent for structured outputs)
 llms:
   nvidia_llm:
     _type: nim
-    model: nvidia/llama-3.1-nemotron-70b-instruct
+    model: meta/llama-3.1-70b-instruct
     api_key: ${NVIDIA_API_KEY}
     base_url: https://integrate.api.nvidia.com/v1
-    temperature: 0.0
-    max_tokens: 500
+    temperature: 0.1
+    max_tokens: 1200
 
 # Workflow Configuration - Intelligent ReAct agent
 workflow:
@@ -88,9 +100,11 @@ workflow:
     - subtract_numbers
     - multiply_numbers
     - divide_numbers
+    - calculate_percentage
     - add_task
     - list_tasks
     - complete_task
+    - delete_task
     - schedule_meeting
     - list_meetings
     - cancel_meeting
@@ -98,8 +112,9 @@ workflow:
     - list_clients
     - add_client_note
     - get_client_details
+    - find_client_by_name
   llm_name: nvidia_llm
   verbose: true
-  parse_agent_response_max_retries: 3
-  max_tool_calls: 10
-  recursion_limit: 50
+  parse_agent_response_max_retries: 5
+  max_tool_calls: 80
+  recursion_limit: 200

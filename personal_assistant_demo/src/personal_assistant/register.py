@@ -32,7 +32,7 @@ from .tools.datetime_info import (
 )
 # Enterprise tools for solutions architect showcase
 from .tools.meeting_scheduler import schedule_meeting, list_meetings, cancel_meeting
-from .tools.client_management import add_client, list_clients, add_client_note, get_client_details
+from .tools.client_management import add_client, list_clients, add_client_note, get_client_details, find_client_by_name
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,9 @@ async def add_task_function(config: AddTaskConfig, builder: Builder):
     yield FunctionInfo.from_fn(
         add_task,
         description=(
-            "Add a new task to your personal task list. "
-            "Provide a description of what needs to be done. "
-            "Example: 'Add a task to buy groceries'"
+            "Add a new task to your personal task list. This tool is ALWAYS available for task creation. "
+            "Can be used independently or as part of multi-step workflows. "
+            "Example: 'Add a task to follow up with Sarah Johnson next week'"
         )
     )
 
@@ -202,21 +202,22 @@ async def divide_numbers_function(config: DivideNumbersConfig, builder: Builder)
     )
 
 
-# Additional calculator function - uncomment if needed
-# class CalculatePercentageConfig(FunctionBaseConfig, name="calculate_percentage"):
-#     pass
+# Percentage calculator function - required for demo step 4
+class CalculatePercentageConfig(FunctionBaseConfig, name="calculate_percentage"):
+    pass
 
 
-# @register_function(config_type=CalculatePercentageConfig)
-# async def calculate_percentage_function(config: CalculatePercentageConfig, builder: Builder):
-#     """Calculate a percentage of a number."""
-#     yield FunctionInfo.from_fn(
-#         calculate_percentage,
-#         description=(
-#             "Calculate what percentage of a number equals. "
-#             "Example: 'What's 20% of 150?' or 'Calculate 15 percent of 200'"
-#         )
-#     )
+@register_function(config_type=CalculatePercentageConfig)
+async def calculate_percentage_function(config: CalculatePercentageConfig, builder: Builder):
+    """Calculate a percentage of a number."""
+    yield FunctionInfo.from_fn(
+        calculate_percentage,
+        description=(
+            "Calculate a percentage of a number for financial and business calculations. "
+            "Always available for percentage calculations like '15% of 50000' or 'What's 20 percent of 150?'. "
+            "Essential for budget calculations and business intelligence."
+        )
+    )
 
 
 # Date/Time Tools
@@ -330,9 +331,10 @@ async def schedule_meeting_function(config: ScheduleMeetingConfig, builder: Buil
     yield FunctionInfo.from_fn(
         schedule_meeting,
         description=(
-            "Schedule a meeting with title, participants, duration, and preferred time slots. "
-            "Demonstrates enterprise calendar integration capabilities. "
-            "Example: 'Schedule a meeting with John and Sarah tomorrow at 2 PM for 1 hour'"
+            "Schedule a meeting with specified participants and timing details. "
+            "This tool is ALWAYS available for scheduling meetings. "
+            "Accepts natural language times like 'tomorrow at 3 PM' and participant names. "
+            "Example: 'Schedule a meeting with Sarah Johnson tomorrow at 3 PM for 90 minutes'"
         )
     )
 
@@ -347,9 +349,9 @@ async def list_meetings_function(config: ListMeetingsConfig, builder: Builder):
     yield FunctionInfo.from_fn(
         list_meetings,
         description=(
-            "List all scheduled meetings with optional filtering by date range and status. "
-            "Useful for daily planning and meeting management. "
-            "Example: 'Show me all meetings this week' or 'List my meetings for tomorrow'"
+            "List all scheduled meetings. This tool is ALWAYS available for retrieving meeting information. "
+            "Can be used independently or as part of multi-step workflows. "
+            "Example: 'List all meetings' or 'Show me my meetings'"
         )
     )
 
@@ -399,9 +401,9 @@ async def list_clients_function(config: ListClientsConfig, builder: Builder):
     yield FunctionInfo.from_fn(
         list_clients,
         description=(
-            "List all clients with optional filtering by company, priority, and status. "
-            "Useful for daily client management and follow-up planning. "
-            "Example: 'Show me all high-priority clients' or 'List clients from TechCorp'"
+            "List all clients in the CRM system. This tool is ALWAYS available for retrieving client information. "
+            "Can be used independently or as part of multi-step workflows. "
+            "Example: 'List all clients' or 'Show me my clients'"
         )
     )
 
@@ -436,5 +438,22 @@ async def get_client_details_function(config: GetClientDetailsConfig, builder: B
             "Get detailed information about a specific client including contact info, "
             "project requirements, and interaction history. "
             "Example: 'Show me details for client 1' or 'Get client information for John Smith'"
+        )
+    )
+
+
+class FindClientByNameConfig(FunctionBaseConfig, name="find_client_by_name"):
+    pass
+
+
+@register_function(config_type=FindClientByNameConfig)
+async def find_client_by_name_function(config: FindClientByNameConfig, builder: Builder):
+    """Find a client by name."""
+    yield FunctionInfo.from_fn(
+        find_client_by_name,
+        description=(
+            "Find a client by searching their name (partial matches allowed). "
+            "Returns client details including their ID, which can be used for other operations. "
+            "Example: 'Find client Sarah Johnson' or 'Look up Sarah'"
         )
     )
