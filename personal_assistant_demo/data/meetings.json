@@ -63,5 +63,31 @@
     "description": "",
     "status": "scheduled",
     "created_at": "2025-08-24T17:57:59.243592"
+  },
+  {
+    "id": 6,
+    "title": "GPU Cluster Architecture Review",
+    "participants": [
+      "Sarah Johnson"
+    ],
+    "start_time": "2025-08-25T15:00:00",
+    "end_time": "2025-08-25T16:30:00",
+    "duration_minutes": 90,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-24T18:18:39.845117"
+  },
+  {
+    "id": 19,
+    "title": "AI infrastructure consulting",
+    "participants": [
+      "Alex Chen"
+    ],
+    "start_time": "2025-08-25T15:00:00",
+    "end_time": "2025-08-25T16:30:00",
+    "duration_minutes": 90,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-24T20:50:32.038129"
   }
 ]

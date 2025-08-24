@@ -94,7 +94,7 @@ site/
 .ipynb_checkpoints
 
 # Personal assistant demo data (keep structure, ignore content)
-personal_assistant_demo/data/tasks.json
+# personal_assistant_demo/data/tasks.json  # Commented out to allow syncing data files
 
 # LinkedIn showcase materials (keep local for personal use)
 personal_assistant_demo/linkedin-materials/

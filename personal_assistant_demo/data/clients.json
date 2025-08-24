@@ -9,13 +9,19 @@
     "priority": "high",
     "status": "active",
     "created_at": "2025-08-24T17:44:00.528532",
-    "last_contact": "2025-08-24T17:45:37.066525",
+    "last_contact": "2025-08-24T18:20:29.097973",
     "notes": [
       {
         "id": 1,
         "content": "Scheduled GPU cluster meeting with Microsoft team",
         "type": "meeting",
         "created_at": "2025-08-24T17:45:37.066518"
+      },
+      {
+        "id": 2,
+        "content": "Scheduled GPU cluster architecture review meeting",
+        "type": "meeting",
+        "created_at": "2025-08-24T18:20:29.097969"
       }
     ]
   },
@@ -29,8 +35,33 @@
     "priority": "high",
     "status": "active",
     "created_at": "2025-08-24T17:52:24.157760",
-    "last_contact": "2025-08-24T17:52:24.157768",
-    "notes": []
+    "last_contact": "2025-08-24T19:58:11.372477",
+    "notes": [
+      {
+        "id": 1,
+        "content": "Scheduled GPU cluster architecture review meeting",
+        "type": "meeting",
+        "created_at": "2025-08-24T18:19:06.427305"
+      },
+      {
+        "id": 2,
+        "content": "Scheduled GPU cluster architecture review meeting",
+        "type": "meeting",
+        "created_at": "2025-08-24T18:24:44.130604"
+      },
+      {
+        "id": 3,
+        "content": "Scheduled GPU cluster architecture review meeting",
+        "type": "general",
+        "created_at": "2025-08-24T19:53:00.450434"
+      },
+      {
+        "id": 4,
+        "content": "Scheduled GPU cluster architecture review meeting",
+        "type": "general",
+        "created_at": "2025-08-24T19:58:11.372464"
+      }
+    ]
   },
   {
     "id": 3,
@@ -69,6 +100,163 @@
     "status": "active",
     "created_at": "2025-08-24T17:57:42.940269",
     "last_contact": "2025-08-24T17:57:42.940276",
+    "notes": []
+  },
+  {
+    "id": 6,
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@microsoft.com",
+    "company": "Microsoft",
+    "phone": "",
+    "project_requirements": "GPU cluster optimization for AI training workloads",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-24T18:18:30.379721",
+    "last_contact": "2025-08-24T23:25:22.540081",
+    "notes": [
+      {
+        "id": 1,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "general",
+        "created_at": "2025-08-24T20:01:10.741893"
+      },
+      {
+        "id": 2,
+        "content": "Had initial discussion about GPU cluster optimization for AI training workloads.",
+        "type": "general",
+        "created_at": "2025-08-24T20:01:46.582667"
+      },
+      {
+        "id": 3,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "general",
+        "created_at": "2025-08-24T20:03:03.353718"
+      },
+      {
+        "id": 4,
+        "content": "Attended the GPU cluster architecture review meeting with IT team. Discussed progress and next steps.",
+        "type": "general",
+        "created_at": "2025-08-24T20:08:04.082975"
+      },
+      {
+        "id": 5,
+        "content": "Attended the GPU cluster architecture review meeting with IT team. Discussed progress and next steps.",
+        "type": "general",
+        "created_at": "2025-08-24T20:09:42.142020"
+      },
+      {
+        "id": 6,
+        "content": "Attended the GPU cluster architecture review meeting with IT team. Discussed progress and next steps.",
+        "type": "general",
+        "created_at": "2025-08-24T20:18:43.741965"
+      },
+      {
+        "id": 7,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "meeting_update",
+        "created_at": "2025-08-24T21:28:09.811196"
+      },
+      {
+        "id": 8,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "meeting_update",
+        "created_at": "2025-08-24T21:42:12.767574"
+      },
+      {
+        "id": 9,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "meeting_update",
+        "created_at": "2025-08-24T21:53:12.067279"
+      },
+      {
+        "id": 10,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "meeting_update",
+        "created_at": "2025-08-24T21:57:51.529987"
+      },
+      {
+        "id": 11,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "meeting_update",
+        "created_at": "2025-08-24T22:30:40.656190"
+      },
+      {
+        "id": 12,
+        "content": "Scheduled GPU cluster architecture review meeting with IT team tomorrow at 10 AM.",
+        "type": "meeting_update",
+        "created_at": "2025-08-24T23:23:19.501803"
+      },
+      {
+        "id": 13,
+        "content": "Scheduled GPU cluster architecture review meeting",
+        "type": "general",
+        "created_at": "2025-08-24T23:25:22.540072"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Test User",
+    "email": "test@testcorp.com",
+    "company": "TestCorp",
+    "phone": "",
+    "project_requirements": "",
+    "priority": "medium",
+    "status": "active",
+    "created_at": "2025-08-24T20:17:13.489111",
+    "last_contact": "2025-08-24T20:17:13.489119",
+    "notes": []
+  },
+  {
+    "id": 8,
+    "name": "John Doe",
+    "email": "john.doe@techcorp.com",
+    "company": "TechCorp",
+    "phone": "",
+    "project_requirements": "",
+    "priority": "medium",
+    "status": "active",
+    "created_at": "2025-08-24T20:31:02.486191",
+    "last_contact": "2025-08-24T20:31:02.486195",
+    "notes": []
+  },
+  {
+    "id": 9,
+    "name": "Alex Chen",
+    "email": "alex.chen@nvidia.com",
+    "company": "NVIDIA",
+    "phone": "",
+    "project_requirements": "AI infrastructure consulting",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-24T20:41:32.692110",
+    "last_contact": "2025-08-24T21:11:34.119043",
+    "notes": [
+      {
+        "id": 1,
+        "content": "AI infrastructure consulting discussion",
+        "type": "general",
+        "created_at": "2025-08-24T20:47:37.229554"
+      },
+      {
+        "id": 2,
+        "content": "AI infrastructure consulting discussion",
+        "type": "general",
+        "created_at": "2025-08-24T21:11:34.119039"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Example Client",
+    "email": "example@example.com",
+    "company": "Example Inc.",
+    "phone": "123-456-7890",
+    "project_requirements": "Demo Project",
+    "priority": "low",
+    "status": "active",
+    "created_at": "2025-08-24T21:23:55.824442",
+    "last_contact": "2025-08-24T21:23:55.824448",
     "notes": []
   }
 ]
