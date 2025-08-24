@@ -27,7 +27,7 @@ from nat.data_models.function import FunctionBaseConfig
 from .tools.tasks import add_task, list_tasks, complete_task, delete_task
 from .tools.calculator import add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage
 from .tools.datetime_info import (
-    get_current_time, get_current_date, get_current_datetime,
+    get_current_time, get_current_date,
     get_timezone_info, calculate_time_difference, get_day_of_week, get_current_hour
 )
 
@@ -245,22 +245,6 @@ async def current_date_function(config: CurrentDateConfig, builder: Builder):
         description=(
             "Get the current date with day of week, month, day, and year. "
             "Example: 'What's today's date?' or 'What day is it?'"
-        )
-    )
-
-
-class CurrentDatetimeConfig(FunctionBaseConfig, name="current_datetime"):
-    pass
-
-
-@register_function(config_type=CurrentDatetimeConfig)
-async def current_datetime_function(config: CurrentDatetimeConfig, builder: Builder):
-    """Get the current date and time together."""
-    yield FunctionInfo.from_fn(
-        get_current_datetime,
-        description=(
-            "Get both the current date and time together. "
-            "Example: 'What's the current date and time?'"
         )
     )
 
