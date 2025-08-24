@@ -106,8 +106,8 @@ ollama pull qwen2.5:7b      # RECOMMENDED: Best for agents, excellent tool calli
 
 1. **Clone this repository**:
    ```bash
-   git clone <repository-url>
-   cd nemo-agent-toolkit-demo
+   git clone https://github.com/javiplav/personal-assistant-demo.git
+   cd personal-assistant-demo
    ```
 
 2. **Run the setup script**:
@@ -133,8 +133,8 @@ ollama pull qwen2.5:7b      # RECOMMENDED: Best for agents, excellent tool calli
 
 1. **Clone this repository**:
    ```bash
-   git clone <repository-url>
-   cd nemo-agent-toolkit-demo
+   git clone https://github.com/javiplav/personal-assistant-demo.git
+   cd personal-assistant-demo
    ```
 
 2. **Set up environment variables**:
