@@ -1,8 +1,8 @@
-# ✅ Demo Verification: Enterprise Solutions Architect Showcase
+# ✅ Demo Verification: Enterprise Solutions Architect Demo
 
-## 🎯 **Status: FULLY FUNCTIONAL & READY FOR LINKEDIN SHOWCASE**
+## 🎯 **Status: FULLY FUNCTIONAL & READY FOR DEMONSTRATION**
 
-This document confirms that the enhanced personal assistant demo is working perfectly and ready for your LinkedIn showcase.
+This document confirms that the enhanced personal assistant demo is working perfectly and ready for demonstrations.
 
 ---
 
@@ -70,16 +70,16 @@ Result: ✅ "Note added successfully to client 1"
 
 ---
 
-## 🎯 **LinkedIn Showcase Ready**
+## 🎯 **Demo Ready**
 
 ### **What You Can Demonstrate:**
 
-1. **Real-time Demo**: Run `python demo_showcase.py` for automated demo
+1. **Automated Demo**: Run `python demo/demo_showcase.py` for automated demo
 2. **Live Interaction**: Use `nat run --config_file configs/config-ollama.yml --input "your query"`
 3. **Enterprise Features**: Show CRM, calendar, and business intelligence
 4. **Multi-step Reasoning**: Demonstrate complex workflow orchestration
 
-### **Key Talking Points:**
+### **Key Features:**
 
 - **Enterprise Integration**: CRM, calendar, and business tools
 - **Real Business Value**: Solutions architect daily workflow automation
@@ -95,8 +95,8 @@ Result: ✅ "Note added successfully to client 1"
 cd personal_assistant_demo
 source ../.venv/bin/activate
 
-# Run automated showcase
-python demo_showcase.py
+# Run automated demo
+python demo/demo_showcase.py
 
 # Or run individual commands
 nat run --config_file configs/config-ollama.yml --input "Add client Google with AI infrastructure requirements"

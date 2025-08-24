@@ -52,7 +52,7 @@ data/
 
 #### **Verification & Testing**
 - **`DEMO_VERIFICATION.md`** - 🆕 Functionality verification and test results
-- **`demo_showcase.py`** - 🆕 Automated demo script for live presentations
+- **`demo/demo_showcase.py`** - 🆕 Automated demo script for live presentations
 
 ---
 
@@ -68,10 +68,10 @@ data/
 #### **Testing & Verification**
 - **`tests/`** - Unit tests for individual tools
 - **`DEMO_VERIFICATION.md`** - Manual testing checklist
-- **`demo_showcase.py`** - Automated testing script
+- **`demo/demo_showcase.py`** - Automated testing script
 
 ### **For Live Demonstrations**
-- **`demo_showcase.py`** - Run automated demo: `python demo_showcase.py`
+- **`demo/demo_showcase.py`** - Run automated demo: `python demo/demo_showcase.py`
 - **`examples.md`** - Quick reference for live demo commands
 - **`DEMO_VERIFICATION.md`** - Confirmation that everything works
 
@@ -117,8 +117,8 @@ pip install -e .
 
 ### **Running Demos**
 ```bash
-# Automated showcase
-python demo_showcase.py
+# Automated demo
+python demo/demo_showcase.py
 
 # Manual demo with Ollama
 nat run --config_file configs/config-ollama.yml --input "your query"
@@ -130,7 +130,7 @@ nat run --config_file configs/config.yml --input "your query"
 ### **Live Demo**
 ```bash
 # 1. Run automated demo
-python demo_showcase.py
+python demo/demo_showcase.py
 
 # 2. Use examples from examples.md
 # 3. Reference enterprise features in README.md
@@ -162,7 +162,7 @@ python demo_showcase.py
 
 ## 🚀 **Next Steps for Demo**
 
-1. **Run Demo**: Execute `python demo_showcase.py` to verify functionality
+1. **Run Demo**: Execute `python demo/demo_showcase.py` to verify functionality
 2. **Review Examples**: Check `examples.md` for comprehensive use cases
 3. **Customize**: Modify the demo for your specific needs
 4. **Deploy**: Use any of the three configurations for your environment
