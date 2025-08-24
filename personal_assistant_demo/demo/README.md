@@ -141,8 +141,8 @@ Use examples from `examples.md` to create custom demo scenarios based on your au
 ## 🔗 **Related Files**
 
 ### **In Main Project:**
-- **`examples.md`**: Comprehensive examples for manual demos
-- **`DEMO_VERIFICATION.md`**: Functionality verification
+- **`docs/examples.md`**: Comprehensive examples for manual demos
+- **`DEMO_VERIFICATION.md`**: Functionality verification (in this folder)
 - **`README.md`**: Main project documentation
 - **`configs/`**: Configuration files for different LLM providers
 

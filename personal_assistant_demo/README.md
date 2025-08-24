@@ -125,6 +125,11 @@ export OPENWEATHERMAP_API_KEY=<YOUR_OPENWEATHERMAP_API_KEY>  # Optional
 nat run --config_file configs/config-ollama.yml --input "What time is it and add a task to review the demo?"
 ```
 
+**Automated demo:**
+```bash
+python demo/demo_showcase.py
+```
+
 **Web UI experience:**
 ```bash
 # Terminal 1: Start Ollama (if not already running)
@@ -169,9 +174,17 @@ nat serve --config_file configs/config.yml
 ./dev.sh serve         # Web UI with NVIDIA NIM
 ```
 
+### Documentation
+
+- **Examples**: `docs/examples.md` - Comprehensive usage examples
+- **Project Structure**: `docs/PROJECT_ORGANIZATION.md` - Complete project guide
+- **Demo Verification**: `demo/DEMO_VERIFICATION.md` - Functionality verification
+
 ---
 
 ## Example Interactions
+
+For comprehensive examples, see `docs/examples.md`.
 
 Here are some example queries you can try:
 
