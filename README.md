@@ -160,10 +160,13 @@ ollama pull qwen2.5:7b      # RECOMMENDED: Best for agents, excellent tool calli
    uv pip install nvidia-nat[all]
    ```
    
-   **Option B: Development Version**
+   **Option B: Install from Source (Optional)**
    ```bash
+   # Only if you want to modify the toolkit itself
+   git clone https://github.com/NVIDIA/NeMo-Agent-Toolkit.git NeMo-Agent-Toolkit-develop
    cd NeMo-Agent-Toolkit-develop
    uv pip install -e .[all]
+   cd ..
    ```
 
 5. **Install the demo**:
@@ -188,7 +191,7 @@ nat run --config_file configs/config.yml --input "What time is it and add a task
 cd personal_assistant_demo
 nat serve --config_file configs/config.yml
 
-# Terminal 2: Start the web UI (if installed)
+# Terminal 2: Start the web UI (if you've set it up)
 cd NeMo-Agent-Toolkit-develop/external/nat-ui
 npm run dev
 
@@ -225,7 +228,7 @@ ollama serve
 cd personal_assistant_demo
 nat serve --config_file configs/config-ollama.yml
 
-# Terminal 3: Start the web UI (if installed)
+# Terminal 3: Start the web UI (if you've set it up)
 cd NeMo-Agent-Toolkit-develop/external/nat-ui
 npm run dev
 
@@ -261,6 +264,8 @@ nat serve --config_file configs/config-ollama.yml
 ## 🌐 Web User Interface (Optional)
 
 The **official NeMo Agent Toolkit Web UI** provides a modern chat interface for interacting with your agents. Since the full toolkit isn't synced to this repository, you'll need to set it up manually if you want the web UI.
+
+> **Note**: The `NeMo-Agent-Toolkit-develop` directory is used locally for development and UI purposes but is not synced to this repository (it's in `.gitignore`). You only need to create it if you want the web UI or plan to modify the toolkit itself.
 
 ### UI Features
 
