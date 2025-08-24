@@ -157,7 +157,7 @@ ollama pull qwen2.5:7b      # RECOMMENDED: Best for agents, excellent tool calli
    
    **Option A: Stable Release**
    ```bash
-   uv pip install nvidia-nat[all]
+   uv pip install nvidia-nat[langchain]
    ```
    
    **Option B: Install from Source (Optional)**
