@@ -2,6 +2,26 @@
 
 A comprehensive demonstration of the NVIDIA NeMo Agent Toolkit featuring a personal assistant agent that showcases the toolkit's key capabilities for building intelligent agent workflows.
 
+## 🚀 Quick Start (Choose Your LLM Provider)
+
+This demo supports **two LLM providers** - choose the one that fits your needs:
+
+### 🏠 **Option A: Ollama (Local) - Recommended for Beginners**
+- ✅ **No API key required** - runs completely locally
+- ✅ **Privacy-focused** - everything stays on your machine
+- ✅ **Free to use** - no usage costs or rate limits
+- ✅ **Works offline** - no internet required after setup
+- ❌ Requires local setup and hardware resources
+
+### ☁️ **Option B: NVIDIA NIM (Cloud) - For Advanced Users**
+- ✅ **More powerful models** - higher performance
+- ✅ **No local setup** - just need an API key
+- ✅ **Always available** - no hardware limitations
+- ❌ Requires NVIDIA API key
+- ❌ Network dependency and potential costs
+
+---
+
 ## Repository Structure
 
 ```
@@ -13,7 +33,7 @@ personal-assistant-demo/
 │   │       ├── register.py         # Function registration
 │   │       └── env_loader.py       # Environment variable loader
 │   ├── configs/                    # Configuration files
-│   │   ├── config.yml              # NVIDIA NIM configuration
+│   │   ├── config.yml              # NVIDIA NIM configuration (cloud)
 │   │   ├── config-ollama.yml       # Ollama local LLM configuration
 │   │   └── config-ollama-env.yml   # Ollama with environment variables
 │   ├── tests/                      # Demo tests
@@ -27,8 +47,6 @@ personal-assistant-demo/
 ├── dev.sh                          # Development helper script
 └── README.md                       # This file
 ```
-
-
 
 ## About NeMo Agent Toolkit
 
@@ -55,18 +73,15 @@ A comprehensive demonstration featuring a personal assistant agent with:
 
 📖 **[Demo Documentation](./personal_assistant_demo/README.md)**
 
-## Quick Start
+## 🎯 Getting Started
 
 ### Prerequisites
 
 - Python 3.11 or 3.12
 - [uv](https://docs.astral.sh/uv/) - Fast Python package manager
 - **Node.js 18+** and **npm** (optional, only if you want the web UI)
-- **Choose one LLM provider:**
-  - **NVIDIA API Key** from [build.nvidia.com](https://build.nvidia.com/) (cloud-based)
-  - **OR [Ollama](https://ollama.com/)** for local LLM (privacy-focused, no API key needed)
 
-#### Installing uv
+### Step 1: Install uv
 
 ```bash
 # Install uv (recommended)
@@ -79,10 +94,11 @@ pip install uv
 brew install uv
 ```
 
-#### Installing Ollama (Optional - for local LLM)
+### Step 2: Choose Your LLM Provider
 
-If you prefer to run LLMs locally instead of using NVIDIA's cloud API:
+#### 🏠 **Option A: Ollama (Local) - Recommended for Beginners**
 
+**Install Ollama:**
 ```bash
 # Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
@@ -97,175 +113,160 @@ ollama serve
 ollama pull qwen2.5:7b      # RECOMMENDED: Best for agents, excellent tool calling
 # ollama pull llama3.2:3b   # Faster, smaller alternative
 # ollama pull llama3.1:8b   # More capable, needs more RAM
-# ollama pull codellama:7b  # Good for coding tasks
 ```
 
-### Installation
+#### ☁️ **Option B: NVIDIA NIM (Cloud) - For Advanced Users**
 
-#### Quick Setup (Recommended)
+**Get NVIDIA API Key:**
+1. Visit [build.nvidia.com](https://build.nvidia.com/)
+2. Sign up for an account
+3. Get your API key from the dashboard
 
-1. **Clone this repository**:
-   ```bash
-   git clone https://github.com/javiplav/personal-assistant-demo.git
-   cd personal-assistant-demo
-   ```
+### Step 3: Setup the Demo
 
-2. **Run the setup script**:
-   ```bash
-   ./setup.sh
-   ```
-   This will:
-   - Check that uv is installed
-   - Create virtual environment with `uv venv`
-   - Create `.env` file from template
-   - Install the demo package with `uv pip install`
-   - Show you next steps
+**Clone and setup:**
+```bash
+# Clone the repository
+git clone https://github.com/javiplav/personal-assistant-demo.git
+cd personal-assistant-demo
 
-3. **Edit `.env` file** with your actual API keys
+# Run the setup script
+./setup.sh
+```
 
-4. **Activate the virtual environment**:
-   ```bash
-   source .venv/bin/activate  # macOS/Linux
-   # or .venv\Scripts\activate  # Windows
-   ```
+**Activate the virtual environment:**
+```bash
+source .venv/bin/activate  # macOS/Linux
+# or .venv\Scripts\activate  # Windows
+```
 
-#### Manual Setup
+### Step 4: Run Your First Demo
 
-1. **Clone this repository**:
-   ```bash
-   git clone https://github.com/javiplav/personal-assistant-demo.git
-   cd personal-assistant-demo
-   ```
+#### 🏠 **With Ollama (Local):**
 
-2. **Set up environment variables**:
-   ```bash
-   # Copy the example environment file
-   cp .env.example .env
-   
-   # Edit .env file with your actual API keys
-   # NVIDIA_API_KEY=your_actual_nvidia_api_key_here
-   # OPENWEATHERMAP_API_KEY=your_actual_openweather_api_key_here  # Optional
-   ```
-
-3. **Create virtual environment**:
-   ```bash
-   uv venv
-   source .venv/bin/activate  # macOS/Linux
-   ```
-
-4. **Install the toolkit** (choose one):
-   
-   **Option A: Stable Release**
-   ```bash
-   uv pip install nvidia-nat[langchain]
-   ```
-   
-   **Option B: Install from Source (Optional)**
-   ```bash
-   # Only if you want to modify the toolkit itself
-   git clone https://github.com/NVIDIA/NeMo-Agent-Toolkit.git NeMo-Agent-Toolkit-develop
-   cd NeMo-Agent-Toolkit-develop
-   uv pip install -e .[all]
-   cd ..
-   ```
-
-5. **Install the demo**:
-   ```bash
-   cd personal_assistant_demo
-   uv pip install -e .
-   ```
-
-### Running Examples
-
-#### With NVIDIA NIM (Cloud)
-
-**Command Line**:
+**Quick test:**
 ```bash
 cd personal_assistant_demo
-nat run --config_file configs/config.yml --input "What time is it and add a task to review the demo?"
+nat run --config_file configs/config-ollama.yml --input "What time is it?"
 ```
 
-**Web UI** (if you've set up the UI):
+**Web UI experience:**
+```bash
+# Terminal 1: Start Ollama (if not already running)
+ollama serve
+
+# Terminal 2: Start the backend
+cd personal_assistant_demo
+nat serve --config_file configs/config-ollama.yml
+
+# Terminal 3: Start the web UI (optional)
+./dev.sh ui-setup  # First time setup
+./dev.sh ui        # Start the UI
+# Then open http://localhost:3001
+```
+
+#### ☁️ **With NVIDIA NIM (Cloud):**
+
+**First, set your API key:**
+```bash
+# Edit .env file and add your NVIDIA API key
+echo "NVIDIA_API_KEY=your_actual_api_key_here" >> .env
+```
+
+**Quick test:**
+```bash
+cd personal_assistant_demo
+nat run --config_file configs/config.yml --input "What time is it?"
+```
+
+**Web UI experience:**
 ```bash
 # Terminal 1: Start the backend
 cd personal_assistant_demo
 nat serve --config_file configs/config.yml
 
-# Terminal 2: Start the web UI (if you've set it up)
-cd NeMo-Agent-Toolkit-develop/external/nat-ui
-npm run dev
-
-# Open http://localhost:3000 in your browser
+# Terminal 2: Start the web UI (optional)
+./dev.sh ui-setup  # First time setup
+./dev.sh ui        # Start the UI
+# Then open http://localhost:3001
 ```
 
-**API Interface** (always available):
-```bash
-# Start the backend
-cd personal_assistant_demo
-nat serve --config_file configs/config.yml
+---
 
-# Open http://localhost:8000/docs in your browser
+## 🎪 Example Interactions
+
+Try these queries with your agent:
+
+### Task Management
+- "Add a task to buy groceries"
+- "List all my tasks"
+- "Mark the grocery task as completed"
+- "Create a task to call mom tomorrow"
+
+### Calculations
+- "What's 15 multiplied by 8?"
+- "Calculate 100 divided by 4"
+- "Add 25 and 37"
+
+### Date/Time
+- "What time is it?"
+- "What's today's date?"
+- "What timezone am I in?"
+
+### Complex Multi-step Queries
+- "What's the weather in Paris and add a task to pack an umbrella if it's going to rain"
+- "Calculate 20% of 150 and create a task to save that amount"
+- "What time is it and how much is 8 hours from now?"
+
+---
+
+## 🔧 Configuration Options
+
+### Config File Comparison
+
+| Config File | LLM Provider | API Key Required | Best For |
+|-------------|--------------|------------------|----------|
+| `config-ollama.yml` | Ollama (Local) | ❌ None | Beginners, privacy, offline use |
+| `config-ollama-env.yml` | Ollama (Local) | ❌ None | Advanced users, custom models |
+| `config.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Production, high performance |
+
+### Using Environment Variables with Ollama
+
+For more flexibility with Ollama, use `config-ollama-env.yml`:
+
+```bash
+# Customize Ollama settings
+export OLLAMA_BASE_URL="http://localhost:11434/v1"
+export OLLAMA_MODEL="qwen2.5:7b"
+
+# Run with environment-based config
+nat run --config_file configs/config-ollama-env.yml --input "Hello!"
 ```
 
-#### With Ollama (Local)
+### Development Helper Script
 
-**Command Line**:
-```bash
-# Terminal 1: Start Ollama
-ollama serve
-
-# Terminal 2: Run the demo
-cd personal_assistant_demo
-nat run --config_file configs/config-ollama.yml --input "What time is it and add a task to review the demo?"
-```
-
-**Web UI** (if you've set up the UI):
-```bash
-# Terminal 1: Start Ollama
-ollama serve
-
-# Terminal 2: Start the backend
-cd personal_assistant_demo
-nat serve --config_file configs/config-ollama.yml
-
-# Terminal 3: Start the web UI (if you've set it up)
-cd NeMo-Agent-Toolkit-develop/external/nat-ui
-npm run dev
-
-# Open http://localhost:3000 in your browser
-```
-
-**API Interface** (always available):
-```bash
-# Terminal 1: Start Ollama
-ollama serve
-
-# Terminal 2: Start the backend
-cd personal_assistant_demo
-nat serve --config_file configs/config-ollama.yml
-
-# Open http://localhost:8000/docs in your browser
-```
-
-#### Using the Development Script
+Use the `dev.sh` script for common tasks:
 
 ```bash
-# NVIDIA NIM
-./dev.sh run       # Quick demo
-./dev.sh serve     # Web UI
-
-# Ollama Local
+# Ollama commands
 ./dev.sh run-ollama    # Quick demo with Ollama
 ./dev.sh serve-ollama  # Web UI with Ollama
+
+# NVIDIA commands
+./dev.sh run           # Quick demo with NVIDIA NIM
+./dev.sh serve         # Web UI with NVIDIA NIM
+
+# Other commands
+./dev.sh help          # Show all available commands
+./dev.sh ui-setup      # Setup web UI
+./dev.sh ui            # Start web UI
 ```
 
-**More Examples**: Check out the [official NeMo Agent Toolkit examples](https://github.com/NVIDIA/NeMo-Agent-Toolkit/tree/main/examples) for additional demonstrations.
+---
 
 ## 🌐 Web User Interface (Optional)
 
-The **official NeMo Agent Toolkit Web UI** provides a modern chat interface for interacting with your agents. Since the full toolkit isn't synced to this repository, you'll need to set it up manually if you want the web UI.
-
-> **Note**: The `NeMo-Agent-Toolkit-develop` directory is used locally for development and UI purposes but is not synced to this repository (it's in `.gitignore`). You only need to create it if you want the web UI or plan to modify the toolkit itself.
+The **official NeMo Agent Toolkit Web UI** provides a modern chat interface for interacting with your agents.
 
 ### UI Features
 
@@ -276,38 +277,30 @@ The **official NeMo Agent Toolkit Web UI** provides a modern chat interface for 
 - 🔌 **WebSocket Integration**: Real-time communication
 - 📱 **Mobile Responsive**: Works on all devices
 
-### UI Setup (Optional)
-
-If you want the web UI, you'll need to set it up manually since it's not included in this repository:
+### UI Setup
 
 ```bash
-# 1. Create the directory structure
+# Automated setup
+./dev.sh ui-setup  # Clones and sets up the UI
+./dev.sh ui        # Starts the UI server
+
+# Manual setup (if needed)
 mkdir -p NeMo-Agent-Toolkit-develop/external
-
-# 2. Clone the UI repository
 git clone https://github.com/NVIDIA/NeMo-Agent-Toolkit-UI.git NeMo-Agent-Toolkit-develop/external/nat-ui
-
-# 3. Install dependencies
 cd NeMo-Agent-Toolkit-develop/external/nat-ui
 npm ci
-
-# 4. Start the UI development server
 npm run dev
 ```
 
-**Or use the automated setup script:**
-```bash
-./dev.sh ui-setup  # Automatically clones and sets up the UI
-./dev.sh ui        # Starts the UI server
-```
+The UI will be available at `http://localhost:3001`
 
-The UI will be available at `http://localhost:3000`
+### Alternative: API Documentation
 
-### Alternative: Use API Documentation
+If you don't want the full UI, use the built-in API documentation at `http://localhost:8000/docs` when running the backend.
 
-If you don't want to set up the full UI, you can use the built-in API documentation interface at `http://localhost:8000/docs` when running the backend. This provides a simpler way to test your agent.
+---
 
-## Key Features Demonstrated
+## 🎯 Key Features Demonstrated
 
 ### Agent Types
 - **ReAct Agents**: Reasoning and acting in iterative cycles
@@ -342,62 +335,44 @@ If you don't want to set up the full UI, you can use the built-in API documentat
 - **Environment Variables**: Secure API key management via `.env` files
 - **Plugin System**: Modular component registration
 
-### Environment Variables
+---
+
+## 🔐 Environment Variables
 
 This demo uses a `.env` file for secure API key management:
 
 1. **Copy the template**: `cp .env.example .env`
 2. **Edit `.env`** with your actual API keys:
-   - `NVIDIA_API_KEY`: Required for LLM access
+   - `NVIDIA_API_KEY`: Required for NVIDIA NIM (cloud) access
    - `OPENWEATHERMAP_API_KEY`: Optional for weather functionality
 3. **Never commit `.env`** - it's automatically ignored by Git
 
 The demo automatically loads environment variables using `python-dotenv`.
 
-### Development with uv
+---
 
-This project uses [uv](https://docs.astral.sh/uv/) for fast dependency management:
+## 🛠️ Development
+
+### Running Tests
 
 ```bash
-# Create virtual environment
-uv venv
-
-# Install dependencies
-uv pip install -e personal_assistant_demo/
-
-# Add new dependencies
-uv add requests>=2.31.0
-
-# Run commands in the virtual environment
-uv run nat --help
+cd personal_assistant_demo
 uv run pytest tests/
-
-# Sync dependencies (if using uv.lock)
-uv sync
 ```
 
-#### Development Helper Script
+### Development Helper Script
 
 Use the `dev.sh` script for common development tasks:
 
 ```bash
 ./dev.sh setup     # Initial setup
 ./dev.sh test      # Run tests
-./dev.sh run       # Run demo with sample query
-./dev.sh serve     # Start web UI
+./dev.sh run       # Run demo with NVIDIA NIM
+./dev.sh run-ollama # Run demo with Ollama
+./dev.sh serve     # Start web UI with NVIDIA NIM
+./dev.sh serve-ollama # Start web UI with Ollama
 ./dev.sh clean     # Clean virtual environment
 ./dev.sh help      # Show all commands
-```
-
-## Development
-
-### Running Tests
-
-**Demo Tests**:
-```bash
-cd personal_assistant_demo
-uv run pytest tests/
-# or with activated venv: python -m pytest tests/
 ```
 
 ### Code Quality
@@ -408,31 +383,28 @@ The project uses:
 - **Logging**: Comprehensive logging throughout
 - **Error Handling**: Graceful error management
 
-### Contributing
+---
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
-
-## Documentation
+## 📚 Documentation
 
 - **[NeMo Agent Toolkit Documentation](https://docs.nvidia.com/nemo/agent-toolkit/latest)**
 - **[GitHub Repository](https://github.com/NVIDIA/NeMo-Agent-Toolkit)**
 - **[Official Examples](https://github.com/NVIDIA/NeMo-Agent-Toolkit/tree/main/examples)**
 - **[API Reference](https://docs.nvidia.com/nemo/agent-toolkit/latest/reference/)**
 
-## License
+---
 
-This project is licensed under the Apache License 2.0. See the [NeMo Agent Toolkit LICENSE](https://github.com/NVIDIA/NeMo-Agent-Toolkit/blob/main/LICENSE.md) for details.
-
-## Support
+## 🤝 Support
 
 - **GitHub Issues**: [NeMo Agent Toolkit Issues](https://github.com/NVIDIA/NeMo-Agent-Toolkit/issues)
 - **Documentation**: [Official Docs](https://docs.nvidia.com/nemo/agent-toolkit/latest)
 - **Community**: Join the NVIDIA Developer community
+
+---
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0. See the [NeMo Agent Toolkit LICENSE](https://github.com/NVIDIA/NeMo-Agent-Toolkit/blob/main/LICENSE.md) for details.
 
 ---
 

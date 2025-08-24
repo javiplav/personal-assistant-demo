@@ -12,37 +12,37 @@ general:
 functions:
   # Task Management Tools
   add_task:
-    _type: add_task
+    _type: personal_assistant/add_task
   list_tasks:
-    _type: list_tasks
+    _type: personal_assistant/list_tasks
   complete_task:
-    _type: complete_task
+    _type: personal_assistant/complete_task
   delete_task:
-    _type: delete_task
+    _type: personal_assistant/delete_task
 
   # Calculator Tools
   add_numbers:
-    _type: add_numbers
+    _type: personal_assistant/add_numbers
   subtract_numbers:
-    _type: subtract_numbers
+    _type: personal_assistant/subtract_numbers
   multiply_numbers:
-    _type: multiply_numbers
+    _type: personal_assistant/multiply_numbers
   divide_numbers:
-    _type: divide_numbers
+    _type: personal_assistant/divide_numbers
 
   # Date/Time Tools
   current_time:
-    _type: current_time
+    _type: personal_assistant/current_time
   current_date:
-    _type: current_date
+    _type: personal_assistant/current_date
   current_datetime:
-    _type: current_datetime
+    _type: personal_assistant/current_datetime
 
   # Weather Tools (uncomment if you have OPENWEATHERMAP_API_KEY)
   # weather_info:
-  #   _type: weather_info
+  #   _type: personal_assistant/weather_info
   # weather_condition:
-  #   _type: weather_condition
+  #   _type: personal_assistant/weather_condition
 
 llms:
   ollama_llm:

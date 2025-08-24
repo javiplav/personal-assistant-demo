@@ -49,7 +49,9 @@ A comprehensive demonstration of the NeMo Agent Toolkit featuring a personal ass
 
 1. Python 3.11 or 3.12 installed
 2. NeMo Agent Toolkit development environment set up
-3. API keys for NVIDIA and OpenWeatherMap services
+3. **Choose one LLM provider:**
+   - **Ollama (Local)** - Recommended for beginners (no API key required)
+   - **NVIDIA NIM (Cloud)** - For advanced users (requires API key)
 
 ### Install this Demo
 
@@ -63,14 +65,42 @@ uv pip install -e .
 pip install -e .
 ```
 
-### Set Up API Keys
+### Set Up Your LLM Provider
 
-You'll need the following API keys:
+#### 🏠 **Option A: Ollama (Local) - Recommended for Beginners**
 
-1. **NVIDIA API Key** (required): Get from [build.nvidia.com](https://build.nvidia.com/)
-2. **OpenWeatherMap API Key** (optional): Get from [openweathermap.org](https://openweathermap.org/api)
-
+**Install Ollama:**
 ```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Or using homebrew (macOS)
+brew install ollama
+
+# Start Ollama service
+ollama serve
+
+# Pull a model (in another terminal)
+ollama pull qwen2.5:7b      # RECOMMENDED: Best for agents, excellent tool calling
+# ollama pull llama3.2:3b   # Faster, smaller alternative
+# ollama pull llama3.1:8b   # More capable, needs more RAM
+```
+
+**No API key required!** Ollama runs completely locally on your machine.
+
+#### ☁️ **Option B: NVIDIA NIM (Cloud) - For Advanced Users**
+
+**Get NVIDIA API Key:**
+1. Visit [build.nvidia.com](https://build.nvidia.com/)
+2. Sign up for an account
+3. Get your API key from the dashboard
+
+**Set up environment variables:**
+```bash
+# Create .env file
+cp .env.example .env
+
+# Edit .env file and add your API keys
 export NVIDIA_API_KEY=<YOUR_NVIDIA_API_KEY>
 export OPENWEATHERMAP_API_KEY=<YOUR_OPENWEATHERMAP_API_KEY>  # Optional
 ```
@@ -79,34 +109,62 @@ export OPENWEATHERMAP_API_KEY=<YOUR_OPENWEATHERMAP_API_KEY>  # Optional
 
 ## Running the Demo
 
-### Basic Usage
+### 🏠 **With Ollama (Local) - Recommended**
 
-Run the personal assistant with a simple query:
+**Quick test:**
+```bash
+nat run --config_file configs/config-ollama.yml --input "What time is it and add a task to review the demo?"
+```
 
+**Web UI experience:**
+```bash
+# Terminal 1: Start Ollama (if not already running)
+ollama serve
+
+# Terminal 2: Start the backend
+nat serve --config_file configs/config-ollama.yml
+
+# Terminal 3: Start the web UI (optional)
+./dev.sh ui-setup  # First time setup
+./dev.sh ui        # Start the UI
+# Then open http://localhost:3001
+```
+
+### ☁️ **With NVIDIA NIM (Cloud)**
+
+**Quick test:**
 ```bash
 nat run --config_file configs/config.yml --input "What time is it and add a task to review the demo?"
 ```
 
-### Interactive Mode
-
-For a more interactive experience, you can use the NeMo Agent Toolkit UI:
-
+**Web UI experience:**
 ```bash
+# Terminal 1: Start the backend
 nat serve --config_file configs/config.yml
+
+# Terminal 2: Start the web UI (optional)
+./dev.sh ui-setup  # First time setup
+./dev.sh ui        # Start the UI
+# Then open http://localhost:3001
 ```
 
-Then open your browser to `http://localhost:8000` to interact with the assistant through a web interface.
+### Using Development Helper Script
+
+```bash
+# Ollama commands
+./dev.sh run-ollama    # Quick demo with Ollama
+./dev.sh serve-ollama  # Web UI with Ollama
+
+# NVIDIA commands
+./dev.sh run           # Quick demo with NVIDIA NIM
+./dev.sh serve         # Web UI with NVIDIA NIM
+```
 
 ---
 
 ## Example Interactions
 
 Here are some example queries you can try:
-
-### Weather Queries
-- "What's the weather like in San Francisco?"
-- "Is it raining in London right now?"
-- "What's the temperature in Tokyo?"
 
 ### Task Management
 - "Add a task to buy groceries"
@@ -123,6 +181,11 @@ Here are some example queries you can try:
 - "What time is it?"
 - "What's today's date?"
 - "What timezone am I in?"
+
+### Weather Queries (requires OpenWeatherMap API key)
+- "What's the weather like in San Francisco?"
+- "Is it raining in London right now?"
+- "What's the temperature in Tokyo?"
 
 ### Complex Multi-step Queries
 - "What's the weather in Paris and add a task to pack an umbrella if it's going to rain"
@@ -147,7 +210,9 @@ personal_assistant_demo/
 │           ├── calculator.py    # Mathematical operations
 │           └── datetime_info.py # Date/time utilities
 ├── configs/
-│   └── config.yml              # Main workflow configuration
+│   ├── config.yml              # NVIDIA NIM configuration (cloud)
+│   ├── config-ollama.yml       # Ollama local LLM configuration
+│   └── config-ollama-env.yml   # Ollama with environment variables
 ├── tests/
 │   ├── test_weather.py
 │   ├── test_tasks.py
@@ -165,6 +230,31 @@ personal_assistant_demo/
 3. **Plugin System**: Functions are registered through the NAT plugin system
 4. **Configuration**: All behavior is controlled through YAML configuration
 5. **Persistence**: Tasks are stored in JSON format for persistence between sessions
+
+---
+
+## Configuration Options
+
+### Config File Comparison
+
+| Config File | LLM Provider | API Key Required | Best For |
+|-------------|--------------|------------------|----------|
+| `config-ollama.yml` | Ollama (Local) | ❌ None | Beginners, privacy, offline use |
+| `config-ollama-env.yml` | Ollama (Local) | ❌ None | Advanced users, custom models |
+| `config.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Production, high performance |
+
+### Using Environment Variables with Ollama
+
+For more flexibility with Ollama, use `config-ollama-env.yml`:
+
+```bash
+# Customize Ollama settings
+export OLLAMA_BASE_URL="http://localhost:11434/v1"
+export OLLAMA_MODEL="qwen2.5:7b"
+
+# Run with environment-based config
+nat run --config_file configs/config-ollama-env.yml --input "Hello!"
+```
 
 ---
 
@@ -189,9 +279,9 @@ You can customize the agent behavior by:
 
 ### Configuration Options
 
-The `configs/config.yml` file allows you to:
+The configuration files allow you to:
 
-- Switch between different LLM providers (NVIDIA NIM, OpenAI, etc.)
+- Switch between different LLM providers (NVIDIA NIM, Ollama, etc.)
 - Adjust model parameters (temperature, max tokens)
 - Enable/disable specific tools
 - Configure tool-specific settings
@@ -202,10 +292,11 @@ The `configs/config.yml` file allows you to:
 
 ### Common Issues
 
-1. **API Key Issues**: Ensure your NVIDIA_API_KEY is set correctly
-2. **Weather Not Working**: Check your OPENWEATHERMAP_API_KEY or disable weather tools
-3. **Task Persistence**: Ensure the `data/` directory is writable
-4. **Import Errors**: Make sure you've installed the package with `pip install -e .`
+1. **Ollama Connection Issues**: Ensure Ollama is running with `ollama serve`
+2. **NVIDIA API Key Issues**: Ensure your NVIDIA_API_KEY is set correctly
+3. **Weather Not Working**: Check your OPENWEATHERMAP_API_KEY or disable weather tools
+4. **Task Persistence**: Ensure the `data/` directory is writable
+5. **Import Errors**: Make sure you've installed the package with `pip install -e .`
 
 ### Getting Help
 
