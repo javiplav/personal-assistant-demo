@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Personal Assistant Demo Configuration - Ollama Local LLM
+# This configuration uses Ollama as the local LLM provider
+
+general:
+  use_uvloop: true
+  front_end:
+    _type: fastapi
+
+functions:
+  # Task Management Tools
+  add_task:
+    _type: add_task
+  list_tasks:
+    _type: list_tasks
+  complete_task:
+    _type: complete_task
+  delete_task:
+    _type: delete_task
+
+  # Calculator Tools
+  add_numbers:
+    _type: add_numbers
+  subtract_numbers:
+    _type: subtract_numbers
+  multiply_numbers:
+    _type: multiply_numbers
+  divide_numbers:
+    _type: divide_numbers
+
+  # Date/Time Tools
+  current_time:
+    _type: current_time
+  current_date:
+    _type: current_date
+  current_datetime:
+    _type: current_datetime
+
+  # Weather Tools (uncomment if you have OPENWEATHERMAP_API_KEY)
+  # weather_info:
+  #   _type: weather_info
+  # weather_condition:
+  #   _type: weather_condition
+
+llms:
+  ollama_llm:
+    _type: openai
+    api_key: "ollama"  # Ollama doesn't require a real API key
+    base_url: "http://localhost:11434/v1"  # Ollama's default OpenAI-compatible endpoint
+    model_name: "qwen2.5:7b"  # Recommended: excellent for agents, tool calling, and reasoning
+    temperature: 0.1
+    max_tokens: 1000
+
+workflow:
+  _type: react_agent
+  tool_names: [
+    add_task, list_tasks, complete_task, delete_task,
+    add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
+    current_time, current_date, current_datetime
+    # weather_info, weather_condition  # Uncomment if using weather tools
+  ]
+  llm_name: ollama_llm
+  verbose: true
+  parse_agent_response_max_retries: 3

@@ -1,0 +1,21 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 64"]
+
+[project]
+name = "personal_assistant_demo"
+version = "1.0.0"
+dependencies = [
+    "nvidia-nat[langchain]>=1.2.0",
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0"
+]
+requires-python = ">=3.11,<3.13"
+description = "Personal Assistant Demo using NeMo Agent Toolkit"
+keywords = ["ai", "agents", "personal-assistant", "demo"]
+classifiers = ["Programming Language :: Python"]
+
+# Using installed nvidia-nat package instead of local source
+
+[project.entry-points.'nat.components']
+personal_assistant = "personal_assistant.register"
