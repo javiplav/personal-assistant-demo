@@ -48,7 +48,7 @@ data/
 - **`examples.md`** - Comprehensive examples for all features (including enterprise)
 - **`pyproject.toml`** - Python package configuration
 
-#### **LinkedIn Showcase Materials** 🆕
+#### **LinkedIn Showcase Materials** 🆕 (Local Only)
 - **`LINKEDIN_SHOWCASE.md`** - Main showcase document for LinkedIn posts
 - **`LINKEDIN_POSTS.md`** - Ready-to-use LinkedIn post templates
 - **`LINKEDIN_STRATEGY_SUMMARY.md`** - Strategic positioning and messaging
@@ -76,7 +76,7 @@ data/
 
 ### **For LinkedIn Showcase**
 
-#### **Content Creation**
+#### **Content Creation** (Local Files)
 - **`LINKEDIN_SHOWCASE.md`** - Main content for LinkedIn posts
 - **`LINKEDIN_POSTS.md`** - Copy-paste post templates
 - **`ENTERPRISE_EXAMPLES.md`** - Enterprise use cases to highlight
@@ -143,9 +143,9 @@ nat run --config_file configs/config.yml --input "your query"
 # 1. Run automated demo
 python demo_showcase.py
 
-# 2. Use content from LINKEDIN_SHOWCASE.md
-# 3. Copy templates from LINKEDIN_POSTS.md
-# 4. Reference examples from ENTERPRISE_EXAMPLES.md
+# 2. Use content from LINKEDIN_SHOWCASE.md (local file)
+# 3. Copy templates from LINKEDIN_POSTS.md (local file)
+# 4. Reference examples from ENTERPRISE_EXAMPLES.md (local file)
 ```
 
 ---
@@ -174,11 +174,11 @@ python demo_showcase.py
 
 ## 🚀 **Next Steps for LinkedIn Showcase**
 
-1. **Review Content**: Check `LINKEDIN_SHOWCASE.md` for main messaging
+1. **Review Content**: Check `LINKEDIN_SHOWCASE.md` for main messaging (local file)
 2. **Run Demo**: Execute `python demo_showcase.py` to verify functionality
-3. **Create Post**: Use templates from `LINKEDIN_POSTS.md`
-4. **Share Examples**: Reference `ENTERPRISE_EXAMPLES.md` for use cases
-5. **Engage**: Use `LINKEDIN_STRATEGY_SUMMARY.md` for follow-up strategy
+3. **Create Post**: Use templates from `LINKEDIN_POSTS.md` (local file)
+4. **Share Examples**: Reference `ENTERPRISE_EXAMPLES.md` for use cases (local file)
+5. **Engage**: Use `LINKEDIN_STRATEGY_SUMMARY.md` for follow-up strategy (local file)
 
 ---
 

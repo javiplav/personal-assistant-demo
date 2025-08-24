@@ -96,6 +96,10 @@ site/
 # Personal assistant demo data (keep structure, ignore content)
 personal_assistant_demo/data/tasks.json
 
+# LinkedIn showcase materials (keep local for personal use)
+personal_assistant_demo/LINKEDIN_*.md
+personal_assistant_demo/ENTERPRISE_EXAMPLES.md
+
 # Vector databases
 *.faiss
 
