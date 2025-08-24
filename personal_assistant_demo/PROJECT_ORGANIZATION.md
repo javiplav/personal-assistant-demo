@@ -48,11 +48,7 @@ data/
 - **`examples.md`** - Comprehensive examples for all features (including enterprise)
 - **`pyproject.toml`** - Python package configuration
 
-#### **LinkedIn Showcase Materials** 🆕 (Local Only)
-- **`LINKEDIN_SHOWCASE.md`** - Main showcase document for LinkedIn posts
-- **`LINKEDIN_POSTS.md`** - Ready-to-use LinkedIn post templates
-- **`LINKEDIN_STRATEGY_SUMMARY.md`** - Strategic positioning and messaging
-- **`ENTERPRISE_EXAMPLES.md`** - Enterprise-focused use cases and examples
+
 
 #### **Verification & Testing**
 - **`DEMO_VERIFICATION.md`** - 🆕 Functionality verification and test results
@@ -74,14 +70,7 @@ data/
 - **`DEMO_VERIFICATION.md`** - Manual testing checklist
 - **`demo_showcase.py`** - Automated testing script
 
-### **For LinkedIn Showcase**
-
-#### **Content Creation** (Local Files)
-- **`LINKEDIN_SHOWCASE.md`** - Main content for LinkedIn posts
-- **`LINKEDIN_POSTS.md`** - Copy-paste post templates
-- **`ENTERPRISE_EXAMPLES.md`** - Enterprise use cases to highlight
-
-#### **Live Demonstrations**
+### **For Live Demonstrations**
 - **`demo_showcase.py`** - Run automated demo: `python demo_showcase.py`
 - **`examples.md`** - Quick reference for live demo commands
 - **`DEMO_VERIFICATION.md`** - Confirmation that everything works
@@ -138,14 +127,13 @@ nat run --config_file configs/config-ollama.yml --input "your query"
 nat run --config_file configs/config.yml --input "your query"
 ```
 
-### **LinkedIn Showcase**
+### **Live Demo**
 ```bash
 # 1. Run automated demo
 python demo_showcase.py
 
-# 2. Use content from LINKEDIN_SHOWCASE.md (local file)
-# 3. Copy templates from LINKEDIN_POSTS.md (local file)
-# 4. Reference examples from ENTERPRISE_EXAMPLES.md (local file)
+# 2. Use examples from examples.md
+# 3. Reference enterprise features in README.md
 ```
 
 ---
@@ -172,13 +160,13 @@ python demo_showcase.py
 
 ---
 
-## 🚀 **Next Steps for LinkedIn Showcase**
+## 🚀 **Next Steps for Demo**
 
-1. **Review Content**: Check `LINKEDIN_SHOWCASE.md` for main messaging (local file)
-2. **Run Demo**: Execute `python demo_showcase.py` to verify functionality
-3. **Create Post**: Use templates from `LINKEDIN_POSTS.md` (local file)
-4. **Share Examples**: Reference `ENTERPRISE_EXAMPLES.md` for use cases (local file)
-5. **Engage**: Use `LINKEDIN_STRATEGY_SUMMARY.md` for follow-up strategy (local file)
+1. **Run Demo**: Execute `python demo_showcase.py` to verify functionality
+2. **Review Examples**: Check `examples.md` for comprehensive use cases
+3. **Customize**: Modify the demo for your specific needs
+4. **Deploy**: Use any of the three configurations for your environment
+5. **Extend**: Add new tools and capabilities as needed
 
 ---
 
