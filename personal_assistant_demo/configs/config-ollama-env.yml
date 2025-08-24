@@ -36,6 +36,22 @@ functions:
   current_date:
     _type: personal_assistant/current_date
 
+  # Enterprise Solutions Architect Tools
+  schedule_meeting:
+    _type: personal_assistant/schedule_meeting
+  list_meetings:
+    _type: personal_assistant/list_meetings
+  cancel_meeting:
+    _type: personal_assistant/cancel_meeting
+  add_client:
+    _type: personal_assistant/add_client
+  list_clients:
+    _type: personal_assistant/list_clients
+  add_client_note:
+    _type: personal_assistant/add_client_note
+  get_client_details:
+    _type: personal_assistant/get_client_details
+
   # Weather Tools (uncomment if you have OPENWEATHERMAP_API_KEY)
   # weather_info:
   #   _type: personal_assistant/weather_info
@@ -56,7 +72,9 @@ workflow:
   tool_names: [
     add_task, list_tasks, complete_task, delete_task,
     add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
-    current_time, current_date
+    current_time, current_date,
+    schedule_meeting, list_meetings, cancel_meeting,
+    add_client, list_clients, add_client_note, get_client_details
     # weather_info, weather_condition  # Uncomment if using weather tools
   ]
   llm_name: ollama_llm

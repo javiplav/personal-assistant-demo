@@ -1,6 +1,6 @@
 # Personal Assistant Demo - Example Interactions
 
-This document provides example interactions you can try with the Personal Assistant Demo to showcase its capabilities.
+This document provides example interactions you can try with the Personal Assistant Demo to showcase its capabilities. The demo now includes **Enterprise Solutions Architect Tools** for client management, meeting scheduling, and business intelligence.
 
 ## Quick Start Examples
 
@@ -10,10 +10,66 @@ This document provides example interactions you can try with the Personal Assist
 nat run --config_file configs/config.yml --input "What time is it?"
 
 # Date information
-nat run --config_file configs/config.yml --input "What's today's date?"
+nat run --config_file config.yml --input "What's today's date?"
 
 # Simple calculation
-nat run --config_file configs/config.yml --input "What's 25 plus 37?"
+nat run --config_file config.yml --input "What's 25 plus 37?"
+```
+
+## Enterprise Solutions Architect Examples
+
+### Client Management (CRM)
+```bash
+# Add a new client
+nat run --config_file configs/config.yml --input "Add client Microsoft with GPU cluster requirements, priority high"
+
+# List all clients
+nat run --config_file configs/config.yml --input "Show me all my clients"
+
+# List high-priority clients
+nat run --config_file configs/config.yml --input "List all high-priority clients"
+
+# Add notes to a client
+nat run --config_file configs/config.yml --input "Add note to client 1: Had productive call about implementation timeline"
+
+# Get detailed client information
+nat run --config_file configs/config.yml --input "Show me details for client Microsoft"
+
+# Add multiple clients
+nat run --config_file configs/config.yml --input "Add client Tesla with autonomous driving requirements, priority high"
+```
+
+### Meeting Scheduling
+```bash
+# Schedule a meeting
+nat run --config_file configs/config.yml --input "Schedule meeting with John and Sarah tomorrow 2 PM for 1 hour, title: AI Review"
+
+# Schedule with natural language time
+nat run --config_file configs/config.yml --input "Schedule technical review meeting tomorrow at 10 AM for 2 hours"
+
+# List all meetings
+nat run --config_file configs/config.yml --input "Show me all meetings this week"
+
+# Cancel a meeting
+nat run --config_file configs/config.yml --input "Cancel meeting 1, reason: Client requested reschedule"
+
+# Schedule client meetings
+nat run --config_file configs/config.yml --input "Schedule meeting with Microsoft team next Friday 9 AM for 3 hours about GPU implementation"
+```
+
+### Business Intelligence & Multi-step Workflows
+```bash
+# Calculate project budget
+nat run --config_file configs/config.yml --input "Calculate 20% of 500000 for project budget"
+
+# Complex enterprise workflow
+nat run --config_file configs/config.yml --input "Add client Fortune500 with multi-cloud requirements, schedule executive presentation next Friday 9 AM for 3 hours, add task to prepare ROI analysis, calculate 20% of 1000000 for project budget"
+
+# Client and meeting management
+nat run --config_file configs/config.yml --input "Add client TechCorp with AI infrastructure requirements, schedule technical review tomorrow 1 PM for 90 minutes, add task to prepare cost analysis by Friday"
+
+# Business planning
+nat run --config_file configs/config.yml --input "Calculate 15% of 200000 for marketing budget, add task to review vendor proposals, schedule team meeting next Monday 10 AM"
 ```
 
 ## Weather Examples

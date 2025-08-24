@@ -52,6 +52,22 @@ functions:
   complete_task:
     _type: personal_assistant/complete_task
 
+  # Enterprise Solutions Architect Tools
+  schedule_meeting:
+    _type: personal_assistant/schedule_meeting
+  list_meetings:
+    _type: personal_assistant/list_meetings
+  cancel_meeting:
+    _type: personal_assistant/cancel_meeting
+  add_client:
+    _type: personal_assistant/add_client
+  list_clients:
+    _type: personal_assistant/list_clients
+  add_client_note:
+    _type: personal_assistant/add_client_note
+  get_client_details:
+    _type: personal_assistant/get_client_details
+
 # LLM Configuration - Using Nemotron 70B (optimized for tool calling)
 llms:
   nvidia_llm:
@@ -75,7 +91,15 @@ workflow:
     - add_task
     - list_tasks
     - complete_task
+    - schedule_meeting
+    - list_meetings
+    - cancel_meeting
+    - add_client
+    - list_clients
+    - add_client_note
+    - get_client_details
   llm_name: nvidia_llm
   verbose: true
   parse_agent_response_max_retries: 3
   max_tool_calls: 10
+  recursion_limit: 50

@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Microsoft",
+    "email": "no_email_provided",
+    "company": "Microsoft",
+    "phone": "",
+    "project_requirements": "GPU cluster requirements",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-24T17:44:00.528532",
+    "last_contact": "2025-08-24T17:45:37.066525",
+    "notes": [
+      {
+        "id": 1,
+        "content": "Scheduled GPU cluster meeting with Microsoft team",
+        "type": "meeting",
+        "created_at": "2025-08-24T17:45:37.066518"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Amazon",
+    "email": "amazon@example.com",
+    "company": "Amazon Inc.",
+    "phone": "",
+    "project_requirements": "cloud infrastructure requirements",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-24T17:52:24.157760",
+    "last_contact": "2025-08-24T17:52:24.157768",
+    "notes": []
+  },
+  {
+    "id": 3,
+    "name": "Netflix",
+    "email": "**PLEASE RESPOND WITH A VALID EMAIL ADDRESS FOR NETFLIX**",
+    "company": "Netflix",
+    "phone": "",
+    "project_requirements": "streaming infrastructure requirements",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-24T17:55:46.337652",
+    "last_contact": "2025-08-24T17:55:46.337661",
+    "notes": []
+  },
+  {
+    "id": 4,
+    "name": "Tesla",
+    "email": "info@tesla.com",
+    "company": "Tesla Inc.",
+    "phone": "",
+    "project_requirements": "autonomous driving",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-24T17:56:19.801069",
+    "last_contact": "2025-08-24T17:56:19.801074",
+    "notes": []
+  },
+  {
+    "id": 5,
+    "name": "SpaceX",
+    "email": "info@spacex.com",
+    "company": "SpaceX",
+    "phone": "",
+    "project_requirements": "rocket propulsion",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-24T17:57:42.940269",
+    "last_contact": "2025-08-24T17:57:42.940276",
+    "notes": []
+  }
+]

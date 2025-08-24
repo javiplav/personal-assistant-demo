@@ -1,0 +1,67 @@
+[
+  {
+    "id": 1,
+    "title": "GPU Cluster Optimization",
+    "participants": [
+      "Microsoft Team"
+    ],
+    "start_time": "2025-08-25T10:00:00",
+    "end_time": "2025-08-25T11:00:00",
+    "duration_minutes": 60,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-24T17:44:17.677722"
+  },
+  {
+    "id": 2,
+    "title": "AI Infrastructure Review",
+    "participants": [
+      "Google team"
+    ],
+    "start_time": "2025-08-25T15:00:00",
+    "end_time": "2025-08-25T16:30:00",
+    "duration_minutes": 90,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-24T17:49:01.510516"
+  },
+  {
+    "id": 3,
+    "title": "GPU Cluster Optimization",
+    "participants": [
+      "Microsoft Team"
+    ],
+    "start_time": "2025-08-25T14:00:00",
+    "end_time": "2025-08-25T15:00:00",
+    "duration_minutes": 60,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-24T17:49:20.187350"
+  },
+  {
+    "id": 4,
+    "title": "Cloud Infrastructure Architecture Discussion",
+    "participants": [
+      "Amazon team"
+    ],
+    "start_time": "2025-08-25T16:00:00",
+    "end_time": "2025-08-25T18:00:00",
+    "duration_minutes": 120,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-24T17:52:52.030686"
+  },
+  {
+    "id": 5,
+    "title": "Rocket Propulsion Systems",
+    "participants": [
+      "SpaceX Team"
+    ],
+    "start_time": "2025-08-25T13:00:00",
+    "end_time": "2025-08-25T14:30:00",
+    "duration_minutes": 90,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-24T17:57:59.243592"
+  }
+]

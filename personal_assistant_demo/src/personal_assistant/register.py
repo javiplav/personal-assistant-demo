@@ -30,6 +30,9 @@ from .tools.datetime_info import (
     get_current_time, get_current_date,
     get_timezone_info, calculate_time_difference, get_day_of_week, get_current_hour
 )
+# Enterprise tools for solutions architect showcase
+from .tools.meeting_scheduler import schedule_meeting, list_meetings, cancel_meeting
+from .tools.client_management import add_client, list_clients, add_client_note, get_client_details
 
 logger = logging.getLogger(__name__)
 
@@ -312,3 +315,126 @@ async def current_date_function(config: CurrentDateConfig, builder: Builder):
 #             "Useful for time-based comparisons and calculations."
 #         )
 #     )
+
+
+# Enterprise Tools for Solutions Architect Showcase
+
+# Meeting Scheduler Tools
+class ScheduleMeetingConfig(FunctionBaseConfig, name="schedule_meeting"):
+    pass
+
+
+@register_function(config_type=ScheduleMeetingConfig)
+async def schedule_meeting_function(config: ScheduleMeetingConfig, builder: Builder):
+    """Schedule a meeting with specified details."""
+    yield FunctionInfo.from_fn(
+        schedule_meeting,
+        description=(
+            "Schedule a meeting with title, participants, duration, and preferred time slots. "
+            "Demonstrates enterprise calendar integration capabilities. "
+            "Example: 'Schedule a meeting with John and Sarah tomorrow at 2 PM for 1 hour'"
+        )
+    )
+
+
+class ListMeetingsConfig(FunctionBaseConfig, name="list_meetings"):
+    pass
+
+
+@register_function(config_type=ListMeetingsConfig)
+async def list_meetings_function(config: ListMeetingsConfig, builder: Builder):
+    """List all scheduled meetings with filtering options."""
+    yield FunctionInfo.from_fn(
+        list_meetings,
+        description=(
+            "List all scheduled meetings with optional filtering by date range and status. "
+            "Useful for daily planning and meeting management. "
+            "Example: 'Show me all meetings this week' or 'List my meetings for tomorrow'"
+        )
+    )
+
+
+class CancelMeetingConfig(FunctionBaseConfig, name="cancel_meeting"):
+    pass
+
+
+@register_function(config_type=CancelMeetingConfig)
+async def cancel_meeting_function(config: CancelMeetingConfig, builder: Builder):
+    """Cancel a scheduled meeting by ID."""
+    yield FunctionInfo.from_fn(
+        cancel_meeting,
+        description=(
+            "Cancel a scheduled meeting by ID with optional reason. "
+            "Includes automatic notification simulation for participants. "
+            "Example: 'Cancel meeting 1' or 'Cancel the 2 PM meeting'"
+        )
+    )
+
+
+# Client Management Tools
+class AddClientConfig(FunctionBaseConfig, name="add_client"):
+    pass
+
+
+@register_function(config_type=AddClientConfig)
+async def add_client_function(config: AddClientConfig, builder: Builder):
+    """Add a new client to the CRM system."""
+    yield FunctionInfo.from_fn(
+        add_client,
+        description=(
+            "Add a new client with contact information, company details, and project requirements. "
+            "Essential for solutions architect client relationship management. "
+            "Example: 'Add client John Smith from TechCorp with email john@techcorp.com'"
+        )
+    )
+
+
+class ListClientsConfig(FunctionBaseConfig, name="list_clients"):
+    pass
+
+
+@register_function(config_type=ListClientsConfig)
+async def list_clients_function(config: ListClientsConfig, builder: Builder):
+    """List all clients with filtering options."""
+    yield FunctionInfo.from_fn(
+        list_clients,
+        description=(
+            "List all clients with optional filtering by company, priority, and status. "
+            "Useful for daily client management and follow-up planning. "
+            "Example: 'Show me all high-priority clients' or 'List clients from TechCorp'"
+        )
+    )
+
+
+class AddClientNoteConfig(FunctionBaseConfig, name="add_client_note"):
+    pass
+
+
+@register_function(config_type=AddClientNoteConfig)
+async def add_client_note_function(config: AddClientNoteConfig, builder: Builder):
+    """Add a note to a client's profile."""
+    yield FunctionInfo.from_fn(
+        add_client_note,
+        description=(
+            "Add a note or interaction record to a client's profile. "
+            "Essential for maintaining relationship history and project progress tracking. "
+            "Example: 'Add note to client 1: Had productive call about AI implementation'"
+        )
+    )
+
+
+class GetClientDetailsConfig(FunctionBaseConfig, name="get_client_details"):
+    pass
+
+
+@register_function(config_type=GetClientDetailsConfig)
+async def get_client_details_function(config: GetClientDetailsConfig, builder: Builder):
+    """Get detailed information about a specific client."""
+    yield FunctionInfo.from_fn(
+        get_client_details,
+        description=(
+            "Get detailed information about a specific client including contact info, "
+            "project requirements, and interaction history. "
+            "Example: 'Show me details for client 1' or 'Get client information for John Smith'"
+        )
+    )

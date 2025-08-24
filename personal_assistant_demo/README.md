@@ -32,14 +32,23 @@ A comprehensive demonstration of the NeMo Agent Toolkit featuring a personal ass
 
 ## Key Features
 
-- **Task Management:** Create, list, and complete personal tasks with persistent storage
+### **Enterprise Solutions Architect Tools**
+- **Client Management:** Add, track, and manage clients with CRM-like capabilities
+- **Meeting Scheduler:** Schedule, manage, and coordinate meetings with participants
+- **Task Management:** Create, list, and complete tasks with intelligent workflow orchestration
+- **Business Intelligence:** Perform calculations, track metrics, and generate reports
+
+### **Core Functionality**
 - **Mathematical Operations:** Perform basic calculations (add, subtract, multiply, divide)
 - **Date/Time Information:** Get current date, time, and timezone information
 - **Weather Information:** Get current weather conditions for any city (requires API key)
+
+### **Technical Excellence**
 - **Multi-step Reasoning:** Uses ReAct agent to break down complex queries into sequential tool calls
 - **Custom Function Registration:** Demonstrates the NeMo Agent Toolkit plugin system
 - **YAML-based Configuration:** Fully configurable workflow through simple YAML files
-- **Persistent Storage:** Tasks are stored locally and persist between sessions
+- **Persistent Storage:** All data stored locally and persists between sessions
+- **Enterprise Architecture:** Production-ready design with error handling and extensibility
 
 ---
 
@@ -166,31 +175,48 @@ nat serve --config_file configs/config.yml
 
 Here are some example queries you can try:
 
-### Task Management
+### **Enterprise Solutions Architect Workflows**
+- "Add client Microsoft with GPU cluster requirements, priority high"
+- "Schedule technical review meeting tomorrow 10 AM for 2 hours"
+- "Add task to prepare cost analysis by Friday"
+- "Show me all high-priority clients and their meetings"
+
+### **Client Management**
+- "Add client TechCorp with requirements: AI infrastructure assessment"
+- "List all high-priority clients"
+- "Add note to client 1: Had productive call about implementation timeline"
+- "Show me details for client Microsoft"
+
+### **Meeting Coordination**
+- "Schedule meeting with John and Sarah tomorrow 2 PM for 1 hour, title: AI Review"
+- "Show me all meetings this week"
+- "Cancel meeting 1, reason: Client requested reschedule"
+
+### **Task Management**
 - "Add a task to buy groceries"
 - "List all my tasks"
 - "Mark the grocery task as completed"
 - "Create a task to call mom tomorrow"
 
-### Calculations
+### **Business Intelligence**
+- "Calculate 20% of 500000 for project budget"
 - "What's 15 multiplied by 8?"
 - "Calculate 100 divided by 4"
-- "Add 25 and 37"
 
-### Date/Time
+### **Date/Time**
 - "What time is it?"
 - "What's today's date?"
 - "What timezone am I in?"
 
-### Weather Queries (requires OpenWeatherMap API key)
+### **Weather Queries (requires OpenWeatherMap API key)**
 - "What's the weather like in San Francisco?"
 - "Is it raining in London right now?"
 - "What's the temperature in Tokyo?"
 
-### Complex Multi-step Queries
+### **Complex Multi-step Queries**
+- "Add client Fortune500 with multi-cloud requirements, schedule executive presentation next Friday 9 AM for 3 hours, add task to prepare ROI analysis, calculate 20% of 1000000 for project budget"
 - "What's the weather in Paris and add a task to pack an umbrella if it's going to rain"
 - "Calculate 20% of 150 and create a task to save that amount"
-- "What time is it and how much is 8 hours from now?"
 
 ---
 
