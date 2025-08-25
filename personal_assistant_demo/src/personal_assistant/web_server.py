@@ -354,18 +354,13 @@ class WebServer:
         # Prefer specific configs if present; otherwise fall back to generic ones
         candidates = []
         if model == "nim":
-            if mode == "tool-calling":
-                candidates = [
-                    base_dir / "config-nim-tool-calling-conversation.yml",
-                    base_dir / "config-nim-conversation.yml",
-                    base_dir / "config-nim-production.yml",
-                ]
-            else:
-                candidates = [
-                    base_dir / "config-nim-react-fixed.yml",
-                    base_dir / "config-nim-conversation.yml",
-                    base_dir / "config-nim-simple.yml",
-                ]
+            # NIM works best with ReAct agent due to model limitations
+            # Always use ReAct config regardless of mode selection
+            candidates = [
+                base_dir / "config-nim-tool-calling-conversation.yml",  # Actually ReAct config now
+                base_dir / "config-nim-react-fixed.yml",
+                base_dir / "config-nim-conversation.yml",
+            ]
         else:  # ollama
             if mode == "tool-calling":
                 candidates = [
