@@ -63,14 +63,14 @@ workflow:
   tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task]
   llm_name: "nim_llm"
   verbose: true
-  max_tool_calls: 3   # Allow a few tool calls for complex queries
+  max_tool_calls: 5   # Allow more tool calls for complex conversational queries
   handle_tool_errors: true
-  recursion_limit: 20   # Lower limit to force faster decisions and prevent loops
+  recursion_limit: 50   # Increased limit to handle conversational follow-ups properly
   
   # ReAct-specific settings  
   use_tool_schema: true  # Include detailed tool descriptions
   retry_agent_response_parsing_errors: true  # Enable retries to handle format issues
-  parse_agent_response_max_retries: 2  # Allow a couple retries for parsing
+  parse_agent_response_max_retries: 3  # Allow more retries for parsing errors
   pass_tool_call_errors_to_agent: false  # Don't pass tool errors to avoid confusion
   
   # Conversation memory settings
@@ -101,6 +101,7 @@ workflow:
     - After getting results from a tool, move directly to "Final Answer"
     - Don't overthink - use 1-2 tool calls maximum
     - ALWAYS end with "Final Answer:" - never keep reasoning forever
+    - For conversational follow-ups (like "how many?" after listing items), understand the context
     
     CONVERSATIONAL QUESTIONS (NO TOOLS NEEDED):
     - "What's your name?" / "Who are you?" / "What can you do?" → Skip directly to Final Answer
@@ -143,6 +144,14 @@ workflow:
     Question: Who are you?
     Thought: This is asking about me directly - skip tools completely
     Final Answer: I'm a NeMo Agent powered personal assistant. I help with client management, scheduling, tasks, and calculations.
+
+    Question: How many medium priority?
+    Thought: This is asking for a count of medium priority clients (follow-up context from previous conversation)
+    Action: list_clients
+    Action Input: {{"filters": "medium"}}
+    Observation: [TOOL RETURNS ACTUAL DATA - USE THIS DATA, NOT THE EXAMPLE!]
+    Thought: I now know the final answer
+    Final Answer: You have X medium priority clients.
 
     ⚠️  CRITICAL DATA EXTRACTION RULES ⚠️:
     1. NEVER copy example data - the examples above show FORMAT only!
