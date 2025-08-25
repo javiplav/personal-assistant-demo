@@ -59,9 +59,30 @@ functions:
     _type: "add_client_task"
 
 workflow:
-  _type: "tool_calling_agent"  # Switch to tool-calling like Ollama for reliability
+  _type: "react_agent"  # Revert to ReAct for NIM - tool-calling causes hangs
   tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task]
   llm_name: "nim_llm"
   verbose: true
-  max_tool_calls: 10  # Tool-calling agents handle more calls efficiently
+  max_tool_calls: 5
   handle_tool_errors: true
+  recursion_limit: 50
+  retry_agent_response_parsing_errors: true
+  parse_agent_response_max_retries: 3
+  
+  # Production ReAct prompt - no templates, direct data extraction
+  system_prompt: |
+    You are a helpful assistant that uses tools to answer questions. Use this exact format:
+
+    Question: the input question
+    Thought: think about what to do
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action in JSON format
+    Observation: the result of the action
+    Thought: I now know the final answer
+    Final Answer: provide a clear answer using the actual data from the tool
+
+    {tools}
+
+    CRITICAL: Always use actual data from tool responses, never use placeholder text or examples.
+    For client questions: Extract real names, companies, and counts from the tool response.
+    Format lists clearly with actual client information.
