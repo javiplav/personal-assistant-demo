@@ -135,13 +135,10 @@ python demo/demo_showcase.py
 # Terminal 1: Start Ollama (if not already running)
 ollama serve
 
-# Terminal 2: Start the backend
-nat serve --config_file configs/config-ollama.yml
-
-# Terminal 3: Start the web UI (optional)
-./dev.sh ui-setup  # First time setup
-./dev.sh ui        # Start the UI
-# Then open http://localhost:3001
+# Start the enhanced web demo (single command)
+python run_web_demo.py            # Ollama ReAct (default)
+# or
+python run_web_demo.py --nim      # NIM tool-calling
 ```
 
 ### ☁️ **With NVIDIA NIM (Cloud)**
@@ -152,14 +149,9 @@ nat run --config_file configs/config.yml --input "What time is it and add a task
 ```
 
 **Web UI experience:**
+Use the same launcher with `--nim`:
 ```bash
-# Terminal 1: Start the backend
-nat serve --config_file configs/config.yml
-
-# Terminal 2: Start the web UI (optional)
-./dev.sh ui-setup  # First time setup
-./dev.sh ui        # Start the UI
-# Then open http://localhost:3001
+python run_web_demo.py --nim
 ```
 
 ### Using Development Helper Script
@@ -179,6 +171,15 @@ nat serve --config_file configs/config.yml
 - **Examples**: `docs/examples.md` - Comprehensive usage examples
 - **Project Structure**: `docs/PROJECT_ORGANIZATION.md` - Complete project guide
 - **Demo Verification**: `demo/DEMO_VERIFICATION.md` - Functionality verification
+- **Web Demo**: `run_web_demo.py` - Launch the FastAPI web UI
+
+### Recent Changes (Troubleshooting + Performance)
+- Centralized data paths with safety checks in `src/personal_assistant/tools/_paths.py`
+- Added DEBUG logging for `web_server.py` and `ToolCallingHandler` to profile ainvoke timings
+- Tool-calling payload shape fixed to `{"input_message": "..."}`
+- Configs tuned for demos (timeouts, top_p, max_tokens) for both Ollama and NIM
+- ReAct configs updated to escape braces and enforce single JSON Action Inputs
+- Meetings/tools now support filters and slimmer outputs to improve second-turn latency
 
 ---
 
@@ -334,7 +335,7 @@ The configuration files allow you to:
 1. **Ollama Connection Issues**: Ensure Ollama is running with `ollama serve`
 2. **NVIDIA API Key Issues**: Ensure your NVIDIA_API_KEY is set correctly
 3. **Weather Not Working**: Check your OPENWEATHERMAP_API_KEY or disable weather tools
-4. **Task Persistence**: Ensure the `data/` directory is writable
+4. **Data Path Safety**: All tools read/write via `tools/_paths.py`; ensure the `data/` directory is writable
 5. **Import Errors**: Make sure you've installed the package with `pip install -e .`
 
 ### Getting Help
