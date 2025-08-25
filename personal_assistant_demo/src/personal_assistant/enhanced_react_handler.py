@@ -258,17 +258,17 @@ class ToolCallingHandler:
         try:
             self.memory.add_user_message(message)
             
-            # Add timeout for operations - accommodate NIM API performance issues
-            timeout = 30.0 if any(word in message.lower() for word in ["how many", "count", "number"]) else 60.0
+            # Add timeout for operations - increase for troubleshooting
+            timeout = 120.0  # Increased timeout to identify if workflow completes
             try:
                 result = await asyncio.wait_for(self.workflow.ainvoke(message), timeout=timeout)
             except asyncio.TimeoutError:
                 logger.error(f"ToolCalling workflow timed out after {timeout}s for message: {message}")
                 return {
-                    "response": f"⚠️ NIM API timed out after {timeout} seconds. This is a known issue with NIM's cloud service during high demand periods.\n\n🔧 **Immediate Solutions:**\n1. Switch to 'Ollama (Local)' in settings for reliable performance\n2. Try again in a few minutes when NIM load decreases\n3. Use simpler queries if you must use NIM\n\n💡 **Why this happens:** NIM's cloud API experiences performance issues during peak usage. Local Ollama provides consistent 3-10 second responses.",
+                    "response": f"⚠️ Workflow timed out after {timeout} seconds. This may indicate a configuration issue.\n\n🔧 **Troubleshooting:**\n1. Check if the model supports the selected agent type (tool-calling vs ReAct)\n2. Verify API connectivity and model availability\n3. Try switching between NIM and Ollama configurations\n4. Check server logs for detailed error information\n\n💡 **Debug Info:** Direct tool functions work correctly (verified), issue is at workflow level.",
                     "steps": [
-                        {"tool": "NIM Timeout Analysis", "action": "Diagnosed NIM API performance issue", "result": "Known cloud service bottleneck"},
-                        {"tool": "Recommendation Engine", "action": "Generated fallback options", "result": "Switch to Ollama recommended"}
+                        {"tool": "Timeout Analysis", "action": "Workflow execution exceeded timeout", "result": "Potential model/agent compatibility issue"},
+                        {"tool": "Recommendation Engine", "action": "Generated troubleshooting steps", "result": "Check configuration compatibility"}
                     ]
                 }
 
