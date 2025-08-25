@@ -21,8 +21,7 @@ src/personal_assistant/
     ├── client_management.py      # 🆕 CRM functionality
     ├── datetime_info.py          # Date/time utilities
     ├── meeting_scheduler.py      # 🆕 Calendar management
-    ├── tasks.py                  # Task management
-    └── weather.py                # Weather API integration
+    └── tasks.py                  # Task management
 ```
 
 #### **Configuration Files**

@@ -5,7 +5,7 @@ Demonstrates the enhanced personal assistant capabilities using NVIDIA's NeMo Ag
 
 This script showcases the enterprise features that solutions architects need:
 - Client Management (CRM-like functionality)
-- Meeting Scheduling (Calendar integration)
+- Meeting Scheduling
 - Task Management
 - Business Intelligence
 """
@@ -136,7 +136,7 @@ def main(config_file="configs/config-ollama.yml"):
         {
             "title": "2. Meeting Scheduling - Schedule Technical Review",
             "input": "Schedule a meeting with Sarah Johnson tomorrow at 3 PM for 90 minutes about GPU cluster architecture review",
-            "description": "Shows enterprise calendar integration and meeting coordination"
+            "description": "Shows enterprise meeting coordination and scheduling"
         },
         {
             "title": "3. Task Management - Create Follow-up Tasks",

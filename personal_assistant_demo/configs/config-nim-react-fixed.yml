@@ -1,0 +1,142 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Fixed ReAct Configuration - Addresses Root Cause of "Action: None" Issue
+# Uses precise prompt engineering to ensure proper tool selection
+
+general:
+  use_uvloop: true
+  front_end:
+    _type: fastapi
+
+functions:
+  # Full tool set for consistency with tool-calling config
+  list_clients:
+    _type: "list_clients"
+  find_client_by_name:
+    _type: "find_client_by_name"
+  add_client:
+    _type: "add_client"
+  add_client_note:
+    _type: "add_client_note"
+  get_client_details:
+    _type: "get_client_details"
+  current_time:
+    _type: "current_time"
+  current_date:
+    _type: "current_date"
+
+  add_numbers:
+    _type: "add_numbers"
+  subtract_numbers:
+    _type: "subtract_numbers"
+  multiply_numbers:
+    _type: "multiply_numbers"
+  divide_numbers:
+    _type: "divide_numbers"
+  calculate_percentage:
+    _type: "calculate_percentage"
+  schedule_meeting:
+    _type: "schedule_meeting"
+  list_meetings:
+    _type: "list_meetings"
+  cancel_meeting:
+    _type: "cancel_meeting"
+  list_tasks:
+    _type: "list_tasks"
+  add_task:
+    _type: "add_task"
+  complete_task:
+    _type: "complete_task"
+  delete_task:
+    _type: "delete_task"
+  list_tasks_for_client:
+    _type: "list_tasks_for_client"
+  add_client_task:
+    _type: "add_client_task"
+
+llms:
+  nim_llm:
+    _type: "nim"
+    model: "nvidia/llama-3.1-nemotron-nano-8b-v1" 
+    temperature: 0.1
+    max_tokens: 800
+    timeout: 60
+    model_kwargs:
+      max_completion_tokens: 800
+      stream: false
+      tool_choice: "auto"
+      parallel_tool_calls: false
+
+workflow:
+  _type: react_agent
+  tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task]
+  llm_name: nim_llm
+  verbose: true
+  
+  # Conservative settings for reliability
+  parse_agent_response_max_retries: 2
+  tool_call_max_retries: 1
+  max_tool_calls: 5
+  recursion_limit: 60
+  pass_tool_call_errors_to_agent: false
+  use_tool_schema: true
+  max_history: 15
+  
+  # ReAct prompt with MANDATORY data display requirements
+  system_prompt: |
+    Answer questions by calling tools and displaying the EXACT DATA returned. Use this format:
+
+    Question: the input question you must answer
+    Thought: think about what tool to use
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action
+    Observation: the result of the action
+    Thought: I now know the final answer
+    Final Answer: [DISPLAY THE ACTUAL DATA FROM THE TOOL - NO META-COMMENTARY]
+
+    {tools}
+
+    CRITICAL RULES FOR "Final Answer" SECTION:
+    - NEVER say "This response indicates", "The function returned", "The list includes"
+    - ALWAYS show actual names, companies, numbers from the tool response
+    - Format lists clearly with numbers
+    - Include ALL relevant details from the tool result
+
+    EXAMPLES:
+
+    Question: List high-priority clients
+    Thought: I need to get high-priority clients
+    Action: list_clients
+    Action Input: {{"filters": "high"}}
+    Observation: {{"success": true, "clients": [...], "count": 7}}
+    Thought: I now know the final answer
+    Final Answer: Here are your high-priority clients: 1. Alex Chen (NVIDIA), 2. Amazon (Amazon Inc.), 3. Microsoft (Microsoft), 4. Netflix (Netflix), 5. Sarah Johnson (Microsoft), 6. SpaceX (SpaceX), 7. Tesla (Tesla Inc.)
+
+    Question: How many medium priority?
+    Thought: I need to get medium priority clients and count them
+    Action: list_clients  
+    Action Input: {{"filters": "medium"}}
+    Observation: {{"success": true, "clients": [...], "count": 2}}
+    Thought: I now know the final answer
+    Final Answer: You have 2 medium priority clients: 1. John Doe (TechCorp), 2. Test User (TestCorp)
+
+    FORBIDDEN "Final Answer" FORMATS:
+    🚫 "This response indicates that there are 2 clients"
+    🚫 "The function call returned 2 medium priority clients"  
+    🚫 "The list of high-priority clients includes:"
+    
+  additional_instructions: |
+    DATA DISPLAY REQUIREMENTS:
+    1. Use ONE tool call, then provide "Final Answer" immediately
+    2. Extract actual data from tool responses - names, numbers, details
+    3. Format lists clearly for user readability
+    4. NEVER describe what functions do - show the actual results
+    5. For counting questions, show both the count AND the actual items
+    
+    TOOL SELECTION:
+    - Client questions → Action: list_clients (with appropriate filters)
+    - Task questions → Action: list_tasks
+    - Time/date questions → Action: current_time or current_date
+    
+    ALWAYS extract and display the actual client names and companies from the tool response!

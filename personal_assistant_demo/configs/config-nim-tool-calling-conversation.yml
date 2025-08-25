@@ -1,0 +1,154 @@
+llms:
+  nim_llm:
+    _type: "nim"
+    model: "nvidia/llama-3.1-nemotron-nano-8b-v1"  # Hybrid: Llama for NIM tool-calling (reliable), Qwen for Ollama
+    temperature: 0.1   # Slightly higher for more natural responses
+    max_tokens: 800    # More tokens for complete responses
+    timeout: 60       # Standard timeout
+    # NIM-specific optimizations
+    model_kwargs:
+      max_completion_tokens: 800
+      stream: false
+      # Tool calling optimizations
+      tool_choice: "auto"
+      parallel_tool_calls: false  # Disable parallel for stability
+
+functions:
+  list_clients:
+    _type: "list_clients"
+  find_client_by_name:
+    _type: "find_client_by_name"
+  add_client:
+    _type: "add_client"
+  add_client_note:
+    _type: "add_client_note"
+  get_client_details:
+    _type: "get_client_details"
+  current_time:
+    _type: "current_time"
+  current_date:
+    _type: "current_date"
+
+  add_numbers:
+    _type: "add_numbers"
+  subtract_numbers:
+    _type: "subtract_numbers"
+  multiply_numbers:
+    _type: "multiply_numbers"
+  divide_numbers:
+    _type: "divide_numbers"
+  calculate_percentage:
+    _type: "calculate_percentage"
+  schedule_meeting:
+    _type: "schedule_meeting"
+  list_meetings:
+    _type: "list_meetings"
+  cancel_meeting:
+    _type: "cancel_meeting"
+  list_tasks:
+    _type: "list_tasks"
+  add_task:
+    _type: "add_task"
+  complete_task:
+    _type: "complete_task"
+  delete_task:
+    _type: "delete_task"
+  list_tasks_for_client:
+    _type: "list_tasks_for_client"
+  add_client_task:
+    _type: "add_client_task"
+
+workflow:
+  _type: "react_agent"  # Switch to ReAct - it works properly and calls tools via text reasoning
+  tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task]
+  llm_name: "nim_llm"
+  verbose: true
+  max_tool_calls: 3   # Allow a few tool calls for complex queries
+  handle_tool_errors: true
+  recursion_limit: 20   # Lower limit to force faster decisions and prevent loops
+  
+  # ReAct-specific settings  
+  use_tool_schema: true  # Include detailed tool descriptions
+  retry_agent_response_parsing_errors: true  # Enable retries to handle format issues
+  parse_agent_response_max_retries: 2  # Allow a couple retries for parsing
+  pass_tool_call_errors_to_agent: false  # Don't pass tool errors to avoid confusion
+  
+  # Conversation memory settings
+  max_history: 5  # Shorter history to prevent empty message accumulation
+  
+  # Enhanced ReAct system prompt with proper format examples and stopping rules
+  system_prompt: |
+    Answer the following questions as best you can. You have access to the following tools:
+
+    {tools}
+
+    Use the following format EXACTLY:
+
+    Question: the input question you must answer
+    Thought: you should always think about what to do
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action
+    Observation: the result of the action
+    ... (this Thought/Action/Action Input/Observation can repeat N times)
+    Thought: I now know the final answer
+    Final Answer: the final answer to the original input question
+
+    FOR GENERAL QUESTIONS (What is your name? How are you? etc.): Skip Action/Action Input and go directly from Thought to Final Answer.
+
+    CRITICAL FORMATTING RULES:
+    - Action MUST be exactly one of the tool names: [{tool_names}]
+    - Action Input MUST use JSON format: {{}} for empty, {{"key": "value"}} for parameters
+    - After getting results from a tool, move directly to "Final Answer"
+    - Don't overthink - use 1-2 tool calls maximum
+    - ALWAYS end with "Final Answer:" - never keep reasoning forever
+    
+    CONVERSATIONAL QUESTIONS (NO TOOLS NEEDED):
+    - "What's your name?" / "Who are you?" / "What can you do?" → Skip directly to Final Answer
+    - "How are you?" / "Hello" / "Hi" → Skip directly to Final Answer  
+    - "What time is it?" → Use current_time tool
+    - "What date is it?" → Use current_date tool
+    
+    If the question is about YOU (the agent), don't use any tools!
+
+    EXAMPLES:
+
+    Question: List high priority clients
+    Thought: I need to list clients with high priority filter
+    Action: list_clients
+    Action Input: {{"filters": "high"}}
+    Observation: [TOOL RETURNS ACTUAL DATA - USE THIS DATA, NOT THE EXAMPLE!]
+    Thought: I now know the final answer
+    Final Answer: You have X high priority clients:
+
+    1. [Client Name] from [Company]
+    2. [Client Name] from [Company]
+    ... (list ALL clients from the tool response)
+
+    Question: Show me all clients  
+    Thought: I need to list all clients without filters
+    Action: list_clients
+    Action Input: {{}}
+    Observation: [TOOL RETURNS ACTUAL DATA - USE THIS DATA, NOT THE EXAMPLE!]
+    Thought: I now know the final answer
+    Final Answer: Here are all your clients:
+
+    1. [Client Name] from [Company]
+    2. [Client Name] from [Company]
+    ... (list ALL clients from the tool response)
+
+    Question: What's your name?
+    Thought: This is asking about my identity - no tools needed for this conversational question
+    Final Answer: I'm your NeMo Agent personal assistant. I can help you manage clients, tasks, meetings, and perform calculations.
+
+    Question: Who are you?
+    Thought: This is asking about me directly - skip tools completely
+    Final Answer: I'm a NeMo Agent powered personal assistant. I help with client management, scheduling, tasks, and calculations.
+
+    ⚠️  CRITICAL DATA EXTRACTION RULES ⚠️:
+    1. NEVER copy example data - the examples above show FORMAT only!
+    2. ALWAYS use the ACTUAL tool response data in your Final Answer
+    3. If tool returns 7 clients, show ALL 7 - not just 2 from examples
+    4. Extract real names, companies, counts from the Observation
+    5. Use clean numbered lists: "1. Alex Chen from NVIDIA"
+    6. Don't include "Action Input:" in your Final Answer - that's internal format
+    7. The examples show format - YOUR RESPONSE uses real data!

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVIDIA NeMo Agent Toolkit - Enterprise Assistant Demo</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .message-bubble {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .typing-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .tool-step {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        .nvidia-green {
+            color: #76B900;
+        }
+        .nvidia-green-bg {
+            background-color: #76B900;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div id="app">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-2xl font-bold nvidia-green">
+                            <i class="fas fa-robot mr-2"></i>
+                            NVIDIA NeMo Agent Toolkit
+                        </div>
+                        <div class="text-sm opacity-75">Enterprise Solutions Assistant</div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                            <span class="text-sm">{{ connectionStatus }}</span>
+                        </div>
+                        <button @click="showSettings = !showSettings" 
+                                class="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex h-screen">
+            <!-- Sidebar -->
+            <div class="w-80 bg-white shadow-lg flex flex-col">
+                <!-- Dashboard Stats -->
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold mb-4">Dashboard</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-blue-50 p-3 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-blue-600">{{ stats.clients }}</div>
+                            <div class="text-sm text-blue-600">Clients</div>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-green-600">{{ stats.meetings }}</div>
+                            <div class="text-sm text-green-600">Meetings</div>
+                        </div>
+                        <div class="bg-yellow-50 p-3 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-yellow-600">{{ stats.tasks }}</div>
+                            <div class="text-sm text-yellow-600">Tasks</div>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-purple-600">{{ stats.completed_tasks }}</div>
+                            <div class="text-sm text-purple-600">Completed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button @click="quickAction('Add a high-priority client meeting for tomorrow')" 
+                                class="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-left">
+                            <i class="fas fa-handshake mr-2"></i>
+                            Schedule Meeting
+                        </button>
+                        <button @click="quickAction('Add client TechCorp with AI infrastructure requirements')" 
+                                class="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-left">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Add Client
+                        </button>
+                        <button @click="quickAction('List all high-priority clients and their status')" 
+                                class="w-full p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-left">
+                            <i class="fas fa-list mr-2"></i>
+                            Review Tasks
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="p-6 flex-1 overflow-y-auto">
+                    <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                    <div class="space-y-3">
+                        <div v-for="activity in recentActivity" :key="activity.id" 
+                             class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i :class="activity.icon" class="text-blue-600 text-xs"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium">{{ activity.type }}</div>
+                                <div class="text-xs text-gray-600">{{ activity.description }}</div>
+                                <div class="text-xs text-gray-400">{{ activity.time }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="flex-1 flex flex-col">
+                <!-- Messages -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-4" ref="messagesContainer">
+                    <!-- Welcome Message -->
+                    <div v-if="messages.length === 0" class="text-center py-12">
+                        <div class="text-6xl mb-4 nvidia-green">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2">Welcome to NeMo Agent Toolkit Demo</h2>
+                        <p class="text-gray-600 mb-6">Your AI-powered enterprise solutions assistant</p>
+                        <div class="flex flex-wrap gap-2 justify-center">
+                            <span v-for="example in exampleQueries" :key="example"
+                                  @click="sendMessage(example)"
+                                  class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full text-sm cursor-pointer transition-colors">
+                                {{ example }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div v-for="message in messages" :key="message.id" class="message-bubble">
+                        <!-- User Message -->
+                        <div v-if="message.type === 'user'" class="flex justify-end mb-4">
+                            <div class="max-w-xs lg:max-w-md xl:max-w-lg">
+                                <div class="bg-blue-500 text-white rounded-lg px-4 py-2">
+                                    {{ message.content }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Agent Message -->
+                        <div v-else-if="message.type === 'agent'" class="flex justify-start mb-4">
+                            <div class="max-w-xs lg:max-w-md xl:max-w-lg">
+                                <div class="bg-white shadow-lg rounded-lg px-4 py-2 border-l-4 border-green-500">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i class="fas fa-robot nvidia-green"></i>
+                                        <span class="font-medium">NeMo Agent</span>
+                                        <!-- Performance indicator -->
+                                        <div v-if="message.profiling" class="flex items-center text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>{{ formatTime(message.profiling.total_time_seconds) }}</span>
+                                        </div>
+                                    </div>
+                                    <div v-html="formatMessage(message.content)"></div>
+                                    
+                                    <!-- Profiling Details (expandable) -->
+                                    <div v-if="message.profiling && settings.verbose" class="mt-3 pt-3 border-t border-gray-200">
+                                        <details class="text-xs text-gray-600">
+                                            <summary class="cursor-pointer hover:text-gray-800 flex items-center">
+                                                <i class="fas fa-chart-line mr-2"></i>
+                                                Performance Details
+                                            </summary>
+                                            <div class="mt-2 space-y-1 ml-4">
+                                                <div><strong>Total Time:</strong> {{ formatTime(message.profiling.total_time_seconds) }}</div>
+                                                <div><strong>Processing:</strong> {{ formatTime(message.profiling.processing_time_seconds) }}</div>
+                                                <div v-if="message.profiling.initialization_time_seconds > 0">
+                                                    <strong>Initialization:</strong> {{ formatTime(message.profiling.initialization_time_seconds) }}
+                                                </div>
+                                                <div><strong>Handler:</strong> {{ message.profiling.handler_type }}</div>
+                                                <div><strong>Model:</strong> {{ message.profiling.model_info }}</div>
+                                                <div><strong>Timestamp:</strong> {{ new Date(message.profiling.timestamp).toLocaleString() }}</div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tool Execution Steps -->
+                        <div v-else-if="message.type === 'tool_step'" class="flex justify-start mb-4">
+                            <div class="max-w-xl">
+                                <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-yellow-500 tool-step">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i class="fas fa-cog text-yellow-600 animate-spin"></i>
+                                        <span class="font-medium text-yellow-700">{{ message.tool_name }}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">{{ message.content }}</div>
+                                    <div v-if="message.result" class="mt-2 p-2 bg-white rounded text-sm">
+                                        <strong>Result:</strong> {{ message.result }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div v-if="isTyping" class="flex justify-start mb-4">
+                        <div class="bg-gray-200 rounded-lg px-4 py-2 typing-indicator">
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="border-t bg-white p-6">
+                    <form @submit.prevent="sendMessage(currentInput)" class="flex space-x-4">
+                        <div class="flex-1 relative">
+                            <input v-model="currentInput" 
+                                   :disabled="isTyping"
+                                   type="text" 
+                                   placeholder="Ask me to manage clients, schedule meetings, or handle tasks..."
+                                   class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12">
+                            <button v-if="currentInput" 
+                                    @click="currentInput = ''"
+                                    type="button"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button type="submit" 
+                                :disabled="!currentInput || isTyping"
+                                class="px-6 py-4 nvidia-green-bg text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div v-if="showSettings" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-96">
+                <h3 class="text-lg font-semibold mb-4">Settings</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Model Configuration</label>
+                        <select v-model="settings.model" class="w-full p-2 border rounded">
+                            <option value="ollama">Ollama (Local)</option>
+                            <option value="nim">NVIDIA NIM (Cloud)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Agent Mode</label>
+                        <select v-model="settings.mode" class="w-full p-2 border rounded">
+                            <option value="auto">Auto (smart switching)</option>
+                            <option value="react">ReAct (reason+act)</option>
+                            <option value="tool-calling">Tool Calling</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" v-model="settings.verbose" class="rounded">
+                            <span class="text-sm">Show agent reasoning steps</span>
+                        </label>
+                    </div>
+                    <div>
+                        <button @click="resetMemory" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                            <i class="fas fa-refresh mr-1"></i> Reset Conversation Memory
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button @click="showSettings = false" 
+                            class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                        Cancel
+                    </button>
+                    <button @click="saveSettings" 
+                            class="px-4 py-2 nvidia-green-bg text-white rounded hover:bg-green-600">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    messages: [],
+                    currentInput: '',
+                    isTyping: false,
+                    connectionStatus: 'Connected',
+                    showSettings: false,
+                    settings: {
+                        model: 'ollama',
+                        mode: 'auto',
+                        verbose: true,
+                        resetMemoryOnNext: false
+                    },
+                    stats: {
+                        clients: 0,
+                        meetings: 0,
+                        tasks: 0,
+                        completed_tasks: 0
+                    },
+                    recentActivity: [],
+                    exampleQueries: [
+                        'Add client Microsoft with AI infrastructure needs',
+                        'Schedule meeting tomorrow 2 PM with engineering team',
+                        'List all high-priority clients',
+                        'Calculate 20% of $50,000 for project budget'
+                    ]
+                };
+            },
+            mounted() {
+                this.loadDashboardStats();
+                this.loadRecentActivity();
+                // Auto-focus input on load
+                this.$nextTick(() => {
+                    const input = this.$el.querySelector('input[type="text"]');
+                    if (input) input.focus();
+                });
+                // Load settings from localStorage
+                const saved = localStorage.getItem('nemo-agent-settings');
+                if (saved) {
+                    try { this.settings = Object.assign(this.settings, JSON.parse(saved)); } catch {}
+                }
+            },
+            methods: {
+                async sendMessage(text) {
+                    if (!text.trim()) return;
+
+                    const userMessage = {
+                        id: Date.now(),
+                        type: 'user',
+                        content: text,
+                        timestamp: new Date()
+                    };
+
+                    this.messages.push(userMessage);
+                    this.currentInput = '';
+                    this.isTyping = true;
+
+                    try {
+                        const response = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                message: text,
+                                verbose: this.settings.verbose,
+                                mode: this.settings.mode,
+                                model: this.settings.model,
+                                reset_memory: this.settings.resetMemoryOnNext
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to get response');
+                        }
+
+                        const data = await response.json();
+                        
+                        // Add tool execution steps if verbose mode
+                        if (this.settings.verbose && data.steps) {
+                            for (const step of data.steps) {
+                                this.messages.push({
+                                    id: Date.now() + Math.random(),
+                                    type: 'tool_step',
+                                    tool_name: step.tool,
+                                    content: step.action,
+                                    result: step.result,
+                                    timestamp: new Date()
+                                });
+                                await this.sleep(500); // Animate steps
+                            }
+                        }
+
+                        // Add final response
+                        this.messages.push({
+                            id: Date.now() + 1,
+                            type: 'agent',
+                            content: data.response,
+                            timestamp: new Date(),
+                            profiling: data.profiling
+                        });
+
+                        // Reset the one-shot reset flag if used
+                        this.settings.resetMemoryOnNext = false;
+
+                        // Update dashboard stats
+                        this.loadDashboardStats();
+                        this.loadRecentActivity();
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.messages.push({
+                            id: Date.now() + 2,
+                            type: 'agent',
+                            content: '⚠️ Sorry, I encountered an error. Please make sure the server is running and try again.',
+                            timestamp: new Date()
+                        });
+                    } finally {
+                        this.isTyping = false;
+                        this.$nextTick(() => {
+                            this.scrollToBottom();
+                        });
+                    }
+                },
+
+                quickAction(action) {
+                    this.sendMessage(action);
+                },
+
+                formatMessage(content) {
+                    // Simple formatting for better readability
+                    return content
+                        .replace(/\n/g, '<br>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                },
+                
+                formatTime(seconds) {
+                    // Format time in a readable way
+                    if (seconds < 1) {
+                        return `${Math.round(seconds * 1000)}ms`;
+                    } else if (seconds < 60) {
+                        return `${seconds.toFixed(2)}s`;
+                    } else {
+                        const minutes = Math.floor(seconds / 60);
+                        const remainingSeconds = Math.round(seconds % 60);
+                        return `${minutes}m ${remainingSeconds}s`;
+                    }
+                },
+
+                async loadDashboardStats() {
+                    try {
+                        const response = await fetch('/api/stats');
+                        if (response.ok) {
+                            this.stats = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Failed to load stats:', error);
+                    }
+                },
+
+                async loadRecentActivity() {
+                    try {
+                        const response = await fetch('/api/activity');
+                        if (response.ok) {
+                            this.recentActivity = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Failed to load activity:', error);
+                    }
+                },
+
+                saveSettings() {
+                    // Save settings to localStorage
+                    localStorage.setItem('nemo-agent-settings', JSON.stringify(this.settings));
+                    this.showSettings = false;
+                },
+
+                resetMemory() {
+                    this.settings.resetMemoryOnNext = true;
+                },
+
+                scrollToBottom() {
+                    const container = this.$refs.messagesContainer;
+                    container.scrollTop = container.scrollHeight;
+                },
+
+                sleep(ms) {
+                    return new Promise(resolve => setTimeout(resolve, ms));
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -24,7 +24,7 @@ from nat.data_models.function import FunctionBaseConfig
 
 # Weather tools commented out - uncomment and add OPENWEATHER_API_KEY to use
 # from .tools.weather import get_weather_info, check_weather_condition
-from .tools.tasks import add_task, list_tasks, complete_task, delete_task
+from .tools.tasks import add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task
 from .tools.calculator import add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage
 from .tools.datetime_info import (
     get_current_time, get_current_date,
@@ -33,6 +33,7 @@ from .tools.datetime_info import (
 # Enterprise tools for solutions architect showcase
 from .tools.meeting_scheduler import schedule_meeting, list_meetings, cancel_meeting
 from .tools.client_management import add_client, list_clients, add_client_note, get_client_details, find_client_by_name
+
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +134,38 @@ async def delete_task_function(config: DeleteTaskConfig, builder: Builder):
         description=(
             "Delete a task from your task list. You can specify the task by its ID number or by part of its description. "
             "Example: 'Delete task 1' or 'Remove the grocery task'"
+        )
+    )
+
+
+class ListTasksForClientConfig(FunctionBaseConfig, name="list_tasks_for_client"):
+    pass
+
+
+@register_function(config_type=ListTasksForClientConfig)
+async def list_tasks_for_client_function(config: ListTasksForClientConfig, builder: Builder):
+    """List all tasks for a specific client."""
+    yield FunctionInfo.from_fn(
+        list_tasks_for_client,
+        description=(
+            "List all tasks associated with a specific client. Shows both pending and completed tasks for that client. "
+            "Example: 'List tasks for Alex Chen' or 'Show all tasks for Microsoft'"
+        )
+    )
+
+
+class AddClientTaskConfig(FunctionBaseConfig, name="add_client_task"):
+    pass
+
+
+@register_function(config_type=AddClientTaskConfig)
+async def add_client_task_function(config: AddClientTaskConfig, builder: Builder):
+    """Add a task for a specific client."""
+    yield FunctionInfo.from_fn(
+        add_client_task,
+        description=(
+            "Add a task associated with a specific client. Automatically links the task to the client for better organization. "
+            "Example: 'Add task for Microsoft: Review GPU cluster requirements' or 'Create task for Alex Chen to follow up on project'"
         )
     )
 
@@ -401,9 +434,14 @@ async def list_clients_function(config: ListClientsConfig, builder: Builder):
     yield FunctionInfo.from_fn(
         list_clients,
         description=(
-            "List all clients in the CRM system. This tool is ALWAYS available for retrieving client information. "
-            "Can be used independently or as part of multi-step workflows. "
-            "Example: 'List all clients' or 'Show me my clients'"
+            "List all clients in the CRM system with optional priority filtering. "
+            "SUPPORTS FILTERING: Use 'high-priority', 'high', 'medium', 'low', or 'active' as filters parameter. "
+            "This tool is ALWAYS available for retrieving client information. "
+            "Examples: "
+            "- 'List all clients' (no filter) "
+            "- list_clients('high-priority') for high-priority clients only "
+            "- list_clients('medium') for medium-priority clients only "
+            "- list_clients('active') for active clients only"
         )
     )
 
@@ -457,3 +495,12 @@ async def find_client_by_name_function(config: FindClientByNameConfig, builder: 
             "Example: 'Find client Sarah Johnson' or 'Look up Sarah'"
         )
     )
+
+
+
+
+
+
+
+
+

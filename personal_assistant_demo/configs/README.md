@@ -1,50 +1,76 @@
 # Configuration Files
 
-This demo includes two main configuration files:
+This demo includes several configuration files optimized for different use cases:
 
-## 🌐 **config.yml** - Cloud LLM (NIM)
-**Default configuration** using NVIDIA's NIM cloud service with Llama 3.1 70B.
+## 🌐 NIM Configurations (Cloud LLM)
 
-### Easy Model Switching
-To use a different model, simply change the `model` field:
+### 1. `config.yml`
+Base configuration using NVIDIA's NIM cloud service. Used primarily with CLI commands.
 
-```yaml
-llms:
-  nvidia_llm:
-    model: meta/llama-3.1-8b-instruct    # Faster, more cost-effective
-    # model: mistralai/mistral-7b-instruct-v0.3  # Excellent for structured outputs
-```
+### 2. `config-nim-tool-calling-conversation.yml`
+Enhanced configuration for the web UI using NIM with tool-calling capabilities and conversation memory.
 
-**Popular NIM models with function calling support:**
-- `meta/llama-3.1-70b-instruct` ✅ (recommended - best balance)
-- `meta/llama-3.1-8b-instruct` ✅ (faster, cheaper)
-- `mistralai/mistral-7b-instruct-v0.3` ✅ (great for structured outputs)
+### 3. `config-nim-react-fixed.yml`
+Web UI configuration using NIM with ReAct agent for structured reasoning.
 
-## 🏠 **config-ollama.yml** - Local LLM 
-Uses Ollama for **completely offline** operation with Qwen 2.5.
+## 🏠 Ollama Configurations (Local LLM)
 
-**Requirements:**
-- Ollama installed locally
-- Qwen model downloaded: `ollama pull qwen2.5:7b`
+### 1. `config-ollama-react-enhanced.yml`
+Primary configuration for web UI using Ollama with enhanced ReAct capabilities and conversation memory.
+
+### 2. `config-ollama-tool-calling.yml`
+Alternative web UI configuration using Ollama with direct tool-calling approach.
 
 ## 🚀 Usage
 
+### Web Interface
 ```bash
-# Cloud NIM (recommended)
-nat run --config_file configs/config.yml --input "your query"
+# Run with Ollama (default)
+python run_web_demo.py
 
-# Local Ollama
-nat run --config_file configs/config-ollama.yml --input "your query"
+# Run with NIM
+python run_web_demo.py --nim
 
-# Demo script
-python demo/demo_showcase.py --config configs/config.yml
+# Run with specific config
+python run_web_demo.py --config configs/config-ollama-tool-calling.yml
 ```
 
-## 🔑 Environment Setup
+### CLI Usage
+```bash
+# Using NIM (recommended for production)
+nat run --config_file configs/config.yml --input "your query"
 
-For NIM cloud models, set your API key:
+# Using Ollama (local development)
+nat run --config_file configs/config-ollama-react-enhanced.yml --input "your query"
+```
+
+## 🔧 Requirements
+
+### For NIM (Cloud)
+1. Get your API key from [build.nvidia.com](https://build.nvidia.com/)
+2. Set environment variable:
 ```bash
 export NVIDIA_API_KEY="your-api-key-here"
 ```
 
-Get your free API key at [build.nvidia.com](https://build.nvidia.com/)
+### For Ollama (Local)
+1. Install Ollama: [ollama.ai](https://ollama.ai)
+2. Pull the Qwen model:
+```bash
+ollama pull qwen2.5:7b
+```
+
+## 🎯 Choosing the Right Configuration
+
+1. **For Production/Enterprise:**
+   - Use NIM configurations (`config.yml` or `config-nim-tool-calling-conversation.yml`)
+   - Benefits: Better performance, no local GPU required, maintained by NVIDIA
+
+2. **For Local Development/Testing:**
+   - Use Ollama configurations (`config-ollama-react-enhanced.yml`)
+   - Benefits: No API key needed, works offline, free to use
+
+3. **For Web UI:**
+   - Default (Ollama): `config-ollama-react-enhanced.yml`
+   - Cloud (NIM): `config-nim-tool-calling-conversation.yml`
+   - You can switch between ReAct and Tool-calling modes in the UI

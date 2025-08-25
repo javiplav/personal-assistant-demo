@@ -1,310 +1,56 @@
 [
   {
     "id": 1,
-    "description": "test the demo",
-    "completed": false,
+    "description": "Test the demo functionality",
+    "client_name": null,
+    "client_id": null,
+    "completed": true,
     "created_at": "2025-08-24T15:38:59.599089",
-    "completed_at": null
+    "completed_at": "2025-08-25T13:51:47.847938"
   },
   {
     "id": 2,
     "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
+    "client_name": "Microsoft",
+    "client_id": 1,
+    "completed": true,
     "created_at": "2025-08-24T18:18:48.334022",
-    "completed_at": null
+    "completed_at": "2025-08-25T12:59:41.174648"
   },
   {
     "id": 3,
     "description": "Follow up with Sarah Johnson about GPU Cluster Architecture Review",
+    "client_name": "Sarah Johnson",
+    "client_id": 6,
     "completed": false,
     "created_at": "2025-08-24T18:19:18.696152",
     "completed_at": null
   },
   {
     "id": 4,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
+    "description": "Schedule meeting with Sarah Johnson for next week at 10 AM",
+    "client_name": "Sarah Johnson",
+    "client_id": 6,
     "completed": false,
-    "created_at": "2025-08-24T18:20:09.660194",
+    "created_at": "2025-08-24T21:28:09.811196",
     "completed_at": null
   },
   {
     "id": 5,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
+    "description": "Follow up with Alex Chen about project status",
+    "client_name": "Alex Chen",
+    "client_id": 9,
     "completed": false,
-    "created_at": "2025-08-24T18:20:43.067327",
+    "created_at": "2025-08-24T20:47:37.229554",
     "completed_at": null
   },
   {
     "id": 6,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
+    "description": "Test workflow configuration",
+    "client_name": null,
+    "client_id": null,
     "completed": false,
-    "created_at": "2025-08-24T18:21:33.556277",
-    "completed_at": null
-  },
-  {
-    "id": 7,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T18:22:28.424640",
-    "completed_at": null
-  },
-  {
-    "id": 8,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T18:24:25.464227",
-    "completed_at": null
-  },
-  {
-    "id": 9,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
-    "completed": false,
-    "created_at": "2025-08-24T18:24:58.773982",
-    "completed_at": null
-  },
-  {
-    "id": 10,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T19:52:19.721679",
-    "completed_at": null
-  },
-  {
-    "id": 11,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
-    "completed": false,
-    "created_at": "2025-08-24T19:53:52.145031",
-    "completed_at": null
-  },
-  {
-    "id": 12,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T19:57:41.723576",
-    "completed_at": null
-  },
-  {
-    "id": 13,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
-    "completed": false,
-    "created_at": "2025-08-24T19:58:40.320835",
-    "completed_at": null
-  },
-  {
-    "id": 14,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T20:02:28.333414",
-    "completed_at": null
-  },
-  {
-    "id": 15,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
-    "completed": false,
-    "created_at": "2025-08-24T20:03:19.094065",
-    "completed_at": null
-  },
-  {
-    "id": 16,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T20:07:41.214068",
-    "completed_at": null
-  },
-  {
-    "id": 17,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
-    "completed": false,
-    "created_at": "2025-08-24T20:08:21.007075",
-    "completed_at": null
-  },
-  {
-    "id": 18,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T20:09:18.684866",
-    "completed_at": null
-  },
-  {
-    "id": 19,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
-    "completed": false,
-    "created_at": "2025-08-24T20:09:54.744321",
-    "completed_at": null
-  },
-  {
-    "id": 20,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T20:18:19.236139",
-    "completed_at": null
-  },
-  {
-    "id": 21,
-    "description": "Follow up with Sarah Johnson about GPU cluster optimization for AI training workloads next week",
-    "completed": false,
-    "created_at": "2025-08-24T20:19:05.659326",
-    "completed_at": null
-  },
-  {
-    "id": 22,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T20:47:11.828111",
-    "completed_at": null
-  },
-  {
-    "id": 23,
-    "description": "{'description': 'Follow up with Alex Chen next week'}\n\n**Observation (Expected from Human Response for `add_task`):**\nPlease provide the outcome of the `add_task` tool call. Specifically, indicate if the task was successfully added, and if so, provide any relevant details (e.g., task ID, scheduled date).\n\n**Next Intended Action (Post",
-    "completed": false,
-    "created_at": "2025-08-24T20:48:24.688105",
-    "completed_at": null
-  },
-  {
-    "id": 24,
-    "description": "Follow up with Alex Chen next week about project status",
-    "completed": false,
-    "created_at": "2025-08-24T20:50:40.079093",
-    "completed_at": null
-  },
-  {
-    "id": 25,
-    "description": "prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T21:11:10.015574",
-    "completed_at": null
-  },
-  {
-    "id": 26,
-    "description": "follow up with Alex Chen next week about project status",
-    "completed": false,
-    "created_at": "2025-08-24T21:11:52.819528",
-    "completed_at": null
-  },
-  {
-    "id": 27,
-    "description": "follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T21:18:23.139247",
-    "completed_at": null
-  },
-  {
-    "id": 28,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T21:27:49.492308",
-    "completed_at": null
-  },
-  {
-    "id": 29,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T21:41:40.963520",
-    "completed_at": null
-  },
-  {
-    "id": 30,
-    "description": "Follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T21:42:42.451094",
-    "completed_at": null
-  },
-  {
-    "id": 31,
-    "description": "Schedule a meeting with Sarah Johnson next week at 10 AM for the GPU cluster architecture review",
-    "completed": false,
-    "created_at": "2025-08-24T21:48:43.175207",
-    "completed_at": null
-  },
-  {
-    "id": 32,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T21:51:32.934036",
-    "completed_at": null
-  },
-  {
-    "id": 33,
-    "description": "follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T21:53:22.975529",
-    "completed_at": null
-  },
-  {
-    "id": 34,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T21:57:35.962456",
-    "completed_at": null
-  },
-  {
-    "id": 35,
-    "description": "follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T21:58:00.804540",
-    "completed_at": null
-  },
-  {
-    "id": 36,
-    "description": "follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T22:00:14.737715",
-    "completed_at": null
-  },
-  {
-    "id": 37,
-    "description": "follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T22:07:51.495821",
-    "completed_at": null
-  },
-  {
-    "id": 38,
-    "description": "Follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T22:24:43.864450",
-    "completed_at": null
-  },
-  {
-    "id": 39,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T22:30:25.942826",
-    "completed_at": null
-  },
-  {
-    "id": 40,
-    "description": "Follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T22:30:54.338268",
-    "completed_at": null
-  },
-  {
-    "id": 41,
-    "description": "test the simplified config",
-    "completed": false,
-    "created_at": "2025-08-24T22:35:33.708497",
-    "completed_at": null
-  },
-  {
-    "id": 42,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T23:23:01.065322",
-    "completed_at": null
-  },
-  {
-    "id": 43,
-    "description": "Follow up with Sarah Johnson next week",
-    "completed": false,
-    "created_at": "2025-08-24T23:23:43.744714",
-    "completed_at": null
-  },
-  {
-    "id": 44,
-    "description": "Prepare GPU cluster architecture presentation for Microsoft meeting",
-    "completed": false,
-    "created_at": "2025-08-24T23:25:06.303545",
+    "created_at": "2025-08-25T12:29:37.191706",
     "completed_at": null
   }
 ]

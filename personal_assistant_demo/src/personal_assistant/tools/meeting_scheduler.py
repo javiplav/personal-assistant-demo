@@ -2,7 +2,7 @@
 Meeting Scheduler Tool for Personal Assistant Demo.
 
 This tool demonstrates enterprise integration capabilities that solutions architects
-need to showcase to clients - calendar management, meeting scheduling, and
+need to showcase to clients - meeting scheduling, coordination, and
 professional communication.
 """
 
@@ -25,7 +25,7 @@ async def schedule_meeting(
     """
     Schedule a meeting with the specified details.
     
-    This function demonstrates enterprise calendar integration capabilities
+    This function demonstrates enterprise scheduling capabilities
     that solutions architects often need to showcase to clients.
     """
     try:

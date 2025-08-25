@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# Personal Assistant Demo Configuration - Ollama with Environment Variables
-# This configuration uses Ollama with settings from environment variables
+# Personal Assistant Demo Configuration - Ollama Tool-Calling Agent
+# This configuration uses tool-calling agent instead of ReAct for better reliability
 
 general:
   use_uvloop: true
@@ -19,6 +19,10 @@ functions:
     _type: personal_assistant/complete_task
   delete_task:
     _type: personal_assistant/delete_task
+  list_tasks_for_client:
+    _type: personal_assistant/list_tasks_for_client
+  add_client_task:
+    _type: personal_assistant/add_client_task
 
   # Calculator Tools
   add_numbers:
@@ -29,6 +33,8 @@ functions:
     _type: personal_assistant/multiply_numbers
   divide_numbers:
     _type: personal_assistant/divide_numbers
+  calculate_percentage:
+    _type: personal_assistant/calculate_percentage
 
   # Date/Time Tools
   current_time:
@@ -54,33 +60,31 @@ functions:
   find_client_by_name:
     _type: personal_assistant/find_client_by_name
 
-  # Weather Tools (uncomment if you have OPENWEATHERMAP_API_KEY)
-  # weather_info:
-  #   _type: personal_assistant/weather_info
-  # weather_condition:
-  #   _type: personal_assistant/weather_condition
+
 
 llms:
   ollama_llm:
     _type: openai
     api_key: "ollama"  # Ollama doesn't require a real API key
-    base_url: "${OLLAMA_BASE_URL:-http://localhost:11434/v1}"  # Use env var or default
-    model_name: "${OLLAMA_MODEL:-qwen2.5:7b}"  # Use env var or default to recommended model
-    temperature: 0.1
-    max_tokens: 1000
+    base_url: "http://localhost:11434/v1"  # Ollama's default OpenAI-compatible endpoint
+    model_name: "qwen2.5:7b"  # Excellent model for tool calling
+    temperature: 0.1  # Low temperature for consistent tool calling
+    max_tokens: 1500
+    frequency_penalty: 0.0  # Explicitly specified to avoid warnings
+    presence_penalty: 0.0   # Explicitly specified to avoid warnings
 
 workflow:
-  _type: react_agent
+  _type: tool_calling_agent  # Using tool-calling instead of ReAct for better reliability
   tool_names: [
-    add_task, list_tasks, complete_task, delete_task,
-    add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
+    add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task,
+    add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage,
     current_time, current_date,
     schedule_meeting, list_meetings, cancel_meeting,
     add_client, list_clients, add_client_note, get_client_details, find_client_by_name
-    # weather_info, weather_condition  # Uncomment if using weather tools
+
   ]
   llm_name: ollama_llm
   verbose: true
-  parse_agent_response_max_retries: 3
-  max_tool_calls: 60
-  recursion_limit: 150
+  # Tool-calling agent specific settings
+  max_tool_calls: 20  # Reasonable limit for tool calling
+  recursion_limit: 50  # Lower recursion for tool calling

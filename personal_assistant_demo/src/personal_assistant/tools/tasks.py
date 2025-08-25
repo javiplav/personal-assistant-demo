@@ -52,12 +52,14 @@ def _save_tasks(tasks: List[Dict[str, Any]]) -> None:
         logger.error(f"Error saving tasks: {e}")
 
 
-async def add_task(description: str) -> str:
+async def add_task(description: str, client_name: str = "", client_id: str = "") -> str:
     """
-    Add a new task to the task list.
+    Add a new task to the task list, optionally associated with a client.
     
     Args:
         description: Description of the task to add
+        client_name: Name of the client this task is for (optional)
+        client_id: ID of the client this task is for (optional)
         
     Returns:
         Confirmation message about the added task
@@ -71,6 +73,8 @@ async def add_task(description: str) -> str:
         new_task = {
             "id": task_id,
             "description": description.strip(),
+            "client_name": client_name.strip() if client_name else None,
+            "client_id": int(client_id) if client_id and client_id.isdigit() else None,
             "completed": False,
             "created_at": datetime.now().isoformat(),
             "completed_at": None
@@ -79,19 +83,28 @@ async def add_task(description: str) -> str:
         tasks.append(new_task)
         _save_tasks(tasks)
         
-        return f"✅ Added task #{task_id}: '{description}'"
+        # Format response based on client association
+        if client_name:
+            return f"✅ Added task #{task_id} for {client_name}: '{description}'"
+        else:
+            return f"✅ Added task #{task_id}: '{description}'"
         
     except Exception as e:
         logger.error(f"Error adding task: {e}")
         return f"Sorry, I couldn't add the task '{description}'. Please try again."
 
 
-async def list_tasks(query: str = "") -> str:
+async def list_tasks(query: str = "", client_name: str = "", client_id: str = "") -> str:
     """
-    List all tasks with their status.
+    List tasks with optional filtering by client or query.
+    
+    Args:
+        query: Optional search query to filter tasks
+        client_name: Filter tasks for specific client by name
+        client_id: Filter tasks for specific client by ID
     
     Returns:
-        A formatted string showing all tasks
+        A formatted string showing filtered or all tasks
     """
     try:
         tasks = _load_tasks()
@@ -99,24 +112,52 @@ async def list_tasks(query: str = "") -> str:
         if not tasks:
             return "📝 You have no tasks yet. Add one by saying 'Add a task to...' or 'Create a task to...'"
         
-        # Separate completed and pending tasks
-        pending_tasks = [task for task in tasks if not task["completed"]]
-        completed_tasks = [task for task in tasks if task["completed"]]
+        # Apply filtering
+        filtered_tasks = tasks
+        filter_description = ""
         
-        result = []
+        if client_name:
+            client_lower = client_name.lower()
+            filtered_tasks = [t for t in filtered_tasks if t.get("client_name") and client_lower in t["client_name"].lower()]
+            filter_description = f" for client '{client_name}'"
+        elif client_id and client_id.isdigit():
+            filtered_tasks = [t for t in filtered_tasks if t.get("client_id") == int(client_id)]
+            filter_description = f" for client ID {client_id}"
+        elif query:
+            query_lower = query.lower()
+            filtered_tasks = [t for t in filtered_tasks if query_lower in t["description"].lower()]
+            filter_description = f" matching '{query}'"
+        
+        if not filtered_tasks:
+            if filter_description:
+                return f"📝 No tasks found{filter_description}."
+            else:
+                return "📝 You have no tasks yet."
+        
+        # Separate completed and pending tasks, sorted by ID
+        pending_tasks = sorted([task for task in filtered_tasks if not task["completed"]], key=lambda x: x["id"])
+        completed_tasks = sorted([task for task in filtered_tasks if task["completed"]], key=lambda x: x["id"])
+        
+        # Build result with client information
+        if filter_description:
+            result = [f"Here are your tasks{filter_description}:"]
+        else:
+            result = ["Here are all your tasks:"]
         
         if pending_tasks:
-            result.append("📋 **Pending Tasks:**")
+            result.append("\n📋 **Pending Tasks:**")
             for task in pending_tasks:
-                result.append(f"  • #{task['id']}: {task['description']}")
+                client_info = f" (for {task['client_name']})" if task.get('client_name') else ""
+                result.append(f"  • #{task['id']}: {task['description']}{client_info}")
         
         if completed_tasks:
             result.append("\n✅ **Completed Tasks:**")
             for task in completed_tasks:
-                result.append(f"  • #{task['id']}: {task['description']}")
+                client_info = f" (for {task['client_name']})" if task.get('client_name') else ""
+                result.append(f"  • #{task['id']}: {task['description']}{client_info}")
         
-        if not pending_tasks and completed_tasks:
-            result.insert(0, "🎉 All tasks completed!")
+        if not pending_tasks and completed_tasks and not filter_description:
+            result.insert(1, "\n🎉 All tasks completed!")
         
         return "\n".join(result)
         
@@ -224,3 +265,52 @@ async def delete_task(task_identifier: str) -> str:
     except Exception as e:
         logger.error(f"Error deleting task: {e}")
         return f"Sorry, I couldn't delete the task '{task_identifier}'. Please try again."
+
+
+async def list_tasks_for_client(client_name: str) -> str:
+    """
+    List all tasks for a specific client.
+    
+    Args:
+        client_name: Name of the client to filter tasks for
+        
+    Returns:
+        A formatted string showing tasks for the specified client
+    """
+    return await list_tasks(client_name=client_name)
+
+
+async def add_client_task(client_name: str, task_description: str) -> str:
+    """
+    Add a task for a specific client.
+    
+    Args:
+        client_name: Name of the client this task is for
+        task_description: Description of the task
+        
+    Returns:
+        Confirmation message about the added task
+    """
+    # Find client ID by name
+    from pathlib import Path
+    import json
+    
+    try:
+        clients_file = Path("data/clients.json")
+        if clients_file.exists():
+            with open(clients_file, "r") as f:
+                clients = json.load(f)
+            
+            # Find matching client
+            client_id = None
+            for client in clients:
+                if client["name"].lower() == client_name.lower():
+                    client_id = str(client["id"])
+                    break
+            
+            return await add_task(task_description, client_name, client_id)
+        else:
+            return await add_task(task_description, client_name)
+    except Exception as e:
+        logger.error(f"Error adding client task: {e}")
+        return await add_task(task_description, client_name)

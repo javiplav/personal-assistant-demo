@@ -75,6 +75,8 @@ functions:
     _type: personal_assistant/get_client_details
   find_client_by_name:
     _type: personal_assistant/find_client_by_name
+  
+
 
 # LLM Configuration - NIM Cloud Models (excellent for function calling and agents)
 # Popular model options (just change the model field):
@@ -113,6 +115,7 @@ workflow:
     - add_client_note
     - get_client_details
     - find_client_by_name
+
   llm_name: nvidia_llm
   verbose: true
   parse_agent_response_max_retries: 5

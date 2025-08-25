@@ -1,0 +1,133 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Enhanced ReAct Agent Configuration - Fixed for Conversational Follow-ups
+# This configuration fixes the ReAct format issues with improved prompt engineering
+
+general:
+  use_uvloop: true
+  front_end:
+    _type: fastapi
+
+functions:
+  # Task Management Tools
+  add_task:
+    _type: personal_assistant/add_task
+  list_tasks:
+    _type: personal_assistant/list_tasks
+  complete_task:
+    _type: personal_assistant/complete_task
+  delete_task:
+    _type: personal_assistant/delete_task
+  list_tasks_for_client:
+    _type: personal_assistant/list_tasks_for_client
+  add_client_task:
+    _type: personal_assistant/add_client_task
+
+  # Calculator Tools
+  add_numbers:
+    _type: personal_assistant/add_numbers
+  subtract_numbers:
+    _type: personal_assistant/subtract_numbers
+  multiply_numbers:
+    _type: personal_assistant/multiply_numbers
+  divide_numbers:
+    _type: personal_assistant/divide_numbers
+  calculate_percentage:
+    _type: personal_assistant/calculate_percentage
+
+  # Date/Time Tools
+  current_time:
+    _type: personal_assistant/current_time
+  current_date:
+    _type: personal_assistant/current_date
+
+  # Enterprise Solutions Architect Tools
+  schedule_meeting:
+    _type: personal_assistant/schedule_meeting
+  list_meetings:
+    _type: personal_assistant/list_meetings
+  cancel_meeting:
+    _type: personal_assistant/cancel_meeting
+  add_client:
+    _type: personal_assistant/add_client
+  list_clients:
+    _type: personal_assistant/list_clients
+  add_client_note:
+    _type: personal_assistant/add_client_note
+  get_client_details:
+    _type: personal_assistant/get_client_details
+  find_client_by_name:
+    _type: personal_assistant/find_client_by_name
+
+llms:
+  ollama_llm:
+    _type: openai
+    api_key: "ollama"
+    base_url: "http://localhost:11434/v1"
+    model_name: "qwen2.5:7b"
+    temperature: 0.1   # Lower temperature for more consistent formatting
+    max_tokens: 800    # Lower token limit for faster responses
+    # Removed model_kwargs to avoid parameter conflicts with Ollama
+
+workflow:
+  _type: react_agent
+  tool_names: [
+    add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task,
+    add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage,
+    current_time, current_date,
+    schedule_meeting, list_meetings, cancel_meeting,
+    add_client, list_clients, add_client_note, get_client_details, find_client_by_name
+  ]
+  llm_name: ollama_llm
+  verbose: true
+  
+  # Temporary debugging - increase retries to see actual output
+  retry_agent_response_parsing_errors: true
+  parse_agent_response_max_retries: 2         # Increase to see actual format issues
+  tool_call_max_retries: 1                    # Single tool retry to avoid loops
+  max_tool_calls: 3                           # Very low limit to force quick decisions
+  recursion_limit: 50                         # Higher limit to handle complex queries
+  pass_tool_call_errors_to_agent: false      # Don't pass errors to avoid confusion
+  use_tool_schema: true                       # Include detailed tool descriptions
+  max_history: 20                             # Longer history for better context understanding
+  
+  # Simplified ReAct prompt to prevent infinite loops
+  system_prompt: |
+    Answer the following questions as best you can. You have access to the following tools:
+
+    {tools}
+
+    Use the following format:
+
+    Question: the input question you must answer
+    Thought: you should always think about what to do
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action
+    Observation: the result of the action
+    ... (this Thought/Action/Action Input/Observation can repeat N times)
+    Thought: I now know the final answer
+    Final Answer: the final answer to the original input question
+
+    IMPORTANT: 
+    - After getting results from a tool, move directly to "Final Answer"
+    - Don't overthink - use 1-2 tool calls maximum
+    - Always end with "Final Answer:" - never keep reasoning forever
+    - Use conversation history to understand follow-up questions like "who?" or "which ones?"
+  
+  # Keep it simple to avoid infinite loops
+  additional_instructions: |
+    STOPPING RULES (CRITICAL):
+    1. Use ONE tool call, then provide Final Answer immediately
+    2. Don't keep reasoning after getting tool results
+    3. Action Input format: {{}} for empty, {{"key": "value"}} for parameters
+    4. ALWAYS end with "Final Answer:" - never get stuck in reasoning loops
+    
+    EXAMPLE - Note how it stops after ONE tool use:
+    Question: List high priority clients
+    Thought: I need to list clients with high priority
+    Action: list_clients
+    Action Input: {{"filters": "high"}}
+    Observation: Found 5 high priority clients...
+    Thought: I now know the final answer
+    Final Answer: You have 5 high priority clients: [list them]

@@ -17,8 +17,8 @@ from pathlib import Path
 
 async def add_client(
     name: str,
-    email: str,
     company: str,
+    email: str = "",
     phone: str = "",
     project_requirements: str = "",
     priority: str = "medium"
@@ -30,6 +30,14 @@ async def add_client(
     use to manage client relationships and track project opportunities.
     """
     try:
+        # Validate priority value
+        valid_priorities = ["high", "medium", "low"]
+        if priority.lower() not in valid_priorities:
+            return {
+                "success": False,
+                "error": f"Invalid priority value. Must be one of: {', '.join(valid_priorities)}"
+            }
+        
         # Load existing clients
         clients_file = Path("data/clients.json")
         clients_file.parent.mkdir(exist_ok=True)
@@ -40,16 +48,21 @@ async def add_client(
         else:
             clients = []
         
-        # Check if client already exists
+        # Check if client already exists by email (if provided) or (name and company)
         for client in clients:
-            if client["email"] == email:
+            if email and client["email"] == email:
                 return {
                     "success": False,
                     "error": f"Client with email {email} already exists."
                 }
+            if client["name"].lower() == name.lower() and client["company"].lower() == company.lower():
+                return {
+                    "success": False,
+                    "error": f"Client '{name}' from company '{company}' already exists."
+                }
         
-        # Generate client ID
-        client_id = len(clients) + 1
+        # Generate client ID - find max ID and increment
+        client_id = max([c["id"] for c in clients], default=0) + 1
         
         # Create client object
         client = {
@@ -90,6 +103,7 @@ async def add_client(
 async def list_clients(filters: str = "") -> Dict[str, Any]:
     """
     List all clients with optional filtering.
+    Supports filtering by priority: 'high', 'medium', 'low', or 'high-priority'
     """
     try:
         clients_file = Path("data/clients.json")
@@ -104,8 +118,34 @@ async def list_clients(filters: str = "") -> Dict[str, Any]:
         with open(clients_file, "r") as f:
             clients = json.load(f)
         
-        # Return all clients (no filtering for simplicity)
+        # Apply filtering based on the filters parameter
         filtered_clients = clients
+        filter_message = ""
+        
+        if filters:
+            filters_lower = filters.lower()
+            # Define valid priority values
+            valid_priorities = ["high", "medium", "low"]
+            
+            # Extract priority from filters
+            priority_filter = None
+            for priority in valid_priorities:
+                if priority in filters_lower and (
+                    f"{priority} priority" in filters_lower or 
+                    filters_lower == priority or 
+                    f"{priority}-priority" in filters_lower
+                ):
+                    priority_filter = priority
+                    break
+            
+            if priority_filter:
+                # Filter for specific priority clients
+                filtered_clients = [c for c in clients if c.get("priority", "medium").lower() == priority_filter]
+                filter_message = f" ({priority_filter} priority only)"
+            elif "active" in filters_lower:
+                # Filter for active clients only
+                filtered_clients = [c for c in clients if c.get("status", "active").lower() == "active"]
+                filter_message = " (active only)"
         
         # Sort by priority (high first) then by name
         priority_order = {"high": 1, "medium": 2, "low": 3}
@@ -115,7 +155,7 @@ async def list_clients(filters: str = "") -> Dict[str, Any]:
             "success": True,
             "clients": filtered_clients,
             "count": len(filtered_clients),
-            "message": f"Found {len(filtered_clients)} client(s)."
+            "message": f"Found {len(filtered_clients)} client(s){filter_message}."
         }
         
     except Exception as e:

@@ -28,7 +28,7 @@ The automated demo script showcases:
 ### **2. Meeting Scheduling**
 - Natural language meeting scheduling
 - Duration and participant management
-- Calendar integration
+- Meeting scheduling
 
 ### **3. Task Management**
 - Creating follow-up tasks

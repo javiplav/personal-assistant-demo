@@ -89,5 +89,18 @@
     "description": "",
     "status": "scheduled",
     "created_at": "2025-08-24T20:50:32.038129"
+  },
+  {
+    "id": 8,
+    "title": "Discuss AI project update",
+    "participants": [
+      "Alex Chen"
+    ],
+    "start_time": "2025-08-26T10:00:00",
+    "end_time": "2025-08-26T11:00:00",
+    "duration_minutes": 60,
+    "description": "Review progress and next steps for the AI project",
+    "status": "scheduled",
+    "created_at": "2025-08-25T14:49:48.875573"
   }
 ]
