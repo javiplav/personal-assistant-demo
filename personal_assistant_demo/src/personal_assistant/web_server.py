@@ -27,6 +27,7 @@ from nat.cli.cli_utils.config_override import load_and_override_config
 from nat.utils.data_models.schema_validator import validate_schema
 from nat.runtime.loader import discover_and_register_plugins, PluginTypes
 from .enhanced_react_handler import EnhancedReActHandler, ToolCallingHandler
+from .tools._paths import DATA_DIR, data_path
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +55,60 @@ class WebServer:
             description="Real-time AI agent demonstration",
             version="1.0.0"
         )
+        # Enable debug logging for troubleshooting
+        self._enable_debug_logging()
         self.handler = None  # Conversation-aware handler (ReAct or ToolCalling)
         self.config_file = config_file
         self.workflow = None
         self.builder = None
+        self._builder_context = None  # Deprecated: keep for backward compat
+        self._builder_manager = None  # Keep async context manager alive
         self.current_mode: str = "react"
         self.current_model: str = "ollama"
         self.setup_routes()
         self.setup_static_files()
+        
+        # Add shutdown handler to clean up resources
+        @self.app.on_event("shutdown")
+        async def shutdown_handler():
+            await self.cleanup()
+
+    def _enable_debug_logging(self) -> None:
+        """Enable DEBUG logging across relevant modules for troubleshooting."""
+        try:
+            # Ensure a console handler exists
+            root_logger = logging.getLogger()
+            if not root_logger.handlers:
+                console = logging.StreamHandler()
+                console.setLevel(logging.DEBUG)
+                console.setFormatter(logging.Formatter(
+                    fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+                    datefmt="%H:%M:%S"
+                ))
+                root_logger.addHandler(console)
+            # Root logger level
+            root_logger.setLevel(logging.DEBUG)
+            # Our modules and NAT
+            for name in [
+                __name__,
+                "personal_assistant",
+                "personal_assistant.tools",
+                "nat",
+                "nat.agent",
+                "nat.builder",
+                "nat.runtime",
+                "nat.components",
+                "nat.utils",
+                "uvicorn",
+                "uvicorn.error",
+                "uvicorn.access",
+            ]:
+                lg = logging.getLogger(name)
+                lg.setLevel(logging.DEBUG)
+                lg.propagate = True
+            logger.info("Debug logging enabled for personal_assistant, NAT, and uvicorn modules")
+        except Exception as e:
+            logger.warning(f"Failed to enable debug logging: {e}")
     
     def setup_static_files(self):
         """Setup static file serving for the web interface."""
@@ -107,57 +154,15 @@ class WebServer:
                 # Re-initialize if mode/model changed or workflow not initialized
                 init_start = time.time()
                 
-                # Analyze message to determine best handler
-                message_lower = chat_message.message.lower()
-                use_tool_calling = any([
-                    "list all" in message_lower,
-                    "show all" in message_lower,
-                    "get all" in message_lower,
-                    "find all" in message_lower,
-                    "high-priority" in message_lower,
-                    "high priority" in message_lower,
-                    "medium priority" in message_lower,
-                    "low priority" in message_lower
-                ])
+                # Mode resolution logic - only apply heuristics for "auto" mode
+                requested_mode = chat_message.mode
+                resolved_mode = chat_message.mode
+                reason = "explicit user choice"
                 
-                # Handle auto mode - smart switching based on query type
+                # Only use heuristics when mode is "auto"
                 if chat_message.mode == "auto":
-                    if use_tool_calling:
-                        chat_message.mode = "tool-calling"
-                        logger.info("Auto mode: switching to tool-calling for structured query")
-                    else:
-                        chat_message.mode = "react"
-                        logger.info("Auto mode: using react for conversational query")
-                
-                # Always resolve config path for profiling info
-                resolved_config = self._resolve_config_path(
-                    chat_message.model or self.current_model, 
-                    chat_message.mode or self.current_mode
-                )
-                
-                if (
-                    (self.workflow is None)
-                    or (chat_message.mode and chat_message.mode != self.current_mode)
-                    or (chat_message.model and chat_message.model != self.current_model)
-                ):
-                    # Update mode/model and initialize workflow
-                    self.current_mode = chat_message.mode or self.current_mode
-                    self.current_model = chat_message.model or self.current_model
-                    await self.initialize_workflow(resolved_config, self.current_mode)
-                initialization_time = time.time() - init_start
-                
-                processing_start = time.time()
-                
-                # Reset memory if requested
-                if chat_message.reset_memory and self.handler and hasattr(self.handler, "memory"):
-                    self.handler.memory.clear_session()
-
-                # Use appropriate handler with conversation memory if available
-                if self.handler:
                     # Analyze message to determine best handler
                     message_lower = chat_message.message.lower()
-                    
-                    # Automatically use Tool-calling for queries that need structured data
                     use_tool_calling = any([
                         "list all" in message_lower,
                         "show all" in message_lower,
@@ -169,7 +174,51 @@ class WebServer:
                         "low priority" in message_lower
                     ])
                     
-                    # Use the appropriate handler based on current mode
+                    if use_tool_calling:
+                        resolved_mode = "tool-calling"
+                        reason = "heuristic: structured query detected"
+                    else:
+                        resolved_mode = "react"
+                        reason = "heuristic: conversational query detected"
+                    
+                    # Only update chat_message.mode if we're in auto mode
+                    chat_message.mode = resolved_mode
+                
+                # Log mode resolution for debugging
+                logger.info("Mode resolution: %s -> %s (reason: %s)", requested_mode, resolved_mode, reason)
+                
+                # Always resolve config path for profiling info
+                resolved_config = self._resolve_config_path(
+                    chat_message.model or self.current_model, 
+                    chat_message.mode or self.current_mode
+                )
+                logger.info("Config selected -> model=%s mode=%s file=%s",
+                            chat_message.model, chat_message.mode, resolved_config)
+                
+                if (
+                    (self.workflow is None)
+                    or (chat_message.mode and chat_message.mode != self.current_mode)
+                    or (chat_message.model and chat_message.model != self.current_model)
+                ):
+                    # Update mode/model and initialize workflow
+                    self.current_mode = chat_message.mode or self.current_mode
+                    self.current_model = chat_message.model or self.current_model
+                    await self.initialize_workflow(resolved_config, self.current_mode)
+                
+                # Log the final mode selection for this request
+                logger.info("Final mode selected for request: %s", self.current_mode)
+                
+                initialization_time = time.time() - init_start
+                
+                processing_start = time.time()
+                
+                # Reset memory if requested
+                if chat_message.reset_memory and self.handler and hasattr(self.handler, "memory"):
+                    self.handler.memory.clear_session()
+
+                # Use appropriate handler with conversation memory if available
+                if self.handler:
+                    # Use the appropriate handler based on resolved mode (no more heuristic overrides)
                     if self.current_mode == "tool-calling" and hasattr(self, 'tool_handler'):
                         self.handler = self.tool_handler
                     elif hasattr(self, 'react_handler'):
@@ -178,8 +227,18 @@ class WebServer:
                     logger.info(f"Processing message with NAT Handler [{self.handler.__class__.__name__}]: {chat_message.message}")
                     
                     # Use selected handler with conversation memory
+                    logger.debug(
+                        "WebServer: starting handler.handle_message with mode=%s model=%s",
+                        self.current_mode,
+                        self.current_model
+                    )
                     result = await self.handler.handle_message(chat_message.message)
                     processing_time = time.time() - processing_start
+                    logger.debug(
+                        "WebServer: handler completed in %.2fs (keys=%s)",
+                        processing_time,
+                        list(result.keys()) if isinstance(result, dict) else type(result).__name__
+                    )
                     
                     # Create profiling information
                     model_info = "NIM" if self.current_model == "nim" else "Ollama"
@@ -297,6 +356,17 @@ class WebServer:
     async def initialize_workflow(self, config_path: Optional[str] = None, mode: str = "react"):
         """Initialize the NeMo Agent Toolkit workflow with selected config and mode."""
         try:
+            # Clean up any existing builder first
+            # Close any existing async context manager first
+            if getattr(self, '_builder_manager', None):
+                try:
+                    await self._builder_manager.__aexit__(None, None, None)
+                except Exception as cleanup_error:
+                    logger.warning(f"Error during builder cleanup: {cleanup_error}")
+                finally:
+                    self._builder_manager = None
+                    self._builder_context = None
+            
             # Discover and register plugins first
             discover_and_register_plugins(PluginTypes.ALL)
             
@@ -307,18 +377,30 @@ class WebServer:
             
             logger.info(f"Initializing workflow with config: {effective_config}")
             
-            # Build the actual workflow using WorkflowBuilder
-            async with WorkflowBuilder.from_config(config) as builder:
-                self.builder = builder
-                self.workflow = builder.get_workflow()
-                
-                # Initialize both handlers for flexibility
-                self.react_handler = EnhancedReActHandler(self.workflow, session_id="web_session")
-                self.tool_handler = ToolCallingHandler(self.workflow, session_id="web_session")
-                
-                # Set the default handler based on mode
-                self.handler = self.tool_handler if mode == "tool-calling" else self.react_handler
-                logger.info("✅ NeMo Agent Toolkit workflow and handlers initialized successfully!")
+            # Build the actual workflow using WorkflowBuilder with more robust error handling
+            self._builder_manager = WorkflowBuilder.from_config(config)
+            self._builder_context = await self._builder_manager.__aenter__()
+            self.builder = self._builder_context
+            
+            # Get workflow with error handling
+            try:
+                self.workflow = self.builder.get_workflow()
+            except Exception as workflow_error:
+                logger.error(f"Failed to get workflow from builder: {workflow_error}")
+                # Clean up the builder context if workflow creation fails
+                if self._builder_manager:
+                    await self._builder_manager.__aexit__(None, None, None)
+                self._builder_manager = None
+                self._builder_context = None
+                raise workflow_error
+            
+            # Initialize both handlers for flexibility
+            self.react_handler = EnhancedReActHandler(self.workflow, session_id="web_session")
+            self.tool_handler = ToolCallingHandler(self.workflow, session_id="web_session")
+            
+            # Set the default handler based on mode
+            self.handler = self.tool_handler if mode == "tool-calling" else self.react_handler
+            logger.info("✅ NeMo Agent Toolkit workflow and handlers initialized successfully!")
             
         except Exception as e:
             logger.error(f"Failed to initialize workflow: {e}", exc_info=True)
@@ -327,11 +409,18 @@ class WebServer:
             logger.warning("Falling back to demo mode with simulated responses")
             
             class MockWorkflow:
-                async def ainvoke(self, message: str) -> list[str]:
+                async def ainvoke(self, payload) -> list[str]:
                     """Mock workflow for demo purposes when real workflow fails."""
+                    # Extract message from payload - handle both string and dict formats
+                    if isinstance(payload, dict) and "input_message" in payload:
+                        message = payload["input_message"]
+                    elif isinstance(payload, str):
+                        message = payload
+                    else:
+                        message = str(payload)
+                    
                     if "client" in message.lower():
                         return ["✅ [DEMO MODE] Client management functionality - real implementation would execute your registered client tools"]
-
                     elif "task" in message.lower():
                         return ["✅ [DEMO MODE] Task management - real implementation would use your task management tools"]
                     elif "calculate" in message.lower() or "%" in message:
@@ -347,42 +436,25 @@ class WebServer:
     def _resolve_config_path(self, model: str, mode: str) -> str:
         """Map model/mode selections to config file paths."""
         base_dir = Path("configs")
-        # Normalize
         model = (model or "ollama").lower()
         mode = (mode or "react").lower()
 
-        # Prefer specific configs if present; otherwise fall back to generic ones
-        candidates = []
         if model == "nim":
-            # NIM works best with ReAct agent due to model limitations
-            # Always use ReAct config regardless of mode selection
-            candidates = [
-                base_dir / "config-nim-tool-calling-conversation.yml",  # Actually ReAct config now
-                base_dir / "config-nim-react-fixed.yml",
-                base_dir / "config-nim-conversation.yml",
-            ]
-        else:  # ollama
-            if mode == "tool-calling":
-                candidates = [
-                    base_dir / "config-ollama-tool-calling.yml",
-                    base_dir / "config-ollama.yml",
-                ]
-            else:
-                candidates = [
-                    base_dir / "config-ollama-react-enhanced.yml",
-                    base_dir / "config-ollama.yml",
-                ]
-
-        for path in candidates:
-            if path.exists():
-                return str(path)
-        # Final fallback
-        return str(base_dir / "config-ollama.yml")
-    
+            return (
+                base_dir / "config-nim-tool-calling-conversation.yml"
+                if mode == "tool-calling"
+                else base_dir / "config-nim-react-fixed.yml"
+            )
+        # ollama
+        return (
+            base_dir / "config-ollama-tool-calling.yml"
+            if mode == "tool-calling"
+            else base_dir / "config-ollama-react-enhanced.yml"
+        )
+        
     async def load_stats(self) -> Dict[str, int]:
         """Load dashboard statistics from data files."""
         try:
-            data_dir = Path("data")
             stats = {
                 "clients": 0,
                 "meetings": 0,
@@ -391,26 +463,20 @@ class WebServer:
             }
             
             # Load clients
-            clients_file = data_dir / "clients.json"
-            if clients_file.exists():
-                with open(clients_file, 'r') as f:
-                    clients = json.load(f)
-                    stats["clients"] = len(clients)
+            if data_path("clients.json").exists():
+                clients = json.loads(data_path("clients.json").read_text(encoding="utf-8"))
+                stats["clients"] = len(clients)
             
             # Load meetings
-            meetings_file = data_dir / "meetings.json"
-            if meetings_file.exists():
-                with open(meetings_file, 'r') as f:
-                    meetings = json.load(f)
-                    stats["meetings"] = len([m for m in meetings if m.get("status") == "scheduled"])
+            if data_path("meetings.json").exists():
+                meetings = json.loads(data_path("meetings.json").read_text(encoding="utf-8"))
+                stats["meetings"] = len([m for m in meetings if m.get("status") == "scheduled"])
             
             # Load tasks
-            tasks_file = data_dir / "tasks.json"
-            if tasks_file.exists():
-                with open(tasks_file, 'r') as f:
-                    tasks = json.load(f)
-                    stats["tasks"] = len([t for t in tasks if not t.get("completed", False)])
-                    stats["completed_tasks"] = len([t for t in tasks if t.get("completed", False)])
+            if data_path("tasks.json").exists():
+                tasks = json.loads(data_path("tasks.json").read_text(encoding="utf-8"))
+                stats["tasks"] = len([t for t in tasks if not t.get("completed", False)])
+                stats["completed_tasks"] = len([t for t in tasks if t.get("completed", False)])
             
             return stats
             
@@ -422,49 +488,42 @@ class WebServer:
         """Load recent activity for the dashboard."""
         try:
             activity = []
-            data_dir = Path("data")
             
             # Load recent clients
-            clients_file = data_dir / "clients.json"
-            if clients_file.exists():
-                with open(clients_file, 'r') as f:
-                    clients = json.load(f)
-                    for client in sorted(clients, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
-                        activity.append({
-                            "id": f"client_{client['id']}",
-                            "type": "Client Added",
-                            "description": f"{client['name']} from {client['company']}",
-                            "time": self.format_time(client.get("created_at", "")),
-                            "icon": "fas fa-user-plus"
-                        })
+            if data_path("clients.json").exists():
+                clients = json.loads(data_path("clients.json").read_text(encoding="utf-8"))
+                for client in sorted(clients, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
+                    activity.append({
+                        "id": f"client_{client['id']}",
+                        "type": "Client Added",
+                        "description": f"{client['name']} from {client['company']}",
+                        "time": self.format_time(client.get("created_at", "")),
+                        "icon": "fas fa-user-plus"
+                    })
             
             # Load recent meetings
-            meetings_file = data_dir / "meetings.json"
-            if meetings_file.exists():
-                with open(meetings_file, 'r') as f:
-                    meetings = json.load(f)
-                    for meeting in sorted(meetings, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
-                        activity.append({
-                            "id": f"meeting_{meeting['id']}",
-                            "type": "Meeting Scheduled",
-                            "description": meeting['title'],
-                            "time": self.format_time(meeting.get("created_at", "")),
-                            "icon": "fas fa-handshake"
-                        })
+            if data_path("meetings.json").exists():
+                meetings = json.loads(data_path("meetings.json").read_text(encoding="utf-8"))
+                for meeting in sorted(meetings, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
+                    activity.append({
+                        "id": f"meeting_{meeting['id']}",
+                        "type": "Meeting Scheduled",
+                        "description": meeting['title'],
+                        "time": self.format_time(meeting.get("created_at", "")),
+                        "icon": "fas fa-handshake"
+                    })
             
             # Load recent tasks
-            tasks_file = data_dir / "tasks.json"
-            if tasks_file.exists():
-                with open(tasks_file, 'r') as f:
-                    tasks = json.load(f)
-                    for task in sorted(tasks, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
-                        activity.append({
-                            "id": f"task_{task['id']}",
-                            "type": "Task Created",
-                            "description": task['description'][:50] + "..." if len(task['description']) > 50 else task['description'],
-                            "time": self.format_time(task.get("created_at", "")),
-                            "icon": "fas fa-tasks"
-                        })
+            if data_path("tasks.json").exists():
+                tasks = json.loads(data_path("tasks.json").read_text(encoding="utf-8"))
+                for task in sorted(tasks, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
+                    activity.append({
+                        "id": f"task_{task['id']}",
+                        "type": "Task Created",
+                        "description": task['description'][:50] + "..." if len(task['description']) > 50 else task['description'],
+                        "time": self.format_time(task.get("created_at", "")),
+                        "icon": "fas fa-tasks"
+                    })
             
             # Sort by time and limit
             activity.sort(key=lambda x: x['time'], reverse=True)
@@ -497,6 +556,17 @@ class WebServer:
                 
         except Exception:
             return "Unknown"
+    
+    async def cleanup(self):
+        """Clean up resources when server shuts down."""
+        try:
+            if getattr(self, '_builder_manager', None):
+                await self._builder_manager.__aexit__(None, None, None)
+                self._builder_manager = None
+                self._builder_context = None
+                logger.info("✅ Workflow builder context cleaned up successfully")
+        except Exception as e:
+            logger.error(f"Error during cleanup: {e}")
 
 
 # Factory function for creating the app

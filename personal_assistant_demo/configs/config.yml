@@ -91,6 +91,7 @@ llms:
     base_url: https://integrate.api.nvidia.com/v1
     temperature: 0.1
     max_tokens: 1200
+    timeout: 30        # Add timeout to prevent hanging
 
 # Workflow Configuration - Intelligent ReAct agent
 workflow:
@@ -118,6 +119,8 @@ workflow:
 
   llm_name: nvidia_llm
   verbose: true
-  parse_agent_response_max_retries: 5
-  max_tool_calls: 80
-  recursion_limit: 200
+  max_tool_calls: 6                           # Right-sized for demos
+  recursion_limit: 20                         # Right-sized for demos
+  parse_agent_response_max_retries: 3         # Right-sized for demos
+  tool_call_timeout: 15                       # Add explicit tool call timeout
+  max_execution_time: 45                      # Add maximum execution time limit

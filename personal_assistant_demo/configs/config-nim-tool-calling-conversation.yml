@@ -1,88 +1,77 @@
 llms:
   nim_llm:
     _type: "nim"
-    model: "meta/llama-3.1-70b-instruct"  # Larger model with better tool calling support
-    temperature: 0.1   # Slightly higher for more natural responses
-    max_tokens: 800    # More tokens for complete responses
-    timeout: 60       # Standard timeout
-    # NIM-specific optimizations
+    model: "nvidia/llama-3.1-nemotron-nano-8b-v1"
+    temperature: 0.1
+    top_p: 0.7
+    max_tokens: 256
+    timeout: 20
     model_kwargs:
-      max_completion_tokens: 800
       stream: false
-      # Tool calling optimizations
-      tool_choice: "auto"
-      parallel_tool_calls: false  # Disable parallel for stability
+      max_completion_tokens: 128
 
 functions:
-  list_clients:
-    _type: "list_clients"
-  find_client_by_name:
-    _type: "find_client_by_name"
-  add_client:
-    _type: "add_client"
-  add_client_note:
-    _type: "add_client_note"
-  get_client_details:
-    _type: "get_client_details"
-  current_time:
-    _type: "current_time"
-  current_date:
-    _type: "current_date"
-
-  add_numbers:
-    _type: "add_numbers"
-  subtract_numbers:
-    _type: "subtract_numbers"
-  multiply_numbers:
-    _type: "multiply_numbers"
-  divide_numbers:
-    _type: "divide_numbers"
-  calculate_percentage:
-    _type: "calculate_percentage"
-  schedule_meeting:
-    _type: "schedule_meeting"
-  list_meetings:
-    _type: "list_meetings"
-  cancel_meeting:
-    _type: "cancel_meeting"
-  list_tasks:
-    _type: "list_tasks"
+  # Task Management Tools
   add_task:
-    _type: "add_task"
+    _type: personal_assistant/add_task
+  list_tasks:
+    _type: personal_assistant/list_tasks
   complete_task:
-    _type: "complete_task"
+    _type: personal_assistant/complete_task
   delete_task:
-    _type: "delete_task"
+    _type: personal_assistant/delete_task
   list_tasks_for_client:
-    _type: "list_tasks_for_client"
+    _type: personal_assistant/list_tasks_for_client
   add_client_task:
-    _type: "add_client_task"
+    _type: personal_assistant/add_client_task
+
+  # Calculator Tools
+  add_numbers:
+    _type: personal_assistant/add_numbers
+  subtract_numbers:
+    _type: personal_assistant/subtract_numbers
+  multiply_numbers:
+    _type: personal_assistant/multiply_numbers
+  divide_numbers:
+    _type: personal_assistant/divide_numbers
+  calculate_percentage:
+    _type: personal_assistant/calculate_percentage
+
+  # Date/Time Tools
+  current_time:
+    _type: personal_assistant/current_time
+  current_date:
+    _type: personal_assistant/current_date
+
+  # Enterprise Solutions Architect Tools
+  schedule_meeting:
+    _type: personal_assistant/schedule_meeting
+  list_meetings:
+    _type: personal_assistant/list_meetings
+  cancel_meeting:
+    _type: personal_assistant/cancel_meeting
+  add_client:
+    _type: personal_assistant/add_client
+  list_clients:
+    _type: personal_assistant/list_clients
+  add_client_note:
+    _type: personal_assistant/add_client_note
+  get_client_details:
+    _type: personal_assistant/get_client_details
+  find_client_by_name:
+    _type: personal_assistant/find_client_by_name
 
 workflow:
-  _type: "react_agent"  # Revert to ReAct for NIM - tool-calling causes hangs
-  tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task]
-  llm_name: "nim_llm"
+  _type: tool_calling_agent
+  llm_name: nim_llm
+  tool_names: [add_task, list_tasks, complete_task, delete_task, list_tasks_for_client,
+               add_client_task, add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
+               calculate_percentage, current_time, current_date, schedule_meeting, list_meetings,
+               cancel_meeting, add_client, list_clients, add_client_note, get_client_details, find_client_by_name]
   verbose: true
-  max_tool_calls: 5
-  handle_tool_errors: true
-  recursion_limit: 50
-  retry_agent_response_parsing_errors: true
-  parse_agent_response_max_retries: 3
-  
-  # Production ReAct prompt - no templates, direct data extraction
-  system_prompt: |
-    You are a helpful assistant that uses tools to answer questions. Use this exact format:
+  max_tool_calls: 3
+  recursion_limit: 8
+  tool_call_timeout: 10
+  max_execution_time: 25
 
-    Question: the input question
-    Thought: think about what to do
-    Action: the action to take, should be one of [{tool_names}]
-    Action Input: the input to the action in JSON format
-    Observation: the result of the action
-    Thought: I now know the final answer
-    Final Answer: provide a clear answer using the actual data from the tool
 
-    {tools}
-
-    CRITICAL: Always use actual data from tool responses, never use placeholder text or examples.
-    For client questions: Extract real names, companies, and counts from the tool response.
-    Format lists clearly with actual client information.

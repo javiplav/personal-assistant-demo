@@ -15,6 +15,7 @@
 
 """Date and time information tools for the Personal Assistant Demo."""
 
+import json
 import logging
 from datetime import datetime, timedelta
 import time
@@ -32,11 +33,19 @@ async def get_current_time(query: str = "") -> str:
     try:
         now = datetime.now()
         formatted_time = now.strftime("%I:%M %p")  # 12-hour format with AM/PM
-        return f"The current time is {formatted_time}"
+        return json.dumps({
+            "success": True,
+            "current_time": formatted_time,
+            "timestamp": now.isoformat(),
+            "message": f"The current time is {formatted_time}"
+        })
         
     except Exception as e:
         logger.error(f"Error getting current time: {e}")
-        return "Sorry, I couldn't get the current time."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't get the current time."
+        })
 
 
 async def get_current_date(query: str = "") -> str:
@@ -49,11 +58,19 @@ async def get_current_date(query: str = "") -> str:
     try:
         now = datetime.now()
         formatted_date = now.strftime("%A, %B %d, %Y")  # e.g., "Monday, January 15, 2024"
-        return f"Today is {formatted_date}"
+        return json.dumps({
+            "success": True,
+            "current_date": formatted_date,
+            "date": now.strftime("%Y-%m-%d"),
+            "message": f"Today is {formatted_date}"
+        })
         
     except Exception as e:
         logger.error(f"Error getting current date: {e}")
-        return "Sorry, I couldn't get the current date."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't get the current date."
+        })
 
 
 async def get_current_datetime(query: str = "") -> str:
@@ -66,11 +83,19 @@ async def get_current_datetime(query: str = "") -> str:
     try:
         now = datetime.now()
         formatted_datetime = now.strftime("%A, %B %d, %Y at %I:%M %p")
-        return f"It is currently {formatted_datetime}"
+        return json.dumps({
+            "success": True,
+            "current_datetime": formatted_datetime,
+            "timestamp": now.isoformat(),
+            "message": f"It is currently {formatted_datetime}"
+        })
         
     except Exception as e:
         logger.error(f"Error getting current datetime: {e}")
-        return "Sorry, I couldn't get the current date and time."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't get the current date and time."
+        })
 
 
 async def get_timezone_info() -> str:
@@ -94,11 +119,19 @@ async def get_timezone_info() -> str:
         else:
             formatted_offset = utc_offset
         
-        return f"Your timezone is {timezone_name} (UTC{formatted_offset})"
+        return json.dumps({
+            "success": True,
+            "timezone_name": timezone_name,
+            "utc_offset": formatted_offset,
+            "message": f"Your timezone is {timezone_name} (UTC{formatted_offset})"
+        })
         
     except Exception as e:
         logger.error(f"Error getting timezone info: {e}")
-        return "Sorry, I couldn't get timezone information."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't get timezone information."
+        })
 
 
 async def calculate_time_difference(hours: str) -> str:
@@ -117,7 +150,10 @@ async def calculate_time_difference(hours: str) -> str:
         numbers = re.findall(r'-?\d+\.?\d*', hours)
         
         if not numbers:
-            return "Please provide the number of hours to add or subtract."
+            return json.dumps({
+                "success": False,
+                "error": "Please provide the number of hours to add or subtract."
+            })
         
         hours_to_add = float(numbers[0])
         
@@ -128,15 +164,26 @@ async def calculate_time_difference(hours: str) -> str:
         future_time_str = future_time.strftime("%I:%M %p")
         
         if hours_to_add > 0:
-            return f"It is currently {current_time_str}. In {hours_to_add} hours, it will be {future_time_str}."
+            message = f"It is currently {current_time_str}. In {hours_to_add} hours, it will be {future_time_str}."
         elif hours_to_add < 0:
-            return f"It is currently {current_time_str}. {abs(hours_to_add)} hours ago, it was {future_time_str}."
+            message = f"It is currently {current_time_str}. {abs(hours_to_add)} hours ago, it was {future_time_str}."
         else:
-            return f"It is currently {current_time_str}."
+            message = f"It is currently {current_time_str}."
+            
+        return json.dumps({
+            "success": True,
+            "current_time": current_time_str,
+            "future_time": future_time_str,
+            "hours_difference": hours_to_add,
+            "message": message
+        })
             
     except Exception as e:
         logger.error(f"Error calculating time difference: {e}")
-        return "Sorry, I couldn't calculate the time difference."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't calculate the time difference."
+        })
 
 
 async def get_day_of_week(query: str = "") -> str:
@@ -149,11 +196,19 @@ async def get_day_of_week(query: str = "") -> str:
     try:
         now = datetime.now()
         day_name = now.strftime("%A")
-        return f"Today is {day_name}"
+        return json.dumps({
+            "success": True,
+            "day_of_week": day_name,
+            "date": now.strftime("%Y-%m-%d"),
+            "message": f"Today is {day_name}"
+        })
         
     except Exception as e:
         logger.error(f"Error getting day of week: {e}")
-        return "Sorry, I couldn't get the current day of the week."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't get the current day of the week."
+        })
 
 
 async def get_current_hour(query: str = "") -> str:
@@ -166,8 +221,16 @@ async def get_current_hour(query: str = "") -> str:
     try:
         now = datetime.now()
         current_hour = now.hour
-        return f"The current hour is {current_hour} (24-hour format)"
+        return json.dumps({
+            "success": True,
+            "current_hour": current_hour,
+            "timestamp": now.isoformat(),
+            "message": f"The current hour is {current_hour} (24-hour format)"
+        })
         
     except Exception as e:
         logger.error(f"Error getting current hour: {e}")
-        return "Sorry, I couldn't get the current hour."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't get the current hour."
+        })

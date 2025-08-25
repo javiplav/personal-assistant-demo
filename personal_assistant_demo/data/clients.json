@@ -258,5 +258,18 @@
     "created_at": "2025-08-24T21:23:55.824442",
     "last_contact": "2025-08-24T21:23:55.824448",
     "notes": []
+  },
+  {
+    "id": 11,
+    "name": "TechCorp",
+    "email": "",
+    "company": "TechCorp",
+    "phone": "",
+    "project_requirements": "AI infrastructure",
+    "priority": "medium",
+    "status": "active",
+    "created_at": "2025-08-25T22:03:47.852210",
+    "last_contact": "2025-08-25T22:03:47.852212",
+    "notes": []
   }
 ]

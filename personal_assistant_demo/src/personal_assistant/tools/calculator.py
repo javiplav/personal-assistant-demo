@@ -15,6 +15,7 @@
 
 """Calculator tools for the Personal Assistant Demo."""
 
+import json
 import re
 import logging
 from typing import List
@@ -44,19 +45,33 @@ async def add_numbers(text: str) -> str:
         numbers = _extract_numbers(text)
         
         if len(numbers) < 2:
-            return "Please provide at least two numbers to add together."
+            return json.dumps({
+                "success": False,
+                "error": "Please provide at least two numbers to add together."
+            })
         
         result = sum(numbers)
         
         if len(numbers) == 2:
-            return f"The sum of {numbers[0]} + {numbers[1]} = {result}"
+            response = f"The sum of {numbers[0]} + {numbers[1]} = {result}"
         else:
             numbers_str = " + ".join(str(n) for n in numbers)
-            return f"The sum of {numbers_str} = {result}"
+            response = f"The sum of {numbers_str} = {result}"
+            
+        return json.dumps({
+            "success": True,
+            "operation": "addition",
+            "operands": numbers,
+            "result": result,
+            "message": response
+        })
             
     except Exception as e:
         logger.error(f"Error adding numbers: {e}")
-        return f"Sorry, I couldn't perform the addition. Please check your input and try again."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't perform the addition. Please check your input and try again."
+        })
 
 
 async def subtract_numbers(text: str) -> str:
@@ -73,17 +88,32 @@ async def subtract_numbers(text: str) -> str:
         numbers = _extract_numbers(text)
         
         if len(numbers) < 2:
-            return "Please provide two numbers to subtract."
+            return json.dumps({
+                "success": False,
+                "error": "Please provide two numbers to subtract."
+            })
         
         if len(numbers) > 2:
-            return "This tool only supports subtraction between two numbers."
+            return json.dumps({
+                "success": False,
+                "error": "This tool only supports subtraction between two numbers."
+            })
         
         result = numbers[0] - numbers[1]
-        return f"The result of {numbers[0]} - {numbers[1]} = {result}"
+        return json.dumps({
+            "success": True,
+            "operation": "subtraction",
+            "operands": numbers,
+            "result": result,
+            "message": f"The result of {numbers[0]} - {numbers[1]} = {result}"
+        })
         
     except Exception as e:
         logger.error(f"Error subtracting numbers: {e}")
-        return f"Sorry, I couldn't perform the subtraction. Please check your input and try again."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't perform the subtraction. Please check your input and try again."
+        })
 
 
 async def multiply_numbers(text: str) -> str:
@@ -100,21 +130,35 @@ async def multiply_numbers(text: str) -> str:
         numbers = _extract_numbers(text)
         
         if len(numbers) < 2:
-            return "Please provide at least two numbers to multiply together."
+            return json.dumps({
+                "success": False,
+                "error": "Please provide at least two numbers to multiply together."
+            })
         
         result = 1
         for num in numbers:
             result *= num
         
         if len(numbers) == 2:
-            return f"The product of {numbers[0]} × {numbers[1]} = {result}"
+            response = f"The product of {numbers[0]} × {numbers[1]} = {result}"
         else:
             numbers_str = " × ".join(str(n) for n in numbers)
-            return f"The product of {numbers_str} = {result}"
+            response = f"The product of {numbers_str} = {result}"
+            
+        return json.dumps({
+            "success": True,
+            "operation": "multiplication",
+            "operands": numbers,
+            "result": result,
+            "message": response
+        })
             
     except Exception as e:
         logger.error(f"Error multiplying numbers: {e}")
-        return f"Sorry, I couldn't perform the multiplication. Please check your input and try again."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't perform the multiplication. Please check your input and try again."
+        })
 
 
 async def divide_numbers(text: str) -> str:
@@ -131,20 +175,38 @@ async def divide_numbers(text: str) -> str:
         numbers = _extract_numbers(text)
         
         if len(numbers) < 2:
-            return "Please provide two numbers to divide."
+            return json.dumps({
+                "success": False,
+                "error": "Please provide two numbers to divide."
+            })
         
         if len(numbers) > 2:
-            return "This tool only supports division between two numbers."
+            return json.dumps({
+                "success": False,
+                "error": "This tool only supports division between two numbers."
+            })
         
         if numbers[1] == 0:
-            return "Cannot divide by zero!"
+            return json.dumps({
+                "success": False,
+                "error": "Cannot divide by zero!"
+            })
         
         result = numbers[0] / numbers[1]
-        return f"The result of {numbers[0]} ÷ {numbers[1]} = {result}"
+        return json.dumps({
+            "success": True,
+            "operation": "division",
+            "operands": numbers,
+            "result": result,
+            "message": f"The result of {numbers[0]} ÷ {numbers[1]} = {result}"
+        })
         
     except Exception as e:
         logger.error(f"Error dividing numbers: {e}")
-        return f"Sorry, I couldn't perform the division. Please check your input and try again."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't perform the division. Please check your input and try again."
+        })
 
 
 async def calculate_percentage(text: str) -> str:
@@ -166,7 +228,14 @@ async def calculate_percentage(text: str) -> str:
             percentage = float(match.group(1))
             number = float(match.group(2))
             result = (percentage / 100) * number
-            return f"{percentage}% of {number} = {result}"
+            return json.dumps({
+                "success": True,
+                "operation": "percentage",
+                "percentage": percentage,
+                "base_number": number,
+                "result": result,
+                "message": f"{percentage}% of {number} = {result}"
+            })
         
         # Fallback: try to extract two numbers and assume first is percentage
         numbers = _extract_numbers(text)
@@ -174,10 +243,23 @@ async def calculate_percentage(text: str) -> str:
             percentage = numbers[0]
             number = numbers[1]
             result = (percentage / 100) * number
-            return f"{percentage}% of {number} = {result}"
+            return json.dumps({
+                "success": True,
+                "operation": "percentage",
+                "percentage": percentage,
+                "base_number": number,
+                "result": result,
+                "message": f"{percentage}% of {number} = {result}"
+            })
         
-        return "Please provide a percentage and a number (e.g., '20% of 150' or '20 percent of 150')."
+        return json.dumps({
+            "success": False,
+            "error": "Please provide a percentage and a number (e.g., '20% of 150' or '20 percent of 150')."
+        })
         
     except Exception as e:
         logger.error(f"Error calculating percentage: {e}")
-        return f"Sorry, I couldn't calculate the percentage. Please check your input and try again."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't calculate the percentage. Please check your input and try again."
+        })

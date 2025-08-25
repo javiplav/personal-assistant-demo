@@ -102,5 +102,35 @@
     "description": "Review progress and next steps for the AI project",
     "status": "scheduled",
     "created_at": "2025-08-25T14:49:48.875573"
+  },
+  {
+    "id": 9,
+    "title": "High-Priority Client Meeting",
+    "participants": [
+      "John Doe"
+    ],
+    "start_time": "2025-08-26T10:00:00",
+    "end_time": "2025-08-26T11:00:00",
+    "duration_minutes": 60,
+    "description": "",
+    "status": "cancelled",
+    "created_at": "2025-08-25T21:06:00.284087",
+    "cancelled_at": "2025-08-25T22:17:55.267704",
+    "cancellation_reason": "No reason provided"
+  },
+  {
+    "id": 10,
+    "title": "High-Priority Client Meeting",
+    "participants": [
+      "John Doe"
+    ],
+    "start_time": "2025-08-26T10:00:00",
+    "end_time": "2025-08-26T11:00:00",
+    "duration_minutes": 60,
+    "description": "",
+    "status": "cancelled",
+    "created_at": "2025-08-25T22:04:42.284092",
+    "cancelled_at": "2025-08-25T22:17:56.706452",
+    "cancellation_reason": "No reason provided"
   }
 ]

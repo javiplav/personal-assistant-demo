@@ -92,7 +92,7 @@ async def run_web_server(config_file: str, host: str = "0.0.0.0", port: int = 80
             app,
             host=host,
             port=port,
-            log_level="info",
+            log_level="debug",
             access_log=False
         )
         server = uvicorn.Server(config)

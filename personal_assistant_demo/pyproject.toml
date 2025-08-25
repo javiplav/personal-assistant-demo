@@ -14,7 +14,8 @@ dependencies = [
     "pydantic>=2.0.0",
     "google-api-python-client>=2.100.0",
     "google-auth-httplib2>=0.2.0",
-    "google-auth-oauthlib>=1.0.0"
+    "google-auth-oauthlib>=1.0.0",
+    "filelock>=3.13"
 ]
 requires-python = ">=3.11,<3.13"
 description = "Personal Assistant Demo using NeMo Agent Toolkit"

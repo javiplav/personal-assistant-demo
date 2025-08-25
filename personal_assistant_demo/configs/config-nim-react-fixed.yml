@@ -61,7 +61,7 @@ llms:
     model: "nvidia/llama-3.1-nemotron-nano-8b-v1" 
     temperature: 0.1
     max_tokens: 800
-    timeout: 60
+    timeout: 30        # Reduced timeout to prevent hanging
     model_kwargs:
       max_completion_tokens: 800
       stream: false
@@ -74,14 +74,16 @@ workflow:
   llm_name: nim_llm
   verbose: true
   
-  # Conservative settings for reliability
-  parse_agent_response_max_retries: 2
+  # Right-sized settings for demos
+  parse_agent_response_max_retries: 3         # Right-sized for demos
   tool_call_max_retries: 1
-  max_tool_calls: 5
-  recursion_limit: 60
+  max_tool_calls: 6                           # Right-sized for demos
+  recursion_limit: 20                         # Right-sized for demos
   pass_tool_call_errors_to_agent: false
   use_tool_schema: true
   max_history: 15
+  tool_call_timeout: 15                       # Add explicit tool call timeout
+  max_execution_time: 45                      # Add maximum execution time limit
   
   # ReAct prompt with MANDATORY data display requirements
   system_prompt: |

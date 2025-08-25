@@ -11,6 +11,25 @@ import os
 from datetime import datetime, timedelta
 from typing import Any, Dict
 from pathlib import Path
+from filelock import FileLock
+from ._paths import data_path
+
+# Standardized file path and lock
+MEETINGS_FILE = data_path("meetings.json")
+_MEETINGS_LOCK = FileLock(str(MEETINGS_FILE) + ".lock")
+
+
+def _load_meetings():
+    """Load meetings from the JSON file with proper locking."""
+    with _MEETINGS_LOCK:
+        return json.loads(MEETINGS_FILE.read_text(encoding="utf-8")) if MEETINGS_FILE.exists() else []
+
+
+def _save_meetings(data):
+    """Save meetings to the JSON file with proper locking."""
+    with _MEETINGS_LOCK:
+        MEETINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        MEETINGS_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
 
@@ -30,14 +49,7 @@ async def schedule_meeting(
     """
     try:
         # Load existing meetings
-        meetings_file = Path("data/meetings.json")
-        meetings_file.parent.mkdir(exist_ok=True)
-        
-        if meetings_file.exists():
-            with open(meetings_file, "r") as f:
-                meetings = json.load(f)
-        else:
-            meetings = []
+        meetings = _load_meetings()
         
         # Check for duplicate meetings (same title, participants, and similar time)
         for existing_meeting in meetings:
@@ -76,15 +88,15 @@ async def schedule_meeting(
                                 # If existing meeting is within 2 hours of target time, consider it duplicate
                                 time_diff = abs((existing_time - target_time).total_seconds())
                                 if time_diff < 7200:  # 2 hours in seconds
-                                    return {
-                                        "success": True,
-                                        "meeting_id": existing_meeting["id"],
-                                        "title": existing_meeting["title"],
-                                        "start_time": existing_time.strftime("%Y-%m-%d %H:%M"),
-                                        "participants": existing_meeting["participants"],
-                                        "message": f"Meeting '{title}' with {', '.join(participants)} already exists (ID: {existing_meeting['id']}) at {existing_time.strftime('%Y-%m-%d %H:%M')}. No duplicate created.",
-                                        "duplicate_prevented": True
-                                    }
+                                                                            return json.dumps({
+                                            "success": True,
+                                            "meeting_id": existing_meeting["id"],
+                                            "title": existing_meeting["title"],
+                                            "start_time": existing_time.strftime("%Y-%m-%d %H:%M"),
+                                            "participants": existing_meeting["participants"],
+                                            "message": f"Meeting '{title}' with {', '.join(participants)} already exists (ID: {existing_meeting['id']}) at {existing_time.strftime('%Y-%m-%d %H:%M')}. No duplicate created.",
+                                            "duplicate_prevented": True
+                                        })
                 except (ValueError, KeyError):
                     continue
         
@@ -162,10 +174,9 @@ async def schedule_meeting(
         meetings.append(meeting)
         
         # Save to file
-        with open(meetings_file, "w") as f:
-            json.dump(meetings, f, indent=2)
+        _save_meetings(meetings)
         
-        return {
+        return json.dumps({
             "success": True,
             "meeting_id": meeting_id,
             "title": title,
@@ -173,50 +184,64 @@ async def schedule_meeting(
             "end_time": end_time.strftime("%Y-%m-%d %H:%M"),
             "participants": participants,
             "message": f"Meeting '{title}' scheduled successfully for {best_time.strftime('%Y-%m-%d at %H:%M')} with {len(participants)} participants."
-        }
+        })
         
     except Exception as e:
-        return {
+        return json.dumps({
             "success": False,
             "error": f"Failed to schedule meeting: {str(e)}"
-        }
+        })
 
 
 async def list_meetings(filters: str = "") -> Dict[str, Any]:
-    """
-    List all scheduled meetings with optional filtering.
-    """
+    """List meetings with optional filtering (e.g., 'active', 'cancelled')."""
     try:
-        meetings_file = Path("data/meetings.json")
-        
-        if not meetings_file.exists():
-            return {
+        meetings = _load_meetings()
+
+        if not meetings:
+            return json.dumps({
                 "success": True,
                 "meetings": [],
+                "count": 0,
                 "message": "No meetings found."
-            }
-        
-        with open(meetings_file, "r") as f:
-            meetings = json.load(f)
-        
-        # Return all meetings (no filtering for simplicity)
+            })
+
+        # Apply simple status filters
         filtered_meetings = meetings
-        
+        if filters:
+            f = filters.lower()
+            if "active" in f:
+                filtered_meetings = [m for m in meetings if m.get("status", "scheduled").lower() != "cancelled"]
+            elif "cancelled" in f or "canceled" in f:
+                filtered_meetings = [m for m in meetings if m.get("status", "scheduled").lower() == "cancelled"]
+
         # Sort by start time
-        filtered_meetings.sort(key=lambda x: x["start_time"])
-        
-        return {
+        filtered_meetings.sort(key=lambda x: x.get("start_time", ""))
+
+        # Project to compact representation
+        def _project(m: Dict[str, Any]) -> Dict[str, Any]:
+            return {
+                "id": m.get("id"),
+                "title": m.get("title"),
+                "start_time": m.get("start_time"),
+                "end_time": m.get("end_time"),
+                "status": m.get("status", "scheduled")
+            }
+
+        slim = [_project(m) for m in filtered_meetings]
+
+        return json.dumps({
             "success": True,
-            "meetings": filtered_meetings,
-            "count": len(filtered_meetings),
-            "message": f"Found {len(filtered_meetings)} meeting(s)."
-        }
-        
+            "meetings": slim,
+            "count": len(slim),
+            "message": f"Found {len(slim)} meeting(s)."
+        })
+
     except Exception as e:
-        return {
+        return json.dumps({
             "success": False,
             "error": f"Failed to list meetings: {str(e)}"
-        }
+        })
 
 
 async def cancel_meeting(meeting_id: int, reason: str = "") -> Dict[str, Any]:
@@ -224,16 +249,13 @@ async def cancel_meeting(meeting_id: int, reason: str = "") -> Dict[str, Any]:
     Cancel a scheduled meeting by ID.
     """
     try:
-        meetings_file = Path("data/meetings.json")
+        meetings = _load_meetings()
         
-        if not meetings_file.exists():
-            return {
+        if not meetings:
+            return json.dumps({
                 "success": False,
                 "error": "No meetings found."
-            }
-        
-        with open(meetings_file, "r") as f:
-            meetings = json.load(f)
+            })
         
         # Find and update meeting
         meeting_found = False
@@ -246,23 +268,22 @@ async def cancel_meeting(meeting_id: int, reason: str = "") -> Dict[str, Any]:
                 break
         
         if not meeting_found:
-            return {
+            return json.dumps({
                 "success": False,
                 "error": f"Meeting with ID {meeting_id} not found."
-            }
+            })
         
         # Save updated meetings
-        with open(meetings_file, "w") as f:
-            json.dump(meetings, f, indent=2)
+        _save_meetings(meetings)
         
-        return {
+        return json.dumps({
             "success": True,
             "meeting_id": meeting_id,
             "message": f"Meeting {meeting_id} cancelled successfully. Participants would be notified automatically."
-        }
+        })
         
     except Exception as e:
-        return {
+        return json.dumps({
             "success": False,
             "error": f"Failed to cancel meeting: {str(e)}"
-        }
+        })

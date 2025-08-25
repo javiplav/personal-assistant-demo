@@ -6,6 +6,7 @@ conversation memory and better error handling for format issues.
 """
 
 import asyncio
+import time
 import json
 import logging
 import re
@@ -261,7 +262,21 @@ class ToolCallingHandler:
             # Add timeout for operations - increase for troubleshooting
             timeout = 120.0  # Increased timeout to identify if workflow completes
             try:
-                result = await asyncio.wait_for(self.workflow.ainvoke(message), timeout=timeout)
+                # Troubleshooting logs
+                logger.debug(
+                    "ToolCallingHandler: invoking workflow.ainvoke (timeout=%ss) msg_preview='%s'",
+                    timeout,
+                    message[:120].replace("\n", " ")
+                )
+                payload = {"input_message": message}
+                invoke_start = time.monotonic()
+                result = await asyncio.wait_for(self.workflow.ainvoke(payload), timeout=timeout)
+                invoke_elapsed = time.monotonic() - invoke_start
+                logger.debug(
+                    "ToolCallingHandler: ainvoke completed in %.2fs (result_type=%s)",
+                    invoke_elapsed,
+                    type(result).__name__
+                )
             except asyncio.TimeoutError:
                 logger.error(f"ToolCalling workflow timed out after {timeout}s for message: {message}")
                 return {

@@ -21,20 +21,23 @@ import logging
 from datetime import datetime
 from typing import List, Dict, Any
 from pathlib import Path
+from filelock import FileLock
+from ._paths import data_path
 
 logger = logging.getLogger(__name__)
 
 # Path to the tasks file
-TASKS_FILE = Path(__file__).parent.parent.parent.parent / "data" / "tasks.json"
+TASKS_FILE = data_path("tasks.json")
+_TASKS_LOCK = FileLock(str(TASKS_FILE) + ".lock")
 
 
 def _load_tasks() -> List[Dict[str, Any]]:
     """Load tasks from the JSON file."""
     try:
-        if TASKS_FILE.exists():
-            with open(TASKS_FILE, 'r') as f:
-                return json.load(f)
-        return []
+        with _TASKS_LOCK:
+            if TASKS_FILE.exists():
+                return json.loads(TASKS_FILE.read_text(encoding="utf-8"))
+            return []
     except Exception as e:
         logger.error(f"Error loading tasks: {e}")
         return []
@@ -46,8 +49,8 @@ def _save_tasks(tasks: List[Dict[str, Any]]) -> None:
         # Ensure the data directory exists
         TASKS_FILE.parent.mkdir(parents=True, exist_ok=True)
         
-        with open(TASKS_FILE, 'w') as f:
-            json.dump(tasks, f, indent=2)
+        with _TASKS_LOCK:
+            TASKS_FILE.write_text(json.dumps(tasks, indent=2), encoding="utf-8")
     except Exception as e:
         logger.error(f"Error saving tasks: {e}")
 
@@ -83,15 +86,30 @@ async def add_task(description: str, client_name: str = "", client_id: str = "")
         tasks.append(new_task)
         _save_tasks(tasks)
         
-        # Format response based on client association
+        # Return structured JSON response
         if client_name:
-            return f"✅ Added task #{task_id} for {client_name}: '{description}'"
+            response_data = {
+                "success": True,
+                "task_id": task_id,
+                "description": description,
+                "client_name": client_name,
+                "message": f"Added task #{task_id} for {client_name}: '{description}'"
+            }
         else:
-            return f"✅ Added task #{task_id}: '{description}'"
+            response_data = {
+                "success": True,
+                "task_id": task_id,
+                "description": description,
+                "message": f"Added task #{task_id}: '{description}'"
+            }
+        return json.dumps(response_data)
         
     except Exception as e:
         logger.error(f"Error adding task: {e}")
-        return f"Sorry, I couldn't add the task '{description}'. Please try again."
+        return json.dumps({
+            "success": False,
+            "error": f"Couldn't add the task '{description}'. Please try again."
+        })
 
 
 async def list_tasks(query: str = "", client_name: str = "", client_id: str = "") -> str:
@@ -110,7 +128,11 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
         tasks = _load_tasks()
         
         if not tasks:
-            return "📝 You have no tasks yet. Add one by saying 'Add a task to...' or 'Create a task to...'"
+            return json.dumps({
+                "success": True,
+                "tasks": [],
+                "message": "You have no tasks yet. Add one by saying 'Add a task to...' or 'Create a task to...'"
+            })
         
         # Apply filtering
         filtered_tasks = tasks
@@ -129,10 +151,13 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
             filter_description = f" matching '{query}'"
         
         if not filtered_tasks:
-            if filter_description:
-                return f"📝 No tasks found{filter_description}."
-            else:
-                return "📝 You have no tasks yet."
+            message = f"No tasks found{filter_description}." if filter_description else "You have no tasks yet."
+            return json.dumps({
+                "success": True,
+                "tasks": [],
+                "filter": filter_description.strip() if filter_description else None,
+                "message": message
+            })
         
         # Separate completed and pending tasks, sorted by ID
         pending_tasks = sorted([task for task in filtered_tasks if not task["completed"]], key=lambda x: x["id"])
@@ -159,11 +184,20 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
         if not pending_tasks and completed_tasks and not filter_description:
             result.insert(1, "\n🎉 All tasks completed!")
         
-        return "\n".join(result)
+        return json.dumps({
+            "success": True,
+            "pending_tasks": [{"id": t["id"], "description": t["description"], "client_name": t.get("client_name")} for t in pending_tasks],
+            "completed_tasks": [{"id": t["id"], "description": t["description"], "client_name": t.get("client_name")} for t in completed_tasks],
+            "filter": filter_description.strip() if filter_description else None,
+            "message": "\n".join(result)
+        })
         
     except Exception as e:
         logger.error(f"Error listing tasks: {e}")
-        return "Sorry, I couldn't retrieve your tasks. Please try again."
+        return json.dumps({
+            "success": False,
+            "error": "Sorry, I couldn't retrieve your tasks. Please try again."
+        })
 
 
 async def complete_task(task_identifier: str) -> str:
@@ -180,7 +214,10 @@ async def complete_task(task_identifier: str) -> str:
         tasks = _load_tasks()
         
         if not tasks:
-            return "You have no tasks to complete."
+            return json.dumps({
+                "success": False,
+                "error": "You have no tasks to complete."
+            })
         
         # Try to find the task by ID first, then by description
         task_to_complete = None
@@ -198,10 +235,19 @@ async def complete_task(task_identifier: str) -> str:
                     break
         
         if not task_to_complete:
-            return f"❌ I couldn't find a task matching '{task_identifier}'. Use 'list tasks' to see all tasks."
+            return json.dumps({
+                "success": False,
+                "error": f"Couldn't find a task matching '{task_identifier}'. Use 'list tasks' to see all tasks."
+            })
         
         if task_to_complete["completed"]:
-            return f"✅ Task #{task_to_complete['id']} is already completed: '{task_to_complete['description']}'"
+            return json.dumps({
+                "success": True,
+                "task_id": task_to_complete['id'],
+                "description": task_to_complete['description'],
+                "already_completed": True,
+                "message": f"Task #{task_to_complete['id']} is already completed: '{task_to_complete['description']}'"
+            })
         
         # Mark as completed
         task_to_complete["completed"] = True
@@ -209,11 +255,20 @@ async def complete_task(task_identifier: str) -> str:
         
         _save_tasks(tasks)
         
-        return f"🎉 Completed task #{task_to_complete['id']}: '{task_to_complete['description']}'"
+        return json.dumps({
+            "success": True,
+            "task_id": task_to_complete['id'],
+            "description": task_to_complete['description'],
+            "completed_at": task_to_complete['completed_at'],
+            "message": f"Completed task #{task_to_complete['id']}: '{task_to_complete['description']}'"
+        })
         
     except Exception as e:
         logger.error(f"Error completing task: {e}")
-        return f"Sorry, I couldn't complete the task '{task_identifier}'. Please try again."
+        return json.dumps({
+            "success": False,
+            "error": f"Couldn't complete the task '{task_identifier}'. Please try again."
+        })
 
 
 async def delete_task(task_identifier: str) -> str:
@@ -230,7 +285,10 @@ async def delete_task(task_identifier: str) -> str:
         tasks = _load_tasks()
         
         if not tasks:
-            return "You have no tasks to delete."
+            return json.dumps({
+                "success": False,
+                "error": "You have no tasks to delete."
+            })
         
         # Try to find the task by ID first, then by description
         task_to_delete = None
@@ -254,17 +312,28 @@ async def delete_task(task_identifier: str) -> str:
                     break
         
         if not task_to_delete:
-            return f"❌ I couldn't find a task matching '{task_identifier}'. Use 'list tasks' to see all tasks."
+            return json.dumps({
+                "success": False,
+                "error": f"Couldn't find a task matching '{task_identifier}'. Use 'list tasks' to see all tasks."
+            })
         
         # Remove the task
         tasks.pop(task_index)
         _save_tasks(tasks)
         
-        return f"🗑️ Deleted task #{task_to_delete['id']}: '{task_to_delete['description']}'"
+        return json.dumps({
+            "success": True,
+            "task_id": task_to_delete['id'],
+            "description": task_to_delete['description'],
+            "message": f"Deleted task #{task_to_delete['id']}: '{task_to_delete['description']}'"
+        })
         
     except Exception as e:
         logger.error(f"Error deleting task: {e}")
-        return f"Sorry, I couldn't delete the task '{task_identifier}'. Please try again."
+        return json.dumps({
+            "success": False,
+            "error": f"Couldn't delete the task '{task_identifier}'. Please try again."
+        })
 
 
 async def list_tasks_for_client(client_name: str) -> str:
@@ -292,14 +361,14 @@ async def add_client_task(client_name: str, task_description: str) -> str:
         Confirmation message about the added task
     """
     # Find client ID by name
-    from pathlib import Path
     import json
     
     try:
-        clients_file = Path("data/clients.json")
+        clients_file = data_path("clients.json")
+        clients_lock = FileLock(str(clients_file) + ".lock")
         if clients_file.exists():
-            with open(clients_file, "r") as f:
-                clients = json.load(f)
+            with clients_lock:
+                clients = json.loads(clients_file.read_text(encoding="utf-8"))
             
             # Find matching client
             client_id = None

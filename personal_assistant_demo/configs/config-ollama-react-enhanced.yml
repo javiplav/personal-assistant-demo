@@ -67,7 +67,9 @@ llms:
     base_url: "http://localhost:11434/v1"
     model_name: "qwen2.5:7b"
     temperature: 0.1   # Lower temperature for more consistent formatting
-    max_tokens: 800    # Lower token limit for faster responses
+    top_p: 0.7         # Constrain sampling to reduce rambling
+    max_tokens: 256    # Tighter token limit to avoid verbose, duplicated answers
+    timeout: 20        # Ensure second-turn completions don't hang
     # Removed model_kwargs to avoid parameter conflicts with Ollama
 
 workflow:
@@ -82,12 +84,12 @@ workflow:
   llm_name: ollama_llm
   verbose: true
   
-  # Temporary debugging - increase retries to see actual output
+  # Right-sized settings for demos
   retry_agent_response_parsing_errors: true
-  parse_agent_response_max_retries: 2         # Increase to see actual format issues
+  parse_agent_response_max_retries: 3         # Right-sized for demos
   tool_call_max_retries: 1                    # Single tool retry to avoid loops
-  max_tool_calls: 3                           # Very low limit to force quick decisions
-  recursion_limit: 50                         # Higher limit to handle complex queries
+  max_tool_calls: 6                           # Right-sized for demos
+  recursion_limit: 20                         # Right-sized for demos
   pass_tool_call_errors_to_agent: false      # Don't pass errors to avoid confusion
   use_tool_schema: true                       # Include detailed tool descriptions
   max_history: 20                             # Longer history for better context understanding
@@ -118,10 +120,23 @@ workflow:
   # Keep it simple to avoid infinite loops
   additional_instructions: |
     STOPPING RULES (CRITICAL):
-    1. Use ONE tool call, then provide Final Answer immediately
-    2. Don't keep reasoning after getting tool results
-    3. Action Input format: {{}} for empty, {{"key": "value"}} for parameters
-    4. ALWAYS end with "Final Answer:" - never get stuck in reasoning loops
+    1. Use ONE tool call, then provide a single Final Answer immediately
+    2. Never output both an Action and a Final Answer in the same turn
+    3. If a required parameter (e.g., meeting_id) is unknown, DO NOT invent or use placeholders (e.g., 12345)
+       - First call the appropriate tool to obtain it (e.g., list_meetings) or ask one concise question
+       - If unknown, set Action Input to {{}}
+    4. After any Observation, output exactly one Final Answer. Do not repeat or restate Final Answer
+    5. Action Input format: {{}} for empty, {{"key": "value"}} for parameters
+    6. ALWAYS end with "Final Answer:" - never get stuck in reasoning loops
+
+    ACTION INPUT VALIDATION (IMPORTANT):
+    - Each Action must include exactly ONE JSON object in Action Input (no arrays, no multiple objects concatenated)
+    - For cancel_meeting, Action Input MUST be of the form: {{"meeting_id": <integer>, "reason": "<string>"}}
+    - If the user asks to cancel multiple meetings (e.g., IDs 9 and 10), perform SEPARATE tool calls:
+      Action: cancel_meeting -> Action Input: {{"meeting_id": 9, "reason": ""}}
+      Observation: ...
+      Action: cancel_meeting -> Action Input: {{"meeting_id": 10, "reason": ""}}
+    - Never place two JSON objects into a single Action Input string
     
     EXAMPLE - Note how it stops after ONE tool use:
     Question: List high priority clients

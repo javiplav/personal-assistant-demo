@@ -65,26 +65,25 @@ functions:
 llms:
   ollama_llm:
     _type: openai
-    api_key: "ollama"  # Ollama doesn't require a real API key
-    base_url: "http://localhost:11434/v1"  # Ollama's default OpenAI-compatible endpoint
-    model_name: "qwen2.5:7b"  # Excellent model for tool calling
-    temperature: 0.1  # Low temperature for consistent tool calling
-    max_tokens: 1500
-    frequency_penalty: 0.0  # Explicitly specified to avoid warnings
-    presence_penalty: 0.0   # Explicitly specified to avoid warnings
+    api_key: "ollama"
+    base_url: "http://localhost:11434/v1"
+    model_name: "qwen2.5:7b"
+    temperature: 0.1
+    max_tokens: 128
+    timeout: 20
+    top_p: 0.7
 
 workflow:
-  _type: tool_calling_agent  # Using tool-calling instead of ReAct for better reliability
-  tool_names: [
-    add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task,
-    add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage,
-    current_time, current_date,
-    schedule_meeting, list_meetings, cancel_meeting,
-    add_client, list_clients, add_client_note, get_client_details, find_client_by_name
-
-  ]
+  _type: tool_calling_agent
   llm_name: ollama_llm
+  tool_names: [add_task, list_tasks, complete_task, delete_task, list_tasks_for_client,
+               add_client_task, add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
+               calculate_percentage, current_time, current_date, schedule_meeting, list_meetings,
+               cancel_meeting, add_client, list_clients, add_client_note, get_client_details, find_client_by_name]
   verbose: true
-  # Tool-calling agent specific settings
-  max_tool_calls: 20  # Reasonable limit for tool calling
-  recursion_limit: 50  # Lower recursion for tool calling
+  max_tool_calls: 3
+  recursion_limit: 10
+  tool_call_timeout: 10
+  max_execution_time: 30
+
+
