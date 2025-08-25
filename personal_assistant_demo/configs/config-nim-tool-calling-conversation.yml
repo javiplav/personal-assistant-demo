@@ -59,48 +59,9 @@ functions:
     _type: "add_client_task"
 
 workflow:
-  _type: "react_agent"  # Switch to ReAct - it works properly and calls tools via text reasoning
+  _type: "tool_calling_agent"  # Switch to tool-calling like Ollama for reliability
   tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task]
   llm_name: "nim_llm"
   verbose: true
-  max_tool_calls: 5   # Allow more tool calls for complex conversational queries
+  max_tool_calls: 10  # Tool-calling agents handle more calls efficiently
   handle_tool_errors: true
-  recursion_limit: 50   # Increased limit to handle conversational follow-ups properly
-  
-  # ReAct-specific settings  
-  use_tool_schema: true  # Include detailed tool descriptions
-  retry_agent_response_parsing_errors: true  # Enable retries to handle format issues
-  parse_agent_response_max_retries: 3  # Allow more retries for parsing errors
-  pass_tool_call_errors_to_agent: false  # Don't pass tool errors to avoid confusion
-  
-  # Conversation memory settings
-  max_history: 5  # Shorter history to prevent empty message accumulation
-  
-  # Production-grade ReAct system prompt - NO TEMPLATES OR EXAMPLES
-  system_prompt: |
-    Answer questions by calling tools and displaying the EXACT DATA returned. Use this format:
-
-    Question: the input question you must answer
-    Thought: think about what tool to use
-    Action: the action to take, should be one of [{tool_names}]
-    Action Input: the input to the action
-    Observation: the result of the action
-    Thought: I now know the final answer
-    Final Answer: [DISPLAY THE ACTUAL DATA FROM THE TOOL - NO META-COMMENTARY]
-
-    {tools}
-
-    CRITICAL RULES FOR "Final Answer" SECTION:
-    1. NEVER use placeholder text like "X clients" or "[Client Name]"
-    2. ALWAYS extract and display the ACTUAL data from the Observation
-    3. For client listings: Show real names and companies
-    4. For counts: Show the actual number (e.g., "You have 2 medium priority clients")
-    5. Use clean numbered lists when displaying multiple items
-    6. NO template text - only real data from tool responses
-
-    CONVERSATIONAL CONTEXT:
-    - "How many [priority]?" = call list_clients with appropriate filter and count results
-    - "List [priority] clients" = call list_clients with filter and show all results
-    - "Show me clients" = call list_clients and display all
-    
-    For personal questions about the agent (name, identity), skip tools and answer directly.
