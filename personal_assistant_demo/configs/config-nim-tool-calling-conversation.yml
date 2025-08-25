@@ -1,7 +1,7 @@
 llms:
   nim_llm:
     _type: "nim"
-    model: "nvidia/llama-3.1-nemotron-nano-8b-v1"  # Hybrid: Llama for NIM tool-calling (reliable), Qwen for Ollama
+    model: "meta/llama-3.1-70b-instruct"  # Larger model with better tool calling support
     temperature: 0.1   # Slightly higher for more natural responses
     max_tokens: 800    # More tokens for complete responses
     timeout: 60       # Standard timeout
