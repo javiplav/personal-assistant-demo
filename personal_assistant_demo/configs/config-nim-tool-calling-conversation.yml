@@ -6,7 +6,7 @@ llms:
     # api_key will be injected from environment by the web server (NVIDIA_API_KEY)
     temperature: 0.1
     top_p: 0.7
-    timeout: 60
+    timeout: 120
     # Using OpenAI-compatible tool calling via NIM endpoint
     # No model_kwargs needed; tools are bound via LangChain
 
