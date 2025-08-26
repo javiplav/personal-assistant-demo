@@ -152,7 +152,7 @@ source .venv/bin/activate  # macOS/Linux
 **Quick test:**
 ```bash
 cd personal_assistant_demo
-nat run --config_file configs/config-ollama.yml --input "What time is it?"
+nat run --config_file configs/config-ollama-react.yml --input "What time is it?"
 ```
 
 **Web UI experience:**
@@ -162,7 +162,7 @@ ollama serve
 
 # Terminal 2: Start the backend
 cd personal_assistant_demo
-nat serve --config_file configs/config-ollama.yml
+nat serve --config_file configs/config-ollama-react.yml
 
 # Terminal 3: Start the web UI (optional)
 ./dev.sh ui-setup  # First time setup
