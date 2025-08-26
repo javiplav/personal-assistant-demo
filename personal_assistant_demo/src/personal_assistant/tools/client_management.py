@@ -316,33 +316,67 @@ async def add_client_note(
         })
 
 
-async def get_client_details(client_id: int) -> Dict[str, Any]:
+async def get_client_details(client_id: str) -> Dict[str, Any]:
     """
-    Get detailed information about a specific client.
+    Get detailed information about a specific client by ID or name.
+
+    Accepts either a numeric client ID (e.g., "1") or a client name
+    (e.g., "Sarah Johnson"). If a name matches multiple clients, returns
+    multiple candidates for disambiguation.
     """
     try:
         clients = _load_clients()
-        
+
         if not clients:
             return json.dumps({
                 "success": False,
                 "error": "No clients found."
             })
-        
-        # Find client
+
+        identifier = str(client_id) if client_id is not None else ""
+
+        # Numeric ID path
+        if identifier.isdigit():
+            target_id = int(identifier)
+            for client in clients:
+                if client.get("id") == target_id:
+                    return json.dumps({
+                        "success": True,
+                        "client": client,
+                        "message": f"Retrieved details for client {target_id}."
+                    })
+            return json.dumps({
+                "success": False,
+                "error": f"Client with ID {target_id} not found."
+            })
+
+        # Name-based path (case-insensitive partial match)
+        identifier_lower = identifier.lower().strip()
+        matches = []
         for client in clients:
-            if client["id"] == client_id:
-                return json.dumps({
-                    "success": True,
-                    "client": client,
-                    "message": f"Retrieved details for client {client_id}."
-                })
-        
-        return json.dumps({
-            "success": False,
-            "error": f"Client with ID {client_id} not found."
-        })
-        
+            if identifier_lower in str(client.get("name", "")).lower():
+                matches.append(client)
+
+        if len(matches) == 0:
+            return json.dumps({
+                "success": False,
+                "error": f"No client found matching '{identifier}'."
+            })
+        elif len(matches) == 1:
+            client = matches[0]
+            return json.dumps({
+                "success": True,
+                "client": client,
+                "message": f"Retrieved details for client {client.get('name')} (ID: {client.get('id')})."
+            })
+        else:
+            return json.dumps({
+                "success": True,
+                "multiple_matches": True,
+                "clients": matches,
+                "message": f"Found {len(matches)} clients matching '{identifier}'. Please specify the ID."
+            })
+
     except Exception as e:
         return json.dumps({
             "success": False,

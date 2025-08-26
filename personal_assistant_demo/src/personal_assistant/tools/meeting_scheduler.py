@@ -50,60 +50,17 @@ async def schedule_meeting(
     try:
         # Load existing meetings
         meetings = _load_meetings()
-        
-        # Check for duplicate meetings (same title, participants, and similar time)
-        for existing_meeting in meetings:
-            if (existing_meeting.get("title", "").lower().strip() == title.lower().strip() and
-                set(existing_meeting.get("participants", [])) == set(participants)):
-                
-                # Check if it's for a similar time (within 24 hours)
-                try:
-                    existing_time = datetime.fromisoformat(existing_meeting["start_time"])
-                    # If we have preferred times, check against those
-                    if preferred_times:
-                        for time_str in preferred_times:
-                            # More general duplicate detection based on time proximity
-                            # Parse the preferred time to compare with existing
-                            target_time = None
-                            time_str_lower = time_str.lower().strip()
-                            now = datetime.now()
-                            
-                            if "tomorrow" in time_str_lower:
-                                target_date = now + timedelta(days=1)
-                            elif "today" in time_str_lower:
-                                target_date = now
-                            else:
-                                target_date = now + timedelta(days=1)  # Default to tomorrow
-                            
-                            # Extract hour from string
-                            if "3 pm" in time_str_lower:
-                                target_time = target_date.replace(hour=15, minute=0, second=0, microsecond=0)
-                            elif "2 pm" in time_str_lower:
-                                target_time = target_date.replace(hour=14, minute=0, second=0, microsecond=0)
-                            elif "4 pm" in time_str_lower:
-                                target_time = target_date.replace(hour=16, minute=0, second=0, microsecond=0)
-                            # Add more time patterns as needed
-                            
-                            if target_time:
-                                # If existing meeting is within 2 hours of target time, consider it duplicate
-                                time_diff = abs((existing_time - target_time).total_seconds())
-                                if time_diff < 7200:  # 2 hours in seconds
-                                                                            return json.dumps({
-                                            "success": True,
-                                            "meeting_id": existing_meeting["id"],
-                                            "title": existing_meeting["title"],
-                                            "start_time": existing_time.strftime("%Y-%m-%d %H:%M"),
-                                            "participants": existing_meeting["participants"],
-                                            "message": f"Meeting '{title}' with {', '.join(participants)} already exists (ID: {existing_meeting['id']}) at {existing_time.strftime('%Y-%m-%d %H:%M')}. No duplicate created.",
-                                            "duplicate_prevented": True
-                                        })
-                except (ValueError, KeyError):
-                    continue
-        
-        # Generate meeting ID
-        meeting_id = len(meetings) + 1
-        
-        # Parse preferred times and find best slot
+
+        # Helpers for robust duplicate detection
+        def _normalize_title(s: str) -> str:
+            """Lowercase, trim, and collapse internal whitespace for title comparison."""
+            return " ".join((s or "").lower().strip().split())
+
+        def _times_overlap(a_start: datetime, a_end: datetime, b_start: datetime, b_end: datetime) -> bool:
+            """Return True if time intervals overlap."""
+            return (a_start < b_end) and (b_start < a_end)
+
+        # Parse preferred times and find best slot FIRST so we can compare against existing meetings
         best_time = None
         if preferred_times:
             # Enhanced logic to handle natural language time strings
@@ -115,7 +72,7 @@ async def schedule_meeting(
                     # Try to parse natural language time strings
                     time_str_lower = time_str.lower().strip()
                     now = datetime.now()
-                    
+
                     if "tomorrow" in time_str_lower:
                         target_date = now + timedelta(days=1)
                     elif "today" in time_str_lower:
@@ -123,7 +80,7 @@ async def schedule_meeting(
                     else:
                         # Default to tomorrow if no date specified
                         target_date = now + timedelta(days=1)
-                    
+
                     # Extract time from string
                     if "2 pm" in time_str_lower or "2:00 pm" in time_str_lower:
                         hour, minute = 14, 0
@@ -142,21 +99,59 @@ async def schedule_meeting(
                     else:
                         # Default to 10 AM if time not recognized
                         hour, minute = 10, 0
-                    
+
                     parsed_time = target_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
-                
+
                 # Check if time is in the future
                 if parsed_time > datetime.now():
                     best_time = parsed_time
                     break
-        
+
         if not best_time:
             # Default to tomorrow at 10 AM
             best_time = datetime.now() + timedelta(days=1)
             best_time = best_time.replace(hour=10, minute=0, second=0, microsecond=0)
-        
-        # Calculate end time
+
+        # Calculate end time for target slot
         end_time = best_time + timedelta(minutes=duration_minutes)
+
+        # Robust duplicate prevention: same normalized title AND same participants AND overlapping/same time
+        new_title_norm = _normalize_title(title)
+        new_participants_set = set(participants)
+        for existing_meeting in meetings:
+            try:
+                existing_title_norm = _normalize_title(existing_meeting.get("title", ""))
+                existing_participants_set = set(existing_meeting.get("participants", []))
+                existing_start = datetime.fromisoformat(existing_meeting["start_time"])
+                # Use stored end_time if present; otherwise compute from duration
+                if existing_meeting.get("end_time"):
+                    existing_end = datetime.fromisoformat(existing_meeting["end_time"])
+                else:
+                    existing_end = existing_start + timedelta(minutes=int(existing_meeting.get("duration_minutes", duration_minutes)))
+
+                # Titles must be exactly equal after normalization, and participants must match exactly
+                titles_match = (existing_title_norm == new_title_norm)
+                participants_match = (existing_participants_set == new_participants_set)
+
+                # Time overlap or near-identical start (<= 5 minutes)
+                starts_close_seconds = abs((existing_start - best_time).total_seconds())
+                time_conflict = _times_overlap(existing_start, existing_end, best_time, end_time) or (starts_close_seconds <= 300)
+
+                if titles_match and participants_match and time_conflict:
+                    return json.dumps({
+                        "success": True,
+                        "meeting_id": existing_meeting["id"],
+                        "title": existing_meeting["title"],
+                        "start_time": existing_start.strftime("%Y-%m-%d %H:%M"),
+                        "participants": existing_meeting["participants"],
+                        "message": f"Meeting '{title}' with {', '.join(participants)} already exists (ID: {existing_meeting['id']}) around {existing_start.strftime('%Y-%m-%d %H:%M')}. No duplicate created.",
+                        "duplicate_prevented": True
+                    })
+            except (ValueError, KeyError, TypeError):
+                continue
+
+        # Generate meeting ID
+        meeting_id = len(meetings) + 1
         
         # Create meeting object
         meeting = {

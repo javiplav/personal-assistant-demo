@@ -35,8 +35,10 @@
     "end_time": "2025-08-25T15:00:00",
     "duration_minutes": 60,
     "description": "",
-    "status": "scheduled",
-    "created_at": "2025-08-24T17:49:20.187350"
+    "status": "cancelled",
+    "created_at": "2025-08-24T17:49:20.187350",
+    "cancelled_at": "2025-08-26T10:45:06.095044",
+    "cancellation_reason": "No reason provided"
   },
   {
     "id": 4,
@@ -74,8 +76,10 @@
     "end_time": "2025-08-25T16:30:00",
     "duration_minutes": 90,
     "description": "",
-    "status": "scheduled",
-    "created_at": "2025-08-24T18:18:39.845117"
+    "status": "cancelled",
+    "created_at": "2025-08-24T18:18:39.845117",
+    "cancelled_at": "2025-08-26T10:26:05.819331",
+    "cancellation_reason": "Duplicate"
   },
   {
     "id": 19,
@@ -115,8 +119,8 @@
     "description": "",
     "status": "cancelled",
     "created_at": "2025-08-25T21:06:00.284087",
-    "cancelled_at": "2025-08-25T22:17:55.267704",
-    "cancellation_reason": "No reason provided"
+    "cancelled_at": "2025-08-26T10:26:07.716793",
+    "cancellation_reason": "Duplicate"
   },
   {
     "id": 10,
@@ -130,7 +134,34 @@
     "description": "",
     "status": "cancelled",
     "created_at": "2025-08-25T22:04:42.284092",
-    "cancelled_at": "2025-08-25T22:17:56.706452",
-    "cancellation_reason": "No reason provided"
+    "cancelled_at": "2025-08-26T10:26:09.957063",
+    "cancellation_reason": "Duplicate"
+  },
+  {
+    "id": 11,
+    "title": "Executive Presentation",
+    "participants": [
+      "John Doe"
+    ],
+    "start_time": "2025-08-27T10:00:00",
+    "end_time": "2025-08-27T13:00:00",
+    "duration_minutes": 180,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-26T00:24:38.114419"
+  },
+  {
+    "id": 12,
+    "title": "NVIDIA GPU Cluster Optimization",
+    "participants": [
+      "John Doe",
+      "Jane Smith"
+    ],
+    "start_time": "2025-08-27T14:00:00",
+    "end_time": "2025-08-27T15:00:00",
+    "duration_minutes": 60,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-08-26T10:39:51.019401"
   }
 ]
