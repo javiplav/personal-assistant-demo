@@ -220,7 +220,8 @@ async def list_meetings(filters: str = "") -> Dict[str, Any]:
                 "title": m.get("title"),
                 "start_time": m.get("start_time"),
                 "end_time": m.get("end_time"),
-                "status": m.get("status", "scheduled")
+                "status": m.get("status", "scheduled"),
+                "participants": m.get("participants", [])
             }
 
         slim = [_project(m) for m in filtered_meetings]

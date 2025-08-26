@@ -130,7 +130,7 @@ workflow:
     
   additional_instructions: |
     DATA DISPLAY REQUIREMENTS:
-    1. Use ONE tool call, then provide "Final Answer" immediately
+    1. Use up to 3 tool calls for multi-step tasks, then provide "Final Answer" immediately
     2. Extract actual data from tool responses - names, numbers, details
     3. Format lists clearly for user readability
     4. NEVER describe what functions do - show the actual results
