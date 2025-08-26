@@ -30,17 +30,22 @@ personal-assistant-demo/
 │   ├── src/                        # Demo source code
 │   │   └── personal_assistant/     # Main package
 │   │       ├── tools/              # Custom tools (weather, tasks, calculator, datetime)
-│   │       ├── register.py         # Function registration
-│   │       └── env_loader.py       # Environment variable loader
+│   │       ├── web/                # Web interface components
+│   │       └── register.py         # Function registration
 │   ├── configs/                    # Configuration files
 │   │   ├── config.yml              # NVIDIA NIM configuration (cloud)
-│   │   ├── config-ollama.yml       # Ollama local LLM configuration
-│   │   └── config-ollama-env.yml   # Ollama with environment variables
+│   │   ├── config-ollama-react.yml # Ollama ReAct configuration
+│   │   ├── config-ollama-tool-calling.yml # Ollama tool-calling configuration
+│   │   ├── config-nim-react.yml    # NIM ReAct configuration
+│   │   └── config-nim-tool-calling.yml # NIM tool-calling configuration
 │   ├── tests/                      # Demo tests
 │   ├── data/                       # Persistent data storage
+│   ├── docs/                       # Demo documentation
+│   ├── demo/                       # Demo scripts
+│   ├── run_web_demo.py             # Web demo launcher
+│   ├── .env.example                # Environment variables template
 │   └── pyproject.toml              # Package configuration
 ├── .venv/                          # Virtual environment (created by uv, not synced)
-├── .env.example                    # Environment variables template
 ├── .env                            # Your actual API keys (not synced)
 ├── .gitignore                      # Git ignore rules
 ├── setup.sh                        # Quick setup script (uses uv)
@@ -224,24 +229,32 @@ Try these queries with your agent:
 
 ### Config File Comparison
 
-| Config File | LLM Provider | API Key Required | Best For |
-|-------------|--------------|------------------|----------|
-| `config-ollama.yml` | Ollama (Local) | ❌ None | Beginners, privacy, offline use |
-| `config-ollama-env.yml` | Ollama (Local) | ❌ None | Advanced users, custom models |
-| `config.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Production, high performance |
+| Config File | LLM Provider | API Key Required | Agent Type | Best For |
+|-------------|--------------|------------------|------------|----------|
+| `config-ollama-react.yml` | Ollama (Local) | ❌ None | ReAct | Beginners, privacy, offline use |
+| `config-ollama-tool-calling.yml` | Ollama (Local) | ❌ None | Tool Calling | Local development, alternative approach |
+| `config.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Tool Calling | Production, high performance |
+| `config-nim-react.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | ReAct | Cloud-based reasoning workflows |
+| `config-nim-tool-calling.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Tool Calling | Cloud-based direct function calls |
 
-### Using Environment Variables with Ollama
+### Choosing Between Agent Types
 
-For more flexibility with Ollama, use `config-ollama-env.yml`:
+The demo supports different agent approaches for both local (Ollama) and cloud (NIM) providers:
 
 ```bash
-# Customize Ollama settings
-export OLLAMA_BASE_URL="http://localhost:11434/v1"
-export OLLAMA_MODEL="qwen2.5:7b"
+# Ollama (Local) Options
+nat run --config_file configs/config-ollama-react.yml --input "Hello!"           # ReAct agent
+nat run --config_file configs/config-ollama-tool-calling.yml --input "Hello!"   # Tool-calling agent
 
-# Run with environment-based config
-nat run --config_file configs/config-ollama-env.yml --input "Hello!"
+# NVIDIA NIM (Cloud) Options  
+nat run --config_file configs/config.yml --input "Hello!"                       # Tool-calling (default)
+nat run --config_file configs/config-nim-react.yml --input "Hello!"            # ReAct agent
+nat run --config_file configs/config-nim-tool-calling.yml --input "Hello!"     # Tool-calling (explicit)
 ```
+
+**Agent Type Differences:**
+- **ReAct**: Reasons through problems step-by-step, better for complex multi-step tasks
+- **Tool Calling**: Direct function invocation, faster for straightforward tasks
 
 ### Development Helper Script
 
@@ -280,19 +293,17 @@ The **official NeMo Agent Toolkit Web UI** provides a modern chat interface for 
 ### UI Setup
 
 ```bash
-# Automated setup
+# Use the enhanced web demo launcher (recommended)
+python run_web_demo.py            # Ollama ReAct (default)
+python run_web_demo.py --nim      # NIM tool-calling
+python run_web_demo.py --config configs/config-nim-react.yml         # NIM ReAct
+
+# Or use the development script for traditional NAT UI
 ./dev.sh ui-setup  # Clones and sets up the UI
 ./dev.sh ui        # Starts the UI server
-
-# Manual setup (if needed)
-mkdir -p NeMo-Agent-Toolkit-develop/external
-git clone https://github.com/NVIDIA/NeMo-Agent-Toolkit-UI.git NeMo-Agent-Toolkit-develop/external/nat-ui
-cd NeMo-Agent-Toolkit-develop/external/nat-ui
-npm ci
-npm run dev
 ```
 
-The UI will be available at `http://localhost:3001`
+The web interface will be available at `http://localhost:8000`
 
 ### Alternative: API Documentation
 

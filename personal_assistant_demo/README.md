@@ -122,7 +122,7 @@ export OPENWEATHERMAP_API_KEY=<YOUR_OPENWEATHERMAP_API_KEY>  # Optional
 
 **Quick test:**
 ```bash
-nat run --config_file configs/config-ollama.yml --input "What time is it and add a task to review the demo?"
+nat run --config_file configs/config-ollama-react.yml --input "What time is it and add a task to review the demo?"
 ```
 
 **Automated demo:**
@@ -251,8 +251,10 @@ personal_assistant_demo/
 │           └── datetime_info.py # Date/time utilities
 ├── configs/
 │   ├── config.yml              # NVIDIA NIM configuration (cloud)
-│   ├── config-ollama.yml       # Ollama local LLM configuration
-│   └── config-ollama-env.yml   # Ollama with environment variables
+│   ├── config-ollama-react.yml # Ollama ReAct configuration
+│   ├── config-ollama-tool-calling.yml # Ollama tool-calling configuration
+│   ├── config-nim-react.yml    # NIM ReAct configuration
+│   └── config-nim-tool-calling.yml # NIM tool-calling configuration
 ├── tests/
 │   ├── test_weather.py
 │   ├── test_tasks.py
@@ -277,24 +279,32 @@ personal_assistant_demo/
 
 ### Config File Comparison
 
-| Config File | LLM Provider | API Key Required | Best For |
-|-------------|--------------|------------------|----------|
-| `config-ollama.yml` | Ollama (Local) | ❌ None | Beginners, privacy, offline use |
-| `config-ollama-env.yml` | Ollama (Local) | ❌ None | Advanced users, custom models |
-| `config.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Production, high performance |
+| Config File | LLM Provider | API Key Required | Agent Type | Best For |
+|-------------|--------------|------------------|------------|----------|
+| `config-ollama-react.yml` | Ollama (Local) | ❌ None | ReAct | Beginners, privacy, offline use |
+| `config-ollama-tool-calling.yml` | Ollama (Local) | ❌ None | Tool Calling | Local development, alternative approach |
+| `config.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Tool Calling | Production, high performance |
+| `config-nim-react.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | ReAct | Cloud-based reasoning workflows |
+| `config-nim-tool-calling.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Tool Calling | Cloud-based direct function calls |
 
-### Using Environment Variables with Ollama
+### Choosing Between Agent Types
 
-For more flexibility with Ollama, use `config-ollama-env.yml`:
+The demo supports different agent approaches for both local (Ollama) and cloud (NIM) providers:
 
 ```bash
-# Customize Ollama settings
-export OLLAMA_BASE_URL="http://localhost:11434/v1"
-export OLLAMA_MODEL="qwen2.5:7b"
+# Ollama (Local) Options
+nat run --config_file configs/config-ollama-react.yml --input "Hello!"           # ReAct agent
+nat run --config_file configs/config-ollama-tool-calling.yml --input "Hello!"   # Tool-calling agent
 
-# Run with environment-based config
-nat run --config_file configs/config-ollama-env.yml --input "Hello!"
+# NVIDIA NIM (Cloud) Options  
+nat run --config_file configs/config.yml --input "Hello!"                       # Tool-calling (default)
+nat run --config_file configs/config-nim-react.yml --input "Hello!"            # ReAct agent
+nat run --config_file configs/config-nim-tool-calling.yml --input "Hello!"     # Tool-calling (explicit)
 ```
+
+**Agent Type Differences:**
+- **ReAct**: Reasons through problems step-by-step, better for complex multi-step tasks
+- **Tool Calling**: Direct function invocation, faster for straightforward tasks
 
 ---
 
