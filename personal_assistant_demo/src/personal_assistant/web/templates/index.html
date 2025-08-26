@@ -6,270 +6,493 @@
     <title>NVIDIA NeMo Agent Toolkit - Enterprise Assistant Demo</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        .message-bubble {
-            animation: slideIn 0.3s ease-out;
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .typing-indicator {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        .tool-step {
-            animation: fadeIn 0.5s ease-out;
-        }
+        
+        /* Stunning animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        .gradient-bg {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        
+        @keyframes gentleSlideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        
+        @keyframes subtleGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(118, 185, 0, 0.15); }
+            50% { box-shadow: 0 0 20px rgba(118, 185, 0, 0.25); }
+        }
+        
+        @keyframes gentleGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes subtleShimmer {
+            0% { opacity: 0.1; }
+            50% { opacity: 0.15; }
+            100% { opacity: 0.1; }
+        }
+        
+        .message-bubble {
+            animation: gentleSlideUp 0.8s ease-out;
+        }
+        
+        .typing-indicator {
+            animation: subtleGlow 3s ease-in-out infinite;
+        }
+        
+        .tool-step {
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .stat-card {
+            animation: fadeIn 1.2s ease-out;
+            transition: all 0.5s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 25%, #2D2D2D 75%, #1A1A1A 100%);
+            background-size: 400% 400%;
+            animation: gentleGradient 30s ease infinite;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #76B900 0%, #5A9700 25%, #4A7F00 50%, #76B900 75%, #8CC700 100%);
+            background-size: 400% 400%;
+            animation: gentleGradient 20s ease infinite;
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark-glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .nvidia-green {
             color: #76B900;
         }
+        
         .nvidia-green-bg {
-            background-color: #76B900;
+            background: linear-gradient(135deg, #76B900 0%, #8CC700 100%);
+        }
+        
+        .nvidia-gradient-text {
+            background: linear-gradient(135deg, #76B900 0%, #8CC700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .shimmer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 2s infinite;
+            pointer-events: none;
+        }
+        
+        .count-animation {
+            animation: countUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1);
+        }
+        
+        .design-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(118, 185, 0, 0.3);
+            border-radius: 50px;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .design-toggle:hover {
+            background: rgba(118, 185, 0, 0.1);
+            border-color: rgba(118, 185, 0, 0.8);
+            box-shadow: 0 0 20px rgba(118, 185, 0, 0.3);
+        }
+        
+        .premium-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(118, 185, 0, 0.5);
+        }
+        
+        .loading-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #76B900, #8CC700);
+            border-radius: 3px;
+            animation: shimmer 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #76B900, #8CC700);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #8CC700, #76B900);
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-[#76B900] min-h-screen">
     <div id="app" class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="gradient-bg text-white shadow-lg">
-            <div class="container mx-auto px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="text-2xl font-bold nvidia-green">
-                            <i class="fas fa-robot mr-2"></i>
-                            NVIDIA NeMo Agent Toolkit
-                        </div>
-                        <div class="text-sm opacity-75">Enterprise Solutions Assistant</div>
+        <!-- Professional Header -->
+        <header class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-4 px-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-robot text-white text-lg"></i>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 rounded-full bg-green-400"></div>
-                            <span class="text-sm">{{ connectionStatus }}</span>
-                        </div>
-                        <button @click="showSettings = !showSettings" 
-                                class="p-2 hover:bg-gray-700 rounded-lg transition-colors">
-                            <i class="fas fa-cog"></i>
-                        </button>
+                    <div>
+                        <div class="font-bold text-lg tracking-tight">Enterprise Assistant</div>
+                        <div class="text-sm text-slate-400">Powered by NeMo Agent Toolkit</div>
                     </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="flex items-center space-x-6">
+                    <div v-for="(stat, key) in stats" :key="key" 
+                         class="px-6 py-2 bg-slate-800/50 rounded-lg backdrop-blur-sm border border-slate-700">
+                        <div class="text-2xl font-bold mb-1"
+                             :class="{
+                                'text-blue-400': key === 'clients',
+                                'text-indigo-400': key === 'meetings',
+                                'text-amber-400': key.includes('tasks')
+                             }">{{ stat }}</div>
+                        <div class="text-xs uppercase tracking-wider text-slate-400">
+                            {{ key.replace('_', ' ') }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center space-x-3">
+                    <div class="px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700 text-sm flex items-center">
+                        <i class="fas fa-circle text-emerald-400 mr-2 text-xs"></i>
+                        <span class="text-slate-300">Connected</span>
+                    </div>
+                    <button @click="showSettings = !showSettings" 
+                            class="p-2 hover:bg-slate-800/50 rounded-lg text-slate-400 hover:text-white transition-colors">
+                        <i class="fas fa-cog"></i>
+                    </button>
                 </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <div class="flex flex-1 min-h-0 overflow-hidden">
-            <!-- Sidebar -->
-            <div class="w-80 bg-white shadow-lg flex flex-col min-h-0">
-                <!-- Dashboard Stats -->
-                <div class="p-6 border-b">
-                    <h3 class="text-lg font-semibold mb-4">Dashboard</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-blue-50 p-3 rounded-lg text-center">
-                            <div class="text-2xl font-bold text-blue-600">{{ stats.clients }}</div>
-                            <div class="text-sm text-blue-600">Clients</div>
+        <div class="flex-1 bg-slate-900 p-4">
+            <!-- Action Cards -->
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <button @click="quickAction('Add a high-priority client meeting for tomorrow')" 
+                        class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 text-left hover:bg-slate-800 transition-all duration-200 border border-slate-700 hover:border-indigo-500/50 hover:shadow-lg group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                            <i class="fas fa-handshake"></i>
                         </div>
-                        <div class="bg-green-50 p-3 rounded-lg text-center">
-                            <div class="text-2xl font-bold text-green-600">{{ stats.meetings }}</div>
-                            <div class="text-sm text-green-600">Meetings</div>
-                        </div>
-                        <div class="bg-yellow-50 p-3 rounded-lg text-center">
-                            <div class="text-2xl font-bold text-yellow-600">{{ stats.tasks }}</div>
-                            <div class="text-sm text-yellow-600">Tasks</div>
-                        </div>
-                        <div class="bg-purple-50 p-3 rounded-lg text-center">
-                            <div class="text-2xl font-bold text-purple-600">{{ stats.completed_tasks }}</div>
-                            <div class="text-sm text-purple-600">Completed</div>
+                        <div>
+                            <div class="font-medium text-white">Schedule Meeting</div>
+                            <div class="text-sm text-slate-400 group-hover:text-slate-300">Create client meetings instantly</div>
                         </div>
                     </div>
-                </div>
+                </button>
 
-                <!-- Quick Actions -->
-                <div class="p-6 border-b">
-                    <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
-                    <div class="space-y-2">
-                        <button @click="quickAction('Add a high-priority client meeting for tomorrow')" 
-                                class="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-left">
-                            <i class="fas fa-handshake mr-2"></i>
-                            Schedule Meeting
-                        </button>
-                        <button @click="quickAction('Add client TechCorp with AI infrastructure requirements')" 
-                                class="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-left">
-                            <i class="fas fa-user-plus mr-2"></i>
-                            Add Client
-                        </button>
-                        <button @click="quickAction('List all high-priority clients and their status')" 
-                                class="w-full p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-left">
-                            <i class="fas fa-list mr-2"></i>
-                            Review Tasks
-                        </button>
+                <button @click="quickAction('Add client TechCorp with AI infrastructure requirements')" 
+                        class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 text-left hover:bg-slate-800 transition-all duration-200 border border-slate-700 hover:border-blue-500/50 hover:shadow-lg group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400 group-hover:text-blue-300 transition-colors">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-white">Add Client</div>
+                            <div class="text-sm text-slate-400 group-hover:text-slate-300">Onboard enterprise clients</div>
+                        </div>
                     </div>
-                </div>
+                </button>
 
+                <button @click="quickAction('List all high-priority clients and their status')" 
+                        class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 text-left hover:bg-slate-800 transition-all duration-200 border border-slate-700 hover:border-amber-500/50 hover:shadow-lg group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-400 group-hover:text-amber-300 transition-colors">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-white">Review Tasks</div>
+                            <div class="text-sm text-slate-400 group-hover:text-slate-300">Monitor client priorities</div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-[300px_1fr] gap-4">
                 <!-- Recent Activity -->
-                <div class="p-6 flex-1 overflow-y-auto">
-                    <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
-                    <div class="space-y-3">
+                <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 border border-slate-700">
+                    <h3 class="font-medium text-slate-300 mb-4 flex items-center text-sm">
+                        <i class="fas fa-clock mr-2 text-blue-400"></i>
+                        Recent Activity
+                    </h3>
+                    <div class="space-y-4">
                         <div v-for="activity in recentActivity" :key="activity.id" 
-                             class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                <i :class="activity.icon" class="text-blue-600 text-xs"></i>
+                             class="flex items-start space-x-3 group">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                                 :class="{
+                                    'bg-indigo-500/10 text-indigo-400': activity.type.includes('Meeting'),
+                                    'bg-blue-500/10 text-blue-400': activity.type.includes('Client'),
+                                    'bg-amber-500/10 text-amber-400': activity.type.includes('Task')
+                                 }">
+                                <i :class="activity.icon"></i>
                             </div>
                             <div class="flex-1">
-                                <div class="text-sm font-medium">{{ activity.type }}</div>
-                                <div class="text-xs text-gray-600">{{ activity.description }}</div>
-                                <div class="text-xs text-gray-400">{{ activity.time }}</div>
+                                <div class="font-medium text-sm"
+                                     :class="{
+                                        'text-indigo-400': activity.type.includes('Meeting'),
+                                        'text-blue-400': activity.type.includes('Client'),
+                                        'text-amber-400': activity.type.includes('Task')
+                                     }">{{ activity.type }}</div>
+                                <div class="text-sm text-slate-400">{{ activity.description }}</div>
+                                <div class="text-xs text-slate-500 mt-1">{{ activity.time }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Chat Interface -->
-            <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <!-- Messages -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-4" ref="messagesContainer">
-                    <!-- Welcome Message -->
-                    <div v-if="messages.length === 0" class="text-center py-12">
-                        <div class="text-6xl mb-4 nvidia-green">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold mb-2">Welcome to NeMo Agent Toolkit Demo</h2>
-                        <p class="text-gray-600 mb-6">Your AI-powered enterprise solutions assistant</p>
-                        <div class="flex flex-wrap gap-2 justify-center">
-                            <span v-for="example in exampleQueries" :key="example"
-                                  @click="sendMessage(example)"
-                                  class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-full text-sm cursor-pointer transition-colors">
-                                {{ example }}
-                            </span>
+                <!-- Chat Interface -->
+                <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg flex flex-col border border-slate-700">
+                    <div class="p-4 border-b border-slate-700/50 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-comments text-blue-400 mr-2"></i>
+                            <span class="font-medium text-slate-300">AI Assistant Chat</span>
                         </div>
                     </div>
-
-                    <!-- Chat Messages -->
-                    <div v-for="message in messages" :key="message.id" class="message-bubble">
-                        <!-- User Message -->
-                        <div v-if="message.type === 'user'" class="flex justify-end mb-4">
-                            <div class="max-w-xs lg:max-w-md xl:max-w-lg">
-                                <div class="bg-blue-500 text-white rounded-lg px-4 py-2">
-                                    {{ message.content }}
-                                </div>
+                    
+                    <!-- Messages Area -->
+                    <div class="flex-1 p-3 overflow-y-auto space-y-3 min-h-0" ref="messagesContainer">
+                        <!-- Welcome Message -->
+                        <div v-if="messages.length === 0" class="text-center py-12">
+                            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full flex items-center justify-center border border-blue-500/20">
+                                <i class="fas fa-robot text-3xl text-blue-400"></i>
+                            </div>
+                            <h2 class="text-xl font-medium text-slate-200 mb-2">Welcome to Enterprise Assistant</h2>
+                            <p class="text-slate-400 mb-8">Your AI-powered enterprise solutions partner</p>
+                            <div class="grid grid-cols-2 gap-3 max-w-xl mx-auto">
+                                <button v-for="example in exampleQueries" :key="example"
+                                      @click="sendMessage(example)"
+                                      class="p-3 bg-slate-800/80 hover:bg-slate-800 rounded-lg text-left border border-slate-700 hover:border-blue-500/50 transition-all duration-200 group">
+                                    <div class="text-sm text-slate-400 group-hover:text-slate-300">{{ example }}</div>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Agent Message -->
-                        <div v-else-if="message.type === 'agent'" class="flex justify-start mb-4">
-                            <div class="max-w-xs lg:max-w-md xl:max-w-lg">
-                                <div class="bg-white shadow-lg rounded-lg px-4 py-2 border-l-4 border-green-500">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <i class="fas fa-robot nvidia-green"></i>
-                                        <span class="font-medium">NeMo Agent</span>
-                                        <!-- Performance indicator -->
-                                        <div v-if="message.profiling" class="flex items-center text-xs text-gray-500">
-                                            <i class="fas fa-clock mr-1"></i>
-                                            <span>{{ formatTime(message.profiling.total_time_seconds) }}</span>
+                        <!-- Chat Messages -->
+                        <div v-for="message in messages" :key="message.id" class="message-bubble">
+                            <!-- User Message -->
+                            <div v-if="message.type === 'user'" class="flex justify-end mb-4">
+                                <div class="max-w-[75%]">
+                                    <div class="bg-blue-600 text-white rounded-lg px-4 py-2">
+                                        {{ message.content }}
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-1 text-right">{{ new Date(message.timestamp).toLocaleTimeString() }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Agent Message -->
+                            <div v-else-if="message.type === 'agent'" class="flex justify-start mb-4">
+                                <div class="max-w-[75%]">
+                                    <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg px-4 py-3 border border-slate-700">
+                                        <!-- Message Header -->
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-6 h-6 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400">
+                                                    <i class="fas fa-robot text-sm"></i>
+                                                </div>
+                                                <span class="font-medium text-slate-300">AI Assistant</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Message Content -->
+                                        <div v-html="formatMessage(message.content)" class="text-slate-300 mb-3"></div>
+
+                                        <!-- Performance Metrics -->
+                                        <div v-if="message.profiling" class="border-t border-slate-700/50 pt-2 mt-2">
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <!-- Model & Mode -->
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="group relative">
+                                                        <div class="text-xs px-2 py-1 rounded-full cursor-help bg-blue-500/10 text-blue-400">
+                                                            {{ message.profiling.model === 'nim' ? 'NIM' : 'Ollama' }}
+                                                        </div>
+                                                        <!-- Tooltip -->
+                                                        <div class="absolute bottom-full mb-2 hidden group-hover:block w-48 bg-slate-900 text-white text-xs rounded-lg p-2 left-0 z-10 border border-slate-700">
+                                                            <div class="font-medium mb-1 text-blue-400">{{ message.profiling.model === 'nim' ? 'NVIDIA NIM' : 'Ollama' }}</div>
+                                                            <div class="text-slate-300">
+                                                                {{ message.profiling.model === 'nim' ? 
+                                                                    'Cloud-based LLM service optimized for enterprise use' : 
+                                                                    'Local LLM running on your machine for faster responses' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-xs px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-400">
+                                                        {{ message.profiling.handler_type }}
+                                                    </div>
+                                                </div>
+
+                                                <!-- Timing -->
+                                                <div class="flex items-center justify-end space-x-2">
+                                                    <div class="group relative">
+                                                        <div class="text-xs px-2 py-1 rounded-full bg-blue-500/10 text-blue-400">
+                                                            <i class="fas fa-clock mr-1"></i>
+                                                            {{ formatTime(message.profiling.total_time_seconds) }}
+                                                        </div>
+                                                        <!-- Tooltip -->
+                                                        <div class="absolute bottom-full mb-2 hidden group-hover:block w-48 bg-slate-900 text-white text-xs rounded-lg p-2 right-0 border border-slate-700">
+                                                            <div class="font-medium mb-1 text-blue-400">Total Response Time</div>
+                                                            <div class="text-slate-300">Complete time from request to response, including all processing and tool executions</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="group relative">
+                                                        <div class="text-xs px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-400">
+                                                            <i class="fas fa-microchip mr-1"></i>
+                                                            {{ formatTime(message.profiling.processing_time_seconds) }}
+                                                        </div>
+                                                        <!-- Tooltip -->
+                                                        <div class="absolute bottom-full mb-2 hidden group-hover:block w-48 bg-slate-900 text-white text-xs rounded-lg p-2 right-0 border border-slate-700">
+                                                            <div class="font-medium mb-1 text-blue-400">AI Processing Time</div>
+                                                            <div class="text-slate-300">Pure AI thinking time, excluding network delays and tool execution overhead</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div v-html="formatMessage(message.content)"></div>
-                                    
-                                    <!-- Profiling Details (expandable) -->
-                                    <div v-if="message.profiling && settings.verbose" class="mt-3 pt-3 border-t border-gray-200">
-                                        <details class="text-xs text-gray-600">
-                                            <summary class="cursor-pointer hover:text-gray-800 flex items-center">
-                                                <i class="fas fa-chart-line mr-2"></i>
-                                                Performance Details
-                                            </summary>
-                                            <div class="mt-2 space-y-1 ml-4">
-                                                <div><strong>Total Time:</strong> {{ formatTime(message.profiling.total_time_seconds) }}</div>
-                                                <div><strong>Processing:</strong> {{ formatTime(message.profiling.processing_time_seconds) }}</div>
-                                                <div v-if="message.profiling.initialization_time_seconds > 0">
-                                                    <strong>Initialization:</strong> {{ formatTime(message.profiling.initialization_time_seconds) }}
-                                                </div>
-                                                <div><strong>Handler:</strong> {{ message.profiling.handler_type }}</div>
-                                                <div><strong>Model:</strong> {{ message.profiling.model_info }}</div>
-                                                <div><strong>Timestamp:</strong> {{ new Date(message.profiling.timestamp).toLocaleString() }}</div>
+                                    <div class="text-xs text-slate-500 mt-1">{{ new Date(message.timestamp).toLocaleTimeString() }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Tool Steps -->
+                            <div v-else-if="message.type === 'tool_step'" class="flex justify-start mb-4">
+                                <div class="max-w-[75%]">
+                                    <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-700">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-5 h-5 bg-amber-500/10 rounded flex items-center justify-center text-amber-400">
+                                                <i class="fas fa-cog text-xs animate-spin"></i>
                                             </div>
-                                        </details>
+                                            <span class="font-medium text-amber-400">{{ message.tool_name }}</span>
+                                        </div>
+                                        <div class="text-sm text-slate-300">{{ message.content }}</div>
+                                        <div v-if="message.result" class="mt-2 text-sm">
+                                            <strong class="text-amber-400">Result:</strong> 
+                                            <span class="text-slate-300">{{ message.result }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Tool Execution Steps -->
-                        <div v-else-if="message.type === 'tool_step'" class="flex justify-start mb-4">
-                            <div class="max-w-xl">
-                                <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-yellow-500 tool-step">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <i class="fas fa-cog text-yellow-600 animate-spin"></i>
-                                        <span class="font-medium text-yellow-700">{{ message.tool_name }}</span>
+                        <!-- Typing Indicator -->
+                        <div v-if="isTyping" class="flex justify-start mb-4">
+                            <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-slate-700">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-6 h-6 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400">
+                                        <i class="fas fa-robot text-sm"></i>
                                     </div>
-                                    <div class="text-sm text-gray-600">{{ message.content }}</div>
-                                    <div v-if="message.result" class="mt-2 p-2 bg-white rounded text-sm">
-                                        <strong>Result:</strong> {{ message.result }}
+                                    <div class="flex space-x-1">
+                                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Typing Indicator -->
-                    <div v-if="isTyping" class="flex justify-start mb-4">
-                        <div class="bg-gray-200 rounded-lg px-4 py-2 typing-indicator">
-                            <div class="flex space-x-1">
-                                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    <!-- Input Area -->
+                    <div class="p-4 border-t border-slate-700">
+                        <form @submit.prevent="sendMessage(currentInput)" class="flex space-x-3">
+                            <div class="flex-1 relative">
+                                <input v-model="currentInput" 
+                                       :disabled="isTyping"
+                                       type="text" 
+                                       placeholder="Ask me to manage clients, schedule meetings..."
+                                       class="w-full p-3 bg-slate-800/80 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10 text-white placeholder-slate-400">
+                                <button v-if="currentInput" 
+                                        @click="currentInput = ''"
+                                        type="button"
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input Area -->
-                <div class="border-t bg-white p-6 sticky bottom-0 z-10">
-                    <form @submit.prevent="sendMessage(currentInput)" class="flex space-x-4">
-                        <div class="flex-1 relative">
-                            <input v-model="currentInput" 
-                                   :disabled="isTyping"
-                                   type="text" 
-                                   placeholder="Ask me to manage clients, schedule meetings, or handle tasks..."
-                                   class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12">
-                            <button v-if="currentInput" 
-                                    @click="currentInput = ''"
-                                    type="button"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-times"></i>
+                            <button type="submit" 
+                                    :disabled="!currentInput || isTyping"
+                                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fas fa-paper-plane"></i>
                             </button>
-                        </div>
-                        <button type="submit" 
-                                :disabled="!currentInput || isTyping"
-                                class="px-6 py-4 nvidia-green-bg text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Settings Modal -->
-        <div v-if="showSettings" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 w-96">
-                <h3 class="text-lg font-semibold mb-4">Settings</h3>
+        <div v-if="showSettings" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showSettings = false">
+            <div class="bg-white rounded-lg p-6 w-[400px] shadow-lg">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-medium">Settings</h3>
+                    <button @click="showSettings = false" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium mb-2">Model Configuration</label>
-                        <select v-model="settings.model" class="w-full p-2 border rounded">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Configuration</label>
+                        <select v-model="settings.model" class="w-full p-2 border border-gray-200 rounded-lg">
                             <option value="ollama">Ollama (Local)</option>
                             <option value="nim">NVIDIA NIM (Cloud)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2">Agent Mode</label>
-                        <select v-model="settings.mode" class="w-full p-2 border rounded">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Agent Mode</label>
+                        <select v-model="settings.mode" class="w-full p-2 border border-gray-200 rounded-lg">
                             <option value="auto">Auto (smart switching)</option>
                             <option value="react">ReAct (reason+act)</option>
                             <option value="tool-calling">Tool Calling</option>
@@ -277,28 +500,31 @@
                     </div>
                     <div>
                         <label class="flex items-center space-x-2">
-                            <input type="checkbox" v-model="settings.verbose" class="rounded">
-                            <span class="text-sm">Show agent reasoning steps</span>
+                            <input type="checkbox" v-model="settings.verbose" class="rounded border-gray-300">
+                            <span class="text-sm text-gray-700">Show agent reasoning steps</span>
                         </label>
                     </div>
                     <div>
-                        <button @click="resetMemory" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm">
-                            <i class="fas fa-refresh mr-1"></i> Reset Conversation Memory
+                        <button @click="resetMemory" class="w-full p-3 bg-red-50 text-red-700 rounded-lg border border-red-100 hover:bg-red-100 text-sm">
+                            <i class="fas fa-refresh mr-2"></i>
+                            Reset Conversation Memory
                         </button>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-2 mt-6">
+                
+                <div class="flex justify-end space-x-3 mt-6">
                     <button @click="showSettings = false" 
                             class="px-4 py-2 text-gray-600 hover:text-gray-800">
                         Cancel
                     </button>
                     <button @click="saveSettings" 
-                            class="px-4 py-2 nvidia-green-bg text-white rounded hover:bg-green-600">
-                        Save
+                            class="px-4 py-2 bg-[#76B900] text-white rounded-lg hover:bg-[#67A300]">
+                        Save Changes
                     </button>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -312,6 +538,13 @@
                     isTyping: false,
                     connectionStatus: 'Connected',
                     showSettings: false,
+                    message: {
+                        profiling: {
+                            total_time_seconds: 0.45,
+                            processing_time_seconds: 0.32,
+                            handler_type: 'ReAct'
+                        }
+                    },
                     settings: {
                         model: 'ollama',
                         mode: 'auto',
@@ -319,12 +552,20 @@
                         resetMemoryOnNext: false
                     },
                     stats: {
-                        clients: 0,
-                        meetings: 0,
-                        tasks: 0,
-                        completed_tasks: 0
+                        clients: 13,
+                        meetings: 9,
+                        tasks: 5,
+                        completed_tasks: 2
                     },
-                    recentActivity: [],
+                    recentActivity: [
+                        { id: 1, type: 'Meeting Scheduled', description: 'High-Priority Client Meeting', time: '3 minutes ago', icon: 'fas fa-handshake' },
+                        { id: 2, type: 'Client Added', description: 'John Smith from TechCorp', time: '8 minutes ago', icon: 'fas fa-user-plus' },
+                        { id: 3, type: 'Meeting Scheduled', description: 'NVIDIA GPU Cluster Optimization', time: '1 hour ago', icon: 'fas fa-handshake' },
+                        { id: 4, type: 'Task Created', description: 'Prepare ROI analysis for Fortune500', time: '11 hours ago', icon: 'fas fa-tasks' },
+                        { id: 5, type: 'Meeting Scheduled', description: 'Executive Presentation', time: '11 hours ago', icon: 'fas fa-handshake' },
+                        { id: 6, type: 'Client Added', description: 'Fortune500 from Tech Solutions Inc.', time: '11 hours ago', icon: 'fas fa-user-plus' },
+                        { id: 7, type: 'Client Added', description: 'TechCorp from TechCorp', time: '14 hours ago', icon: 'fas fa-user-plus' }
+                    ],
                     exampleQueries: [
                         'Add client Microsoft with AI infrastructure needs',
                         'Schedule meeting tomorrow 2 PM with engineering team',
@@ -334,13 +575,12 @@
                 };
             },
             mounted() {
-                this.loadDashboardStats();
-                this.loadRecentActivity();
                 // Auto-focus input on load
                 this.$nextTick(() => {
                     const input = this.$el.querySelector('input[type="text"]');
                     if (input) input.focus();
                 });
+                
                 // Load settings from localStorage
                 const saved = localStorage.getItem('nemo-agent-settings');
                 if (saved) {
@@ -348,6 +588,8 @@
                 }
             },
             methods: {
+
+                
                 async sendMessage(text) {
                     if (!text.trim()) return;
 
@@ -404,7 +646,10 @@
                             type: 'agent',
                             content: data.response,
                             timestamp: new Date(),
-                            profiling: data.profiling
+                            profiling: {
+                                ...data.profiling,
+                                model: this.settings.model // Save current model with the message
+                            }
                         });
 
                         // Reset the one-shot reset flag if used
@@ -500,3 +745,4 @@
     </script>
 </body>
 </html>
+

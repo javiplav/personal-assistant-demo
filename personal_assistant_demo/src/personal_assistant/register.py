@@ -24,7 +24,7 @@ from nat.data_models.function import FunctionBaseConfig
 
 # Weather tools commented out - uncomment and add OPENWEATHER_API_KEY to use
 # from .tools.weather import get_weather_info, check_weather_condition
-from .tools.tasks import add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task
+from .tools.tasks import add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task, assign_random_clients_to_unassigned_tasks
 from .tools.calculator import add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage
 from .tools.datetime_info import (
     get_current_time, get_current_date,
@@ -32,7 +32,7 @@ from .tools.datetime_info import (
 )
 # Enterprise tools for solutions architect showcase
 from .tools.meeting_scheduler import schedule_meeting, list_meetings, cancel_meeting
-from .tools.client_management import add_client, list_clients, add_client_note, get_client_details, find_client_by_name
+from .tools.client_management import add_client, list_clients, add_client_note, get_client_details, find_client_by_name, update_client_email
 
 
 logger = logging.getLogger(__name__)
@@ -166,6 +166,23 @@ async def add_client_task_function(config: AddClientTaskConfig, builder: Builder
         description=(
             "Add a task associated with a specific client. Automatically links the task to the client for better organization. "
             "Example: 'Add task for Microsoft: Review GPU cluster requirements' or 'Create task for Alex Chen to follow up on project'"
+        )
+    )
+
+
+class AssignRandomClientsConfig(FunctionBaseConfig, name="assign_random_clients"):
+    pass
+
+
+@register_function(config_type=AssignRandomClientsConfig)
+async def assign_random_clients_function(config: AssignRandomClientsConfig, builder: Builder):
+    """Assign random clients to tasks that don't have specific client assignments."""
+    yield FunctionInfo.from_fn(
+        assign_random_clients_to_unassigned_tasks,
+        description=(
+            "Assign random clients to all tasks that do not have a specific client name associated with them. "
+            "This helps ensure better task organization and client relationship management. "
+            "Use this when you notice tasks without client assignments or when asked to organize tasks by clients."
         )
     )
 
@@ -434,14 +451,14 @@ async def list_clients_function(config: ListClientsConfig, builder: Builder):
     yield FunctionInfo.from_fn(
         list_clients,
         description=(
-            "List all clients in the CRM system with optional priority filtering. "
-            "SUPPORTS FILTERING: Use 'high-priority', 'high', 'medium', 'low', or 'active' as filters parameter. "
-            "This tool is ALWAYS available for retrieving client information. "
+            "List all clients in the CRM system. By default shows ALL clients unless specifically asked to filter. "
+            "IMPORTANT: Only use filters parameter if the user specifically asks for filtering by priority. "
+            "FILTERS: Use 'high', 'medium', 'low', or 'active' only when explicitly requested. "
             "Examples: "
-            "- 'List all clients' (no filter) "
-            "- list_clients('high-priority') for high-priority clients only "
-            "- list_clients('medium') for medium-priority clients only "
-            "- list_clients('active') for active clients only"
+            "- 'List all clients' → list_clients('') or list_clients() - shows ALL 13 clients "
+            "- 'Show high priority clients only' → list_clients('high') "
+            "- 'Show medium priority clients' → list_clients('medium') "
+            "- 'Show active clients only' → list_clients('active')"
         )
     )
 
@@ -493,6 +510,23 @@ async def find_client_by_name_function(config: FindClientByNameConfig, builder: 
             "Find a client by searching their name (partial matches allowed). "
             "Returns client details including their ID, which can be used for other operations. "
             "Example: 'Find client Sarah Johnson' or 'Look up Sarah'"
+        )
+    )
+
+
+class UpdateClientEmailConfig(FunctionBaseConfig, name="update_client_email"):
+    pass
+
+
+@register_function(config_type=UpdateClientEmailConfig)
+async def update_client_email_function(config: UpdateClientEmailConfig, builder: Builder):
+    """Update a client's email by ID or name."""
+    yield FunctionInfo.from_fn(
+        update_client_email,
+        description=(
+            "Update a client's email address by specifying the client ID or name. "
+            "Use to correct or add missing emails. "
+            "Example: 'Update Netflix email to ops@netflix.com' or 'Set email for client 3 to ops@netflix.com'"
         )
     )
 

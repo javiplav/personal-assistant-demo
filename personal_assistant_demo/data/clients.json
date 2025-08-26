@@ -66,14 +66,14 @@
   {
     "id": 3,
     "name": "Netflix",
-    "email": "**PLEASE RESPOND WITH A VALID EMAIL ADDRESS FOR NETFLIX**",
+    "email": "email@netflix.com",
     "company": "Netflix",
     "phone": "",
     "project_requirements": "streaming infrastructure requirements",
     "priority": "high",
     "status": "active",
     "created_at": "2025-08-24T17:55:46.337652",
-    "last_contact": "2025-08-24T17:55:46.337661",
+    "last_contact": "2025-08-26T13:15:09.571437",
     "notes": []
   },
   {
@@ -283,6 +283,19 @@
     "status": "active",
     "created_at": "2025-08-26T00:24:35.626536",
     "last_contact": "2025-08-26T00:24:35.626539",
+    "notes": []
+  },
+  {
+    "id": 13,
+    "name": "John Smith",
+    "email": "john.smith@techcorp.com",
+    "company": "TechCorp",
+    "phone": "123-456-7890",
+    "project_requirements": "AI implementation",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-08-26T12:15:47.436711",
+    "last_contact": "2025-08-26T12:15:47.436716",
     "notes": []
   }
 ]

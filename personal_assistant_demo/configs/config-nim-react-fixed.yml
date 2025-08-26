@@ -15,6 +15,8 @@ functions:
     _type: "list_clients"
   find_client_by_name:
     _type: "find_client_by_name"
+  update_client_email:
+    _type: "update_client_email"
   add_client:
     _type: "add_client"
   add_client_note:
@@ -54,6 +56,8 @@ functions:
     _type: "list_tasks_for_client"
   add_client_task:
     _type: "add_client_task"
+  assign_random_clients:
+    _type: "assign_random_clients"
 
 llms:
   nim_llm:
@@ -70,7 +74,7 @@ llms:
 
 workflow:
   _type: react_agent
-  tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task]
+  tool_names: [list_clients, find_client_by_name, add_client, add_client_note, get_client_details, update_client_email, current_time, current_date, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, schedule_meeting, list_meetings, cancel_meeting, list_tasks, add_task, complete_task, delete_task, list_tasks_for_client, add_client_task, assign_random_clients]
   llm_name: nim_llm
   verbose: true
   
@@ -85,27 +89,39 @@ workflow:
   tool_call_timeout: 15                       # Add explicit tool call timeout
   max_execution_time: 45                      # Add maximum execution time limit
   
-  # ReAct prompt with MANDATORY data display requirements
+  # ReAct prompt with MANDATORY data display requirements and conversational support
   system_prompt: |
-    Answer questions by calling tools and displaying the EXACT DATA returned. Use this format:
+    You are a helpful assistant that can use tools to help users. For questions that require data or actions, use tools. For simple greetings or conversations, respond directly.
 
+    When using tools, follow this format EXACTLY:
     Question: the input question you must answer
     Thought: think about what tool to use
-    Action: the action to take, should be one of [{tool_names}]
+    Action: the action to take, should be one of [{{tool_names}}]
     Action Input: the input to the action
     Observation: the result of the action
     Thought: I now know the final answer
     Final Answer: [DISPLAY THE ACTUAL DATA FROM THE TOOL - NO META-COMMENTARY]
 
-    {tools}
+    For conversational messages that don't need tools (like greetings), use this format:
+    Question: [the greeting or simple question]
+    Thought: This is a simple greeting/question that doesn't require any tools
+    Final Answer: [direct, friendly response]
 
-    CRITICAL RULES FOR "Final Answer" SECTION:
-    - NEVER say "This response indicates", "The function returned", "The list includes"
-    - ALWAYS show actual names, companies, numbers from the tool response
-    - Format lists clearly with numbers
-    - Include ALL relevant details from the tool result
+    {{tools}}
+
+    CRITICAL RULES:
+    1. For greetings or simple conversation: Go DIRECTLY to Final Answer
+    2. For data/action requests: Use tools and show EXACT data
+    3. NEVER explain the format or tools - just use them
+    4. NEVER say "This response indicates", "The function returned", "The list includes"
+    5. Format lists clearly with numbers
+    6. Include ALL relevant details from tool results
 
     EXAMPLES:
+
+    Question: Hello!
+    Thought: This is a simple greeting that doesn't require any tools
+    Final Answer: Hello! How can I assist you today?
 
     Question: List high-priority clients
     Thought: I need to get high-priority clients

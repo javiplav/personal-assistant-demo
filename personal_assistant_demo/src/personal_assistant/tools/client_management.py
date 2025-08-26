@@ -16,7 +16,7 @@ from ._paths import data_path
 
 # Standardized file path and lock
 CLIENTS_FILE = data_path("clients.json")
-_CLIENTS_LOCK = FileLock(str(CLIENTS_FILE) + ".lock")
+_CLIENTS_LOCK = FileLock(str(CLIENTS_FILE) + ".lock", timeout=5)
 
 
 def _load_clients():
@@ -130,49 +130,75 @@ async def list_clients(filters: str = "") -> Dict[str, Any]:
         # Apply filtering based on the filters parameter
         filtered_clients = clients
         filter_message = ""
+        
+        # DEBUG: Log the actual filter parameter being passed
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"list_clients called with filters: '{filters}' (type: {type(filters)})")
 
-        if filters:
-            filters_lower = filters.lower()
+        if filters and filters.strip():
+            filters_lower = filters.lower().strip()
+            logger.info(f"Normalized filters: '{filters_lower}'")
+            
             # Define valid priority values
             valid_priorities = ["high", "medium", "low"]
 
-            # Extract priority from filters - use precise matching to avoid false positives
+            # FIXED: Much more restrictive filtering to avoid false positives
             priority_filter = None
-            for priority in valid_priorities:
-                if (
-                    filters_lower == priority or
-                    f"{priority} priority" in filters_lower or
-                    f"{priority}-priority" in filters_lower or
-                    filters_lower == f"{priority}priority"  # Handle "highpriority" etc.
-                ):
-                    priority_filter = priority
-                    break
-
+            
+            # Only filter if the filter string exactly matches expected patterns
+            if filters_lower in valid_priorities:
+                priority_filter = filters_lower
+            elif filters_lower in [f"{p}-priority" for p in valid_priorities]:
+                priority_filter = filters_lower.replace("-priority", "")
+            elif filters_lower in [f"{p}priority" for p in valid_priorities]:
+                priority_filter = filters_lower.replace("priority", "")
+            elif filters_lower == "active":
+                # Keep active filtering as-is
+                filtered_clients = [c for c in clients if c.get("status", "active").lower() == "active"]
+                filter_message = " (active only)"
+                
             if priority_filter:
+                logger.info(f"Applying priority filter: {priority_filter}")
                 # Filter for specific priority clients
                 filtered_clients = [c for c in clients if c.get("priority", "medium").lower() == priority_filter]
                 filter_message = f" ({priority_filter} priority only)"
-            elif "active" in filters_lower:
-                # Filter for active clients only
-                filtered_clients = [c for c in clients if c.get("status", "active").lower() == "active"]
-                filter_message = " (active only)"
+            elif filters_lower not in ["active"] and not priority_filter:
+                # If filters provided but don't match any expected pattern, log warning but show all
+                logger.warning(f"Unrecognized filter '{filters_lower}' - showing all clients")
+                filter_message = " (filter not recognized, showing all)"
 
+        # DEBUG: Log counts before processing
+        logger.info(f"Total clients loaded: {len(clients)}")
+        logger.info(f"Clients after filtering: {len(filtered_clients)}")
+        
         # Sort by priority (high first) then by name
         priority_order = {"high": 1, "medium": 2, "low": 3}
         filtered_clients.sort(key=lambda x: (priority_order.get(x.get("priority", "medium"), 2), x["name"]))
 
         # Project to a compact representation to keep downstream LLM prompts small
         def _project_client(c: Dict[str, Any]) -> Dict[str, Any]:
+            email = c.get("email", "").strip()
+            # Provide clear indication when email is missing or placeholder
+            if not email or email in ["no_email_provided", "PLEASE RESPOND WITH A VALID EMAIL ADDRESS FOR NETFLIX"]:
+                email_display = "(no email set)"
+            else:
+                email_display = email
+                
             return {
                 "id": c.get("id"),
                 "name": c.get("name"),
                 "company": c.get("company"),
                 "priority": c.get("priority", "medium"),
                 "status": c.get("status", "active"),
-                "email": c.get("email", "")
+                "email": email_display
             }
 
         slim_clients = [_project_client(c) for c in filtered_clients]
+        
+        # DEBUG: Log final count and client names
+        logger.info(f"Final projected clients count: {len(slim_clients)}")
+        logger.info(f"Client names: {[c['name'] for c in slim_clients]}")
 
         return json.dumps({
             "success": True,
@@ -381,4 +407,94 @@ async def get_client_details(client_id: str) -> Dict[str, Any]:
         return json.dumps({
             "success": False,
             "error": f"Failed to get client details: {str(e)}"
+        })
+
+
+async def update_client_email(client_identifier: str, email: str) -> Dict[str, Any]:
+    """
+    Update a client's email by ID or name.
+
+    Accepts either a numeric client ID (e.g., "3") or a client name (partial match allowed).
+    Validates basic email format and saves the change.
+    """
+    try:
+        clients = _load_clients()
+
+        if not clients:
+            return json.dumps({
+                "success": False,
+                "error": "No clients found."
+            })
+
+        identifier = (client_identifier or "").strip()
+        if not identifier:
+            return json.dumps({
+                "success": False,
+                "error": "Client identifier is required."
+            })
+
+        # Basic email validation (very permissive)
+        email_value = (email or "").strip()
+        if not email_value or "@" not in email_value or "." not in email_value.split("@")[-1]:
+            return json.dumps({
+                "success": False,
+                "error": "Please provide a valid email address."
+            })
+
+        target_client = None
+
+        if identifier.isdigit():
+            target_id = int(identifier)
+            for c in clients:
+                if c.get("id") == target_id:
+                    target_client = c
+                    break
+        else:
+            ident_lower = identifier.lower()
+            matches = [c for c in clients if ident_lower in str(c.get("name", "")).lower()]
+            if len(matches) == 1:
+                target_client = matches[0]
+            elif len(matches) > 1:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Multiple clients found matching '{client_identifier}'. Please use the client ID."
+                })
+
+        if not target_client:
+            return json.dumps({
+                "success": False,
+                "error": f"Client '{client_identifier}' not found."
+            })
+
+        old_email = target_client.get("email", "")
+        
+        # Check if email is already set to the requested value
+        if old_email == email_value:
+            return json.dumps({
+                "success": True,
+                "client_id": target_client.get("id"),
+                "client_name": target_client.get("name"),
+                "old_email": old_email,
+                "new_email": email_value,
+                "no_change_needed": True,
+                "message": f"Email for {target_client.get('name')} (ID: {target_client.get('id')}) is already set to {email_value}. No update needed."
+            })
+        
+        target_client["email"] = email_value
+        target_client["last_contact"] = datetime.now().isoformat()
+
+        _save_clients(clients)
+
+        return json.dumps({
+            "success": True,
+            "client_id": target_client.get("id"),
+            "client_name": target_client.get("name"),
+            "old_email": old_email,
+            "new_email": email_value,
+            "message": f"Updated email for {target_client.get('name')} (ID: {target_client.get('id')}) from '{old_email}' to '{email_value}'."
+        })
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": f"Failed to update client email: {str(e)}"
         })

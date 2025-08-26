@@ -24,6 +24,8 @@ functions:
     _type: personal_assistant/list_tasks_for_client
   add_client_task:
     _type: personal_assistant/add_client_task
+  assign_random_clients:
+    _type: personal_assistant/assign_random_clients
 
   # Calculator Tools
   add_numbers:
@@ -60,14 +62,16 @@ functions:
     _type: personal_assistant/get_client_details
   find_client_by_name:
     _type: personal_assistant/find_client_by_name
+  update_client_email:
+    _type: personal_assistant/update_client_email
 
 workflow:
   _type: tool_calling_agent
   llm_name: nim_llm
   tool_names: [add_task, list_tasks, complete_task, delete_task, list_tasks_for_client,
-               add_client_task, add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
+               add_client_task, assign_random_clients, add_numbers, subtract_numbers, multiply_numbers, divide_numbers,
                calculate_percentage, current_time, current_date, schedule_meeting, list_meetings,
-               cancel_meeting, add_client, list_clients, add_client_note, get_client_details, find_client_by_name]
+               cancel_meeting, add_client, list_clients, add_client_note, get_client_details, find_client_by_name, update_client_email]
   verbose: true
   max_tool_calls: 3
   recursion_limit: 8

@@ -124,7 +124,7 @@ class WebServer:
         
         @self.app.get("/", response_class=HTMLResponse)
         async def serve_index():
-            """Serve the main web interface."""
+            """Serve the web interface."""
             template_path = Path(__file__).parent / "web" / "templates" / "index.html"
             
             if not template_path.exists():
@@ -163,16 +163,22 @@ class WebServer:
                 if chat_message.mode == "auto":
                     # Analyze message to determine best handler
                     message_lower = chat_message.message.lower()
-                    use_tool_calling = any([
-                        "list all" in message_lower,
-                        "show all" in message_lower,
-                        "get all" in message_lower,
-                        "find all" in message_lower,
-                        "high-priority" in message_lower,
-                        "high priority" in message_lower,
-                        "medium priority" in message_lower,
-                        "low priority" in message_lower
-                    ])
+                    # Queries that are clearly data-retrieval lists
+                    list_markers = [
+                        "list all", "show all", "get all", "find all",
+                        "high-priority", "high priority", "medium priority", "low priority"
+                    ]
+                    # Action verbs implying structured tool operations
+                    action_markers = [
+                        "add ", "update", "edit", "schedule", "cancel", "complete", "delete", "create", "set "
+                    ]
+                    # Domain hints for structured updates
+                    domain_markers = ["client", "meeting", "task", "email"]
+
+                    use_tool_calling = (
+                        any(marker in message_lower for marker in list_markers)
+                        or any(marker in message_lower for marker in action_markers) and any(d in message_lower for d in domain_markers)
+                    )
                     
                     if use_tool_calling:
                         resolved_mode = "tool-calling"

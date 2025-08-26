@@ -36,7 +36,22 @@ class EnhancedReActHandler:
             # Store user message in conversation memory
             self.memory.add_user_message(message)
             
-            # Let ReAct agent handle context naturally - no hardcoded rules
+            # Short-circuit simple greetings/conversational openers to avoid invoking ReAct workflow
+            if self._is_greeting(message):
+                greeting_response = self._create_greeting_response(message)
+                self.memory.add_final_answer(greeting_response)
+                return {
+                    "response": greeting_response,
+                    "steps": [
+                        {
+                            "tool": "Greeting Handler",
+                            "action": "Detected greeting and responded directly",
+                            "result": greeting_response,
+                        }
+                    ],
+                }
+
+            # Let ReAct agent handle context naturally otherwise
             enhanced_message = message
             
             # Execute the workflow with retries and parsing improvements
@@ -57,6 +72,32 @@ class EnhancedReActHandler:
                 "steps": None
             }
     
+    def _is_greeting(self, message: str) -> bool:
+        """Detect if the message is a simple greeting or small-talk that needs no tools."""
+        try:
+            if not message:
+                return False
+            text = message.strip().lower()
+            # Very short messages or classic greetings
+            greeting_patterns = [
+                r"^(hi|hello|hey|yo|hola|howdy|sup)\b",
+                r"^good\s*(morning|afternoon|evening)\b",
+                r"^(what's up|whats up|how's it going|hows it going)\b",
+            ]
+            if len(text) <= 16 and any(re.match(p, text) for p in greeting_patterns):
+                return True
+            # Single-word polite messages
+            return text in {"hi", "hello", "hey", "hiya", "yo"}
+        except Exception:
+            return False
+
+    def _create_greeting_response(self, message: str) -> str:
+        """Create a friendly response for greetings."""
+        base = "Hello! How can I assist you today?"
+        if isinstance(message, str) and message.strip().lower() in {"hi", "hello", "hey", "hiya", "yo"}:
+            return base
+        return base
+
     def _create_contextual_message(self, original_message: str, context_suggestion: Dict[str, str]) -> str:
         """Create a contextual message that helps ReAct agent understand follow-ups."""
         
@@ -88,7 +129,17 @@ CONTEXT: Follow-up question detected. Suggested: Action: {context_suggestion['ac
                 else:
                     response = str(result)
                 
-                # Check for format errors in the response
+                # If parser complains it found both a final answer and an action, extract the final answer and return it
+                if (
+                    "both a final answer and a parse-able action" in response
+                    or re.search(r"parse[- ]?able action", response, re.IGNORECASE)
+                ):
+                    extracted = self._extract_final_answer_text(response)
+                    if extracted:
+                        return extracted
+                    # Fall through to retry flow if extraction failed
+                
+                # Check for other format errors in the response
                 if "Invalid Format" in response or "Missing 'Action Input'" in response:
                     logger.error(f"Format error detected in response: {response[:200]}...")
                     if attempt < max_retries:
@@ -119,6 +170,28 @@ CONTEXT: Follow-up question detected. Suggested: Action: {context_suggestion['ac
         # All retries failed
         logger.error(f"All retries failed, last error: {last_error}")
         return self._create_fallback_response(message, str(last_error))
+
+    def _extract_final_answer_text(self, content: str) -> Optional[str]:
+        """Extract the text that follows 'Final Answer:' from agent output.
+
+        Returns None if no clean extraction is possible.
+        """
+        try:
+            # Try to find the final answer block
+            match = re.search(r"Final Answer:\s*(.+)", content, re.DOTALL | re.IGNORECASE)
+            if match:
+                # Take until next section header-like token or end
+                text = match.group(1).strip()
+                # Trim if it repeats the preamble again
+                text = re.split(r"\n(?:Question:|Thought:|Action:|Observation:)\b", text, maxsplit=1)[0].strip()
+                # Remove enclosing brackets if present like [ ... ]
+                text = text.strip()
+                if text.startswith("[") and text.endswith("]") and len(text) >= 2:
+                    text = text[1:-1].strip()
+                return text if text else None
+        except Exception:
+            return None
+        return None
     
     def _modify_for_retry(self, message: str, attempt: int) -> str:
         """Modify message for retry to encourage better ReAct format compliance."""
@@ -307,30 +380,84 @@ class ToolCallingHandler:
             return {"response": f"I encountered an issue processing your request: {str(e)}", "steps": error_steps}
     
     def _generate_tool_steps(self, message: str, response: str) -> List[Dict[str, Any]]:
-        """Generate reasoning steps for verbose mode."""
+        """Generate reasoning steps for verbose mode with actual tool result parsing."""
         steps = []
         
         # Analyze the message to determine what tools were likely used
         message_lower = message.lower()
         
+        # Try to extract actual tool results from response if they contain JSON
+        try:
+            # Look for JSON-like structures in the response that indicate tool results
+            import json
+            import re
+            
+            # Find potential JSON structures
+            json_matches = re.findall(r'\{[^{}]*"success"[^{}]*\}', response)
+            tool_results = []
+            for match in json_matches:
+                try:
+                    parsed = json.loads(match)
+                    tool_results.append(parsed)
+                except:
+                    continue
+                    
+        except:
+            tool_results = []
+        
         if "client" in message_lower:
             if "list" in message_lower or "all" in message_lower:
+                # Try to extract actual client count if available
+                client_count = "multiple clients"
+                if tool_results:
+                    for result in tool_results:
+                        if "count" in result:
+                            client_count = f"{result['count']} clients"
+                            break
+                
                 steps.append({
                     "tool": "Client Management",
                     "action": "Retrieving client list from database",
-                    "result": "Successfully loaded client data"
+                    "result": f"Successfully loaded data for {client_count}"
                 })
                 steps.append({
-                    "tool": "Data Processing",
+                    "tool": "Data Processing", 
                     "action": "Filtering and formatting client information",
-                    "result": "Processed client records for display"
+                    "result": "Processed client records with emails for display"
                 })
-            elif "add" in message_lower:
-                steps.append({
-                    "tool": "Client Management",
-                    "action": "Adding new client to CRM system",
-                    "result": "Client record created successfully"
-                })
+            elif "add" in message_lower or "update" in message_lower or "email" in message_lower:
+                # Check if there was actually an update or if it was already correct
+                action_type = "update" if "update" in message_lower or "email" in message_lower else "add"
+                
+                if tool_results:
+                    for result in tool_results:
+                        if result.get("success") and "already" in result.get("message", "").lower():
+                            steps.append({
+                                "tool": "Client Management",
+                                "action": f"Checking client {action_type} request",
+                                "result": "Found that requested change was already in place"
+                            })
+                            break
+                        elif result.get("success"):
+                            client_name = result.get("client_name", "client")
+                            steps.append({
+                                "tool": "Client Management", 
+                                "action": f"Performing client {action_type} operation",
+                                "result": f"Successfully updated {client_name}"
+                            })
+                            break
+                    else:
+                        steps.append({
+                            "tool": "Client Management",
+                            "action": f"Performing client {action_type} operation",
+                            "result": "Client operation completed"
+                        })
+                else:
+                    steps.append({
+                        "tool": "Client Management",
+                        "action": f"Performing client {action_type} operation", 
+                        "result": "Client operation completed"
+                    })
         elif "task" in message_lower:
             steps.append({
                 "tool": "Task Management",
@@ -340,7 +467,7 @@ class ToolCallingHandler:
         elif "meeting" in message_lower:
             steps.append({
                 "tool": "Meeting Scheduler",
-                "action": "Processing meeting request",
+                "action": "Processing meeting request", 
                 "result": "Meeting operation completed"
             })
         elif any(op in message_lower for op in ["calculate", "add", "subtract", "multiply", "divide", "%"]):

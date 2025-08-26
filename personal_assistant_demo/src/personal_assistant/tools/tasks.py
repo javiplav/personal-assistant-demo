@@ -18,6 +18,7 @@
 import json
 import os
 import logging
+import random
 from datetime import datetime
 from typing import List, Dict, Any
 from pathlib import Path
@@ -383,3 +384,93 @@ async def add_client_task(client_name: str, task_description: str) -> str:
     except Exception as e:
         logger.error(f"Error adding client task: {e}")
         return await add_task(task_description, client_name)
+
+
+def _load_clients() -> List[Dict[str, Any]]:
+    """Load clients from the clients JSON file."""
+    try:
+        clients_file = data_path("clients.json")
+        clients_lock = FileLock(str(clients_file) + ".lock")
+        if clients_file.exists():
+            with clients_lock:
+                return json.loads(clients_file.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.error(f"Error loading clients: {e}")
+    return []
+
+
+async def assign_random_clients_to_unassigned_tasks(force_reassign: str = "false") -> str:
+    """
+    Assign random clients to tasks that don't have a specific client name assigned.
+    This helps ensure all tasks are associated with a client for better organization.
+    
+    Args:
+        force_reassign: Set to "true" to reassign clients even if tasks already have assignments (optional)
+    
+    Returns:
+        A JSON string with the results of the assignment operation
+    """
+    try:
+        # Load tasks and clients
+        tasks = _load_tasks()
+        clients = _load_clients()
+        
+        if not clients:
+            return json.dumps({
+                "success": False,
+                "error": "No clients available for assignment. Please add some clients first."
+            })
+        
+        # Find tasks without client assignments
+        unassigned_tasks = []
+        should_force_reassign = force_reassign.lower() == "true"
+        
+        for task in tasks:
+            # A task is considered unassigned if it has no client_name or client_name is null/empty
+            # OR if force_reassign is true
+            if should_force_reassign or not task.get("client_name") or task.get("client_name") in [None, "", "null"]:
+                unassigned_tasks.append(task)
+        
+        if not unassigned_tasks:
+            return json.dumps({
+                "success": True,
+                "assignments_made": 0,
+                "message": "All tasks already have client assignments."
+            })
+        
+        # Assign random clients to unassigned tasks
+        assignments_made = []
+        
+        for task in unassigned_tasks:
+            # Pick a random client
+            random_client = random.choice(clients)
+            
+            # Update task with client information
+            task["client_name"] = random_client["name"]
+            task["client_id"] = random_client["id"]
+            
+            assignments_made.append({
+                "task_id": task["id"],
+                "task_description": task["description"],
+                "assigned_client": random_client["name"],
+                "client_id": random_client["id"]
+            })
+            
+            logger.info(f"Assigned task #{task['id']} ('{task['description']}') to client {random_client['name']} (ID: {random_client['id']})")
+        
+        # Save updated tasks
+        _save_tasks(tasks)
+        
+        return json.dumps({
+            "success": True,
+            "assignments_made": len(assignments_made),
+            "assignments": assignments_made,
+            "message": f"Successfully assigned {len(assignments_made)} tasks to random clients."
+        })
+        
+    except Exception as e:
+        logger.error(f"Error assigning random clients to tasks: {e}")
+        return json.dumps({
+            "success": False,
+            "error": f"Failed to assign clients to tasks: {str(e)}"
+        })
