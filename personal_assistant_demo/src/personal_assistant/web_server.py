@@ -49,7 +49,7 @@ class ChatResponse(BaseModel):
 class WebServer:
     """Enhanced web server for the Personal Assistant demo."""
     
-    def __init__(self, config_file: str = "configs/config-ollama-react-enhanced.yml"):
+    def __init__(self, config_file: str = "configs/config-ollama-react.yml"):
         self.app = FastAPI(
             title="NVIDIA NeMo Agent Toolkit - Enterprise Assistant Demo",
             description="Real-time AI agent demonstration",
@@ -447,15 +447,15 @@ class WebServer:
 
         if model == "nim":
             return (
-                base_dir / "config-nim-tool-calling-conversation.yml"
+                base_dir / "config-nim-tool-calling.yml"
                 if mode == "tool-calling"
-                else base_dir / "config-nim-react-fixed.yml"
+                else base_dir / "config-nim-react.yml"
             )
         # ollama
         return (
             base_dir / "config-ollama-tool-calling.yml"
             if mode == "tool-calling"
-            else base_dir / "config-ollama-react-enhanced.yml"
+            else base_dir / "config-ollama-react.yml"
         )
         
     async def load_stats(self) -> Dict[str, int]:

@@ -26,7 +26,7 @@ def test_nim_tool_calling_config_selection():
     
     # Test tool-calling mode selection
     config_path = server._resolve_config_path("nim", "tool-calling")
-    expected_path = "configs/config-nim-tool-calling-conversation.yml"
+    expected_path = "configs/config-nim-tool-calling.yml"
     
     if expected_path in config_path:
         print(f"   ✅ Tool-calling mode: PASSED")
@@ -48,7 +48,7 @@ def test_nim_react_config_selection():
     
     # Test react mode selection
     config_path = server._resolve_config_path("nim", "react")
-    expected_path = "configs/config-nim-react-fixed.yml"
+    expected_path = "configs/config-nim-react.yml"
     
     if expected_path in config_path:
         print(f"   ✅ React mode: PASSED")
@@ -70,7 +70,7 @@ def test_nim_auto_mode_default():
     
     # Test auto mode selection
     config_path = server._resolve_config_path("nim", "auto")
-    expected_path = "configs/config-nim-tool-calling-conversation.yml"
+    expected_path = "configs/config-nim-tool-calling.yml"
     
     if expected_path in config_path:
         print(f"   ✅ Auto mode default: PASSED")
@@ -91,10 +91,10 @@ def test_explicit_mode_choice_respected():
     
     # Test various explicit combinations
     test_cases = [
-        ("nim", "tool-calling", "config-nim-tool-calling-conversation.yml"),
-        ("nim", "react", "config-nim-react-fixed.yml"),
+        ("nim", "tool-calling", "config-nim-tool-calling.yml"),
+        ("nim", "react", "config-nim-react.yml"),
         ("ollama", "tool-calling", "config-ollama-tool-calling.yml"),
-        ("ollama", "react", "config-ollama-react-enhanced.yml"),
+        ("ollama", "react", "config-ollama-react.yml"),
     ]
     
     all_passed = True
@@ -121,10 +121,10 @@ def test_case_insensitive_model_mode():
     
     # Test case variations
     test_cases = [
-        ("NIM", "TOOL-CALLING", "config-nim-tool-calling-conversation.yml"),
-        ("nim", "Tool-Calling", "config-nim-tool-calling-conversation.yml"),
-        ("NIM", "react", "config-nim-react-fixed.yml"),
-        ("nim", "REACT", "config-nim-react-fixed.yml"),
+        ("NIM", "TOOL-CALLING", "config-nim-tool-calling.yml"),
+        ("nim", "Tool-Calling", "config-nim-tool-calling.yml"),
+        ("NIM", "react", "config-nim-react.yml"),
+        ("nim", "REACT", "config-nim-react.yml"),
     ]
     
     all_passed = True
@@ -149,10 +149,10 @@ def test_config_files_exist():
     
     base_dir = Path("configs")
     expected_configs = [
-        "config-nim-tool-calling-conversation.yml",
-        "config-nim-react-fixed.yml",
+        "config-nim-tool-calling.yml",
+        "config-nim-react.yml",
         "config-ollama-tool-calling.yml", 
-        "config-ollama-react-enhanced.yml",
+        "config-ollama-react.yml",
     ]
     
     all_exist = True
@@ -200,8 +200,8 @@ def main():
     if success:
         print("🎉 ALL TESTS PASSED!")
         print("✅ Mode selection is working correctly.")
-        print("✅ Tool-calling mode loads config-nim-tool-calling-conversation.yml")
-        print("✅ React mode loads config-nim-react-fixed.yml") 
+        print("✅ Tool-calling mode loads config-nim-tool-calling.yml")
+        print("✅ React mode loads config-nim-react.yml") 
         print("✅ Explicit user choices are respected.")
     else:
         print("❌ SOME TESTS FAILED!")

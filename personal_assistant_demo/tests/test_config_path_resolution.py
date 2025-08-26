@@ -23,12 +23,12 @@ def _resolve_config_path(model: str, mode: str) -> str:
 
     if model == "nim":
         if mode == "tool-calling":
-            return str(base_dir / "config-nim-tool-calling-conversation.yml")
+            return str(base_dir / "config-nim-tool-calling.yml")
         elif mode == "react":
-            return str(base_dir / "config-nim-react-fixed.yml")
+            return str(base_dir / "config-nim-react.yml")
         else:  # auto
             # keep your auto logic, but do NOT override an explicit user choice
-            return str(base_dir / "config-nim-tool-calling-conversation.yml")
+            return str(base_dir / "config-nim-tool-calling.yml")
     else:  # ollama
         if mode == "tool-calling":
             candidates = [
@@ -37,7 +37,7 @@ def _resolve_config_path(model: str, mode: str) -> str:
             ]
         else:
             candidates = [
-                base_dir / "config-ollama-react-enhanced.yml",
+                base_dir / "config-ollama-react.yml",
                 base_dir / "config-ollama.yml",
             ]
 
@@ -53,7 +53,7 @@ def test_nim_tool_calling_config():
     print("🧪 Testing NIM tool-calling mode...")
     
     config_path = _resolve_config_path("nim", "tool-calling")
-    expected = "config-nim-tool-calling-conversation.yml"
+    expected = "config-nim-tool-calling.yml"
     
     if expected in config_path:
         print(f"   ✅ PASSED: {config_path}")
@@ -68,7 +68,7 @@ def test_nim_react_config():
     print("🧪 Testing NIM react mode...")
     
     config_path = _resolve_config_path("nim", "react")
-    expected = "config-nim-react-fixed.yml"
+    expected = "config-nim-react.yml"
     
     if expected in config_path:
         print(f"   ✅ PASSED: {config_path}")
@@ -83,7 +83,7 @@ def test_nim_auto_mode():
     print("🧪 Testing NIM auto mode...")
     
     config_path = _resolve_config_path("nim", "auto")
-    expected = "config-nim-tool-calling-conversation.yml"
+    expected = "config-nim-tool-calling.yml"
     
     if expected in config_path:
         print(f"   ✅ PASSED: {config_path}")
@@ -99,10 +99,10 @@ def test_explicit_choices_respected():
     
     test_cases = [
         # (model, mode, expected_config_name)
-        ("nim", "tool-calling", "config-nim-tool-calling-conversation.yml"),
-        ("nim", "react", "config-nim-react-fixed.yml"),
-        ("NIM", "TOOL-CALLING", "config-nim-tool-calling-conversation.yml"),  # Case insensitive
-        ("nim", "React", "config-nim-react-fixed.yml"),  # Case insensitive
+        ("nim", "tool-calling", "config-nim-tool-calling.yml"),
+        ("nim", "react", "config-nim-react.yml"),
+        ("NIM", "TOOL-CALLING", "config-nim-tool-calling.yml"),  # Case insensitive
+        ("nim", "React", "config-nim-react.yml"),  # Case insensitive
     ]
     
     all_passed = True
@@ -150,8 +150,8 @@ def test_config_files_exist():
     print("🧪 Testing that config files exist...")
     
     expected_configs = [
-        "configs/config-nim-tool-calling-conversation.yml",
-        "configs/config-nim-react-fixed.yml",
+        "configs/config-nim-tool-calling.yml",
+        "configs/config-nim-react.yml",
     ]
     
     all_exist = True
@@ -194,8 +194,8 @@ def main():
     print("\n" + "=" * 60)
     if success:
         print("🎉 ALL TESTS PASSED!")
-        print("✅ tool-calling mode → config-nim-tool-calling-conversation.yml")
-        print("✅ react mode → config-nim-react-fixed.yml")
+        print("✅ tool-calling mode → config-nim-tool-calling.yml")
+        print("✅ react mode → config-nim-react.yml")
         print("✅ Explicit user choices are respected (not overridden)")
         print("✅ Case-insensitive mode handling works correctly")
     else:

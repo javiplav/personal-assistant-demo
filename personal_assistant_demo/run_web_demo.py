@@ -183,9 +183,9 @@ Examples:
     if args.config:
         config_file = args.config
     elif args.nim:
-        config_file = "configs/config-nim-tool-calling-conversation.yml"  # Use the correct NIM config
+        config_file = "configs/config-nim-tool-calling.yml"  # Use the NIM tool-calling config
     else:
-        config_file = "configs/config-ollama-react-enhanced.yml"
+        config_file = "configs/config-ollama-react.yml"
     
     # Validate configuration
     if not Path(config_file).exists():
