@@ -135,10 +135,11 @@ python demo/demo_showcase.py
 # Terminal 1: Start Ollama (if not already running)
 ollama serve
 
-# Start the enhanced web demo (single command)
-python run_web_demo.py            # Ollama ReAct (default)
+# Terminal 2: Start the enhanced web demo (single command)
+# Note: Do NOT run 'nat serve' and 'run_web_demo.py' at the same time (port conflict)
+python run_web_demo.py            # Ollama ReAct (default) - Full web UI
 # or
-python run_web_demo.py --nim      # NIM tool-calling
+python run_web_demo.py --nim      # NIM tool-calling - Full web UI
 ```
 
 ### ☁️ **With NVIDIA NIM (Cloud)**
@@ -151,7 +152,8 @@ nat run --config_file configs/config.yml --input "What time is it and add a task
 **Web UI experience:**
 Use the same launcher with `--nim`:
 ```bash
-python run_web_demo.py --nim
+# Note: Do NOT run 'nat serve' and 'run_web_demo.py' at the same time (port conflict)
+python run_web_demo.py --nim      # Full web UI with NIM
 ```
 
 ### Using Development Helper Script
@@ -172,6 +174,51 @@ python run_web_demo.py --nim
 - **Project Structure**: `docs/PROJECT_ORGANIZATION.md` - Complete project guide
 - **Demo Verification**: `demo/DEMO_VERIFICATION.md` - Functionality verification
 - **Web Demo**: `run_web_demo.py` - Launch the FastAPI web UI
+
+### ⚠️ **Important: Avoiding Port Conflicts**
+
+**Two Different Servers:**
+- `nat serve` - Creates a basic API server (no web interface) 
+- `run_web_demo.py` - Creates a full web application with chat UI
+
+**Common Mistake - Port Conflict:**
+```bash
+# ❌ This causes a port conflict:
+nat serve --config_file configs/config-ollama-tool-calling.yml  # Starts on port 8000
+python run_web_demo.py                                          # Tries to use port 8000 too!
+# Result: Second command fails, browser shows "Not Found"
+```
+
+**✅ Correct Approaches:**
+
+**Option 1: Use Only Web Demo (Recommended)**
+```bash
+# Stop any running nat serve command (Ctrl+C)
+python run_web_demo.py                    # Full web UI on port 8000
+```
+
+**Option 2: Use Different Ports**  
+```bash
+# Terminal 1: Keep nat serve
+nat serve --config_file configs/config-ollama-tool-calling.yml --port 8001
+
+# Terminal 2: Run web demo on default port
+python run_web_demo.py                    # Web UI on port 8000
+```
+
+**Option 3: Web Demo on Different Port**
+```bash
+# Keep nat serve on port 8000
+nat serve --config_file configs/config-ollama-tool-calling.yml
+
+# Run web demo on different port  
+python run_web_demo.py --port 3000       # Web UI on port 3000
+```
+
+**When to Use Each:**
+- **Web Demo Only**: Best for interactive demos and showcasing capabilities
+- **nat serve**: For API development, testing, or integrating with other applications
+- **Both**: When you need both API access and web interface simultaneously
 
 ### Recent Changes (Troubleshooting + Performance)
 - Centralized data paths with safety checks in `src/personal_assistant/tools/_paths.py`
@@ -342,11 +389,12 @@ The configuration files allow you to:
 
 ### Common Issues
 
-1. **Ollama Connection Issues**: Ensure Ollama is running with `ollama serve`
-2. **NVIDIA API Key Issues**: Ensure your NVIDIA_API_KEY is set correctly
-3. **Weather Not Working**: Check your OPENWEATHERMAP_API_KEY or disable weather tools
-4. **Data Path Safety**: All tools read/write via `tools/_paths.py`; ensure the `data/` directory is writable
-5. **Import Errors**: Make sure you've installed the package with `pip install -e .`
+1. **Port Conflicts**: If you get "Not Found" in browser, you may have both `nat serve` and `run_web_demo.py` trying to use port 8000. See the [Port Conflicts section](#️-important-avoiding-port-conflicts) above for solutions.
+2. **Ollama Connection Issues**: Ensure Ollama is running with `ollama serve`
+3. **NVIDIA API Key Issues**: Ensure your NVIDIA_API_KEY is set correctly
+4. **Weather Not Working**: Check your OPENWEATHERMAP_API_KEY or disable weather tools
+5. **Data Path Safety**: All tools read/write via `tools/_paths.py`; ensure the `data/` directory is writable
+6. **Import Errors**: Make sure you've installed the package with `pip install -e .`
 
 ### Getting Help
 

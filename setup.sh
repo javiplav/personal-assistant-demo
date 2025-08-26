@@ -46,14 +46,43 @@ else
     echo "✅ .env file already exists"
 fi
 
+# Handle conda interference (common issue)
+echo "🔍 Checking for conda interference..."
+if [[ "$CONDA_DEFAULT_ENV" != "" ]]; then
+    echo "⚠️  Conda environment detected: $CONDA_DEFAULT_ENV"
+    echo "   This may cause pip/python conflicts. Deactivating conda..."
+    # Try to deactivate conda if it's active
+    if command -v conda &> /dev/null; then
+        conda deactivate 2>/dev/null || true
+        echo "   ✅ Conda deactivated to prevent conflicts"
+    fi
+fi
+
 # Create virtual environment and install dependencies
-echo "🔧 Creating virtual environment with uv..."
+echo "🔧 Creating clean virtual environment with uv..."
+# Remove any existing broken venv
+if [ -d ".venv" ]; then
+    echo "   🧹 Removing existing virtual environment..."
+    rm -rf .venv
+fi
 uv venv
 
-echo "📦 Installing demo package with dependencies..."
+echo "📦 Installing demo package with dependencies using uv pip..."
 cd personal_assistant_demo
+# Use uv pip to avoid any system pip conflicts
 uv pip install -e .
 cd ..
+
+# Verify the installation works
+echo "🧪 Verifying installation..."
+if .venv/bin/python -c "import uvicorn, fastapi, personal_assistant; print('✅ Core dependencies verified')" 2>/dev/null; then
+    echo "✅ Installation verification successful!"
+else
+    echo "❌ Installation verification failed. Dependencies may not be properly installed."
+    echo "💡 Try running the commands manually:"
+    echo "   cd personal_assistant_demo && uv pip install -e ."
+    exit 1
+fi
 
 echo "🎨 Setting up Web UI..."
 if [ -d "NeMo-Agent-Toolkit-develop/external/nat-ui" ]; then
@@ -80,35 +109,41 @@ echo "🏠 Option A: Ollama (Local) - Recommended for beginners"
 echo "   1. Install Ollama: curl -fsSL https://ollama.com/install.sh | sh"
 echo "   2. Start Ollama: ollama serve"
 echo "   3. Pull a model: ollama pull qwen2.5:7b"
-echo "   4. Activate virtual environment:"
+echo "   4. Activate virtual environment (REQUIRED for every session):"
 echo "      source .venv/bin/activate  # On macOS/Linux"
 echo "      # or .venv\\Scripts\\activate  # On Windows"
-echo "   5. Run the demo:"
+echo "   5. Run quick test:"
 echo "      cd personal_assistant_demo"
-echo "      nat run --config_file configs/config-ollama.yml --input \"What time is it?\""
+echo "      nat run --config_file configs/config-ollama-react.yml --input \"What time is it?\""
+echo "   6. Or run the full web interface:"
+echo "      python run_web_demo.py  # Full web UI with chat interface"
 echo ""
 echo "☁️  Option B: NVIDIA NIM (Cloud) - For advanced users"
 echo "   1. Get NVIDIA API key from https://build.nvidia.com/"
 echo "   2. Edit .env file and add your NVIDIA_API_KEY"
-echo "   3. Activate virtual environment:"
+echo "   3. Activate virtual environment (REQUIRED for every session):"
 echo "      source .venv/bin/activate  # On macOS/Linux"
 echo "      # or .venv\\Scripts\\activate  # On Windows"
-echo "   4. Run the demo:"
+echo "   4. Run quick test:"
 echo "      cd personal_assistant_demo"
 echo "      nat run --config_file configs/config.yml --input \"What time is it?\""
+echo "   5. Or run the full web interface:"
+echo "      python run_web_demo.py --nim  # Full web UI with cloud LLM"
 echo ""
-echo "🌐 Web UI Experience (Optional):"
-echo "   # Terminal 1: Start backend"
-echo "   nat serve --config_file configs/config-ollama.yml  # For Ollama"
-echo "   # or nat serve --config_file configs/config.yml    # For NVIDIA NIM"
-echo "   # Terminal 2: Start web UI"
-echo "   ./dev.sh ui-setup  # First time setup"
-echo "   ./dev.sh ui        # Start the UI"
-echo "   # Then open http://localhost:8000"
+echo "🌐 Web UI Experience (Recommended):"
+echo "   ⚠️  IMPORTANT: Don't run 'nat serve' and 'run_web_demo.py' together (port conflict)"
+echo "   ✅ Use ONLY the web demo for the best experience:"
+echo "      source .venv/bin/activate              # Activate environment"
+echo "      cd personal_assistant_demo             # Navigate to demo"
+echo "      python run_web_demo.py                 # For Ollama"
+echo "      # or python run_web_demo.py --nim     # For NVIDIA NIM"
+echo "   📱 Then open: http://localhost:8000"
 echo ""
 echo "💡 Tips:"
+echo "   - ALWAYS activate virtual environment: source .venv/bin/activate"
+echo "   - For conda users: The setup script handles conda deactivation automatically"
 echo "   - Use './dev.sh run-ollama' for quick Ollama demo"
 echo "   - Use './dev.sh run' for quick NVIDIA NIM demo"
 echo "   - Use './dev.sh help' to see all available commands"
-echo "   - Use './dev.sh ui-setup' if UI setup was skipped"
+echo "   - If you get 'uvicorn not found' error, verify you activated the virtual environment"
 echo ""

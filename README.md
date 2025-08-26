@@ -35,7 +35,7 @@ personal-assistant-demo/
 │   ├── configs/                    # Configuration files
 │   │   ├── config.yml              # NVIDIA NIM configuration (cloud)
 │   │   ├── config-ollama-react.yml # Ollama ReAct configuration
-│   │   ├── config-ollama-tool-calling.yml # Ollama tool-calling configuration
+│   │   ├── config-ollama-tool-calling.yml # Ollama tool-calling epuration
 │   │   ├── config-nim-react.yml    # NIM ReAct configuration
 │   │   └── config-nim-tool-calling.yml # NIM tool-calling configuration
 │   ├── tests/                      # Demo tests
@@ -85,6 +85,17 @@ A comprehensive demonstration featuring a personal assistant agent with:
 - Python 3.11 or 3.12
 - [uv](https://docs.astral.sh/uv/) - Fast Python package manager
 - **Node.js 18+** and **npm** (optional, only if you want the web UI)
+
+### 🐍 Important for Conda Users
+
+This repository's setup script **automatically handles conda environment conflicts** that commonly cause `ModuleNotFoundError: No module named 'uvicorn'` errors. The script:
+
+- ✅ **Detects active conda environments** and deactivates them during setup
+- ✅ **Uses `uv pip` instead of conda's pip** to avoid package conflicts  
+- ✅ **Verifies installation** to ensure all dependencies work correctly
+- ✅ **Provides clear instructions** for proper virtual environment activation
+
+**If you previously had issues with conda conflicts**, simply re-run `./setup.sh` and the improved script will resolve them automatically.
 
 ### Step 1: Install uv
 
