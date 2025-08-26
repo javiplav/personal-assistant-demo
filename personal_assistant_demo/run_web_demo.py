@@ -42,7 +42,7 @@ def check_ollama_status():
 
 def check_nvidia_api_key():
     """Check if NVIDIA API key is configured."""
-    return bool(os.environ.get('NVIDIA_API_KEY'))
+    return bool(os.environ.get('NVIDIA_API_KEY') or os.environ.get('OPENAI_API_KEY'))
 
 
 def setup_environment():
@@ -214,6 +214,12 @@ Examples:
     elif args.nim or "nim" in config_file.lower():
         print("🔍 Checking NVIDIA NIM configuration...")
         if check_nvidia_api_key():
+            # Map NVIDIA_API_KEY to OPENAI_API_KEY for OpenAI-compatible client
+            if 'OPENAI_API_KEY' not in os.environ and 'NVIDIA_API_KEY' in os.environ:
+                os.environ['OPENAI_API_KEY'] = os.environ['NVIDIA_API_KEY']
+            # Ensure base URL is set for OpenAI-compatible client
+            if 'OPENAI_BASE_URL' not in os.environ:
+                os.environ['OPENAI_BASE_URL'] = 'https://integrate.api.nvidia.com/v1'
             print("   ✅ NVIDIA API key configured")
         else:
             print("   ❌ NVIDIA API key not found")

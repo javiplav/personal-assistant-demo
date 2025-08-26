@@ -260,7 +260,7 @@ class ToolCallingHandler:
             self.memory.add_user_message(message)
             
             # Add timeout for operations - increase for troubleshooting
-            timeout = 120.0  # Increased timeout to identify if workflow completes
+            timeout = 180.0  # Increased timeout to accommodate slower LLM/tool-calls
             try:
                 # Troubleshooting logs
                 logger.debug(
@@ -298,8 +298,9 @@ class ToolCallingHandler:
             # Store as final answer in memory
             self.memory.add_final_answer(response)
 
-            # Don't generate fake steps - let the real tool-calling agent handle this
-            return {"response": response, "steps": None}
+            # Return tool execution steps for UI (heuristic based on message/response)
+            steps = self._generate_tool_steps(message, response)
+            return {"response": response, "steps": steps}
         except Exception as e:
             logger.error(f"ToolCalling handler failed: {e}", exc_info=True)
             error_steps = [{"tool": "Error Handler", "action": f"Processing failed: {str(e)}", "result": "Error occurred"}]

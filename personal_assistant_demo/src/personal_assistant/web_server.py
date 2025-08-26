@@ -493,11 +493,19 @@ class WebServer:
             if data_path("clients.json").exists():
                 clients = json.loads(data_path("clients.json").read_text(encoding="utf-8"))
                 for client in sorted(clients, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
+                    created_str = client.get("created_at", "")
+                    try:
+                        created_dt = datetime.fromisoformat(created_str)
+                        created_ts = created_dt.timestamp()
+                    except Exception:
+                        created_ts = 0
                     activity.append({
                         "id": f"client_{client['id']}",
                         "type": "Client Added",
                         "description": f"{client['name']} from {client['company']}",
-                        "time": self.format_time(client.get("created_at", "")),
+                        "time": self.format_time(created_str),
+                        "timestamp": created_str,
+                        "ts": created_ts,
                         "icon": "fas fa-user-plus"
                     })
             
@@ -505,11 +513,19 @@ class WebServer:
             if data_path("meetings.json").exists():
                 meetings = json.loads(data_path("meetings.json").read_text(encoding="utf-8"))
                 for meeting in sorted(meetings, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
+                    created_str = meeting.get("created_at", "")
+                    try:
+                        created_dt = datetime.fromisoformat(created_str)
+                        created_ts = created_dt.timestamp()
+                    except Exception:
+                        created_ts = 0
                     activity.append({
                         "id": f"meeting_{meeting['id']}",
                         "type": "Meeting Scheduled",
                         "description": meeting['title'],
-                        "time": self.format_time(meeting.get("created_at", "")),
+                        "time": self.format_time(created_str),
+                        "timestamp": created_str,
+                        "ts": created_ts,
                         "icon": "fas fa-handshake"
                     })
             
@@ -517,16 +533,24 @@ class WebServer:
             if data_path("tasks.json").exists():
                 tasks = json.loads(data_path("tasks.json").read_text(encoding="utf-8"))
                 for task in sorted(tasks, key=lambda x: x.get("created_at", ""), reverse=True)[:3]:
+                    created_str = task.get("created_at", "")
+                    try:
+                        created_dt = datetime.fromisoformat(created_str)
+                        created_ts = created_dt.timestamp()
+                    except Exception:
+                        created_ts = 0
                     activity.append({
                         "id": f"task_{task['id']}",
                         "type": "Task Created",
                         "description": task['description'][:50] + "..." if len(task['description']) > 50 else task['description'],
-                        "time": self.format_time(task.get("created_at", "")),
+                        "time": self.format_time(created_str),
+                        "timestamp": created_str,
+                        "ts": created_ts,
                         "icon": "fas fa-tasks"
                     })
             
-            # Sort by time and limit
-            activity.sort(key=lambda x: x['time'], reverse=True)
+            # Sort by actual timestamp and limit
+            activity.sort(key=lambda x: x.get('ts', 0), reverse=True)
             return activity[:10]
             
         except Exception as e:

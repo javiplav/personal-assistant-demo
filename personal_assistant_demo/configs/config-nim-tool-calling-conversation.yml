@@ -1,14 +1,14 @@
 llms:
   nim_llm:
-    _type: "nim"
+    _type: "openai"
     model: "nvidia/llama-3.1-nemotron-nano-8b-v1"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    # api_key will be injected from environment by the web server (NVIDIA_API_KEY)
     temperature: 0.1
     top_p: 0.7
-    max_tokens: 256
-    timeout: 20
-    model_kwargs:
-      stream: false
-      max_completion_tokens: 128
+    timeout: 60
+    # Using OpenAI-compatible tool calling via NIM endpoint
+    # No model_kwargs needed; tools are bound via LangChain
 
 functions:
   # Task Management Tools
