@@ -48,14 +48,21 @@ fi
 
 # Handle conda interference (common issue)
 echo "🔍 Checking for conda interference..."
-if [[ "$CONDA_DEFAULT_ENV" != "" ]]; then
-    echo "⚠️  Conda environment detected: $CONDA_DEFAULT_ENV"
+if [[ "$CONDA_DEFAULT_ENV" != "" ]] || [[ "$CONDA_PREFIX" != "" ]]; then
+    echo "⚠️  Conda environment detected: ${CONDA_DEFAULT_ENV:-$CONDA_PREFIX}"
     echo "   This may cause pip/python conflicts. Deactivating conda..."
     # Try to deactivate conda if it's active
     if command -v conda &> /dev/null; then
         conda deactivate 2>/dev/null || true
-        echo "   ✅ Conda deactivated to prevent conflicts"
+        # Unset conda environment variables to prevent interference
+        unset CONDA_DEFAULT_ENV
+        unset CONDA_PREFIX
+        unset CONDA_PYTHON_EXE
+        unset CONDA_EXE
+        echo "   ✅ Conda deactivated and environment variables cleared"
     fi
+else
+    echo "✅ No conda interference detected"
 fi
 
 # Create virtual environment and install dependencies
@@ -68,9 +75,10 @@ fi
 uv venv
 
 echo "📦 Installing demo package with dependencies using uv pip..."
+echo "   🐍 Target Python: $(realpath .venv/bin/python)"
 cd personal_assistant_demo
-# Use uv pip to avoid any system pip conflicts
-uv pip install -e .
+# Use uv pip with explicit python path to avoid conda interference
+uv pip install --python ..//.venv/bin/python -e .
 cd ..
 
 # Verify the installation works
