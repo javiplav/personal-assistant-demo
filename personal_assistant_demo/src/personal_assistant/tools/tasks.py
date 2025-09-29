@@ -490,21 +490,3 @@ async def assign_random_clients_to_unassigned_tasks(force_reassign: str = "false
         })
 
 
-async def list_completed_tasks() -> str:
-    """
-    List only completed tasks for easy access.
-    
-    Returns:
-        A formatted string showing only completed tasks
-    """
-    return await list_tasks(status="completed")
-
-
-async def list_pending_tasks() -> str:
-    """
-    List only pending/incomplete tasks for easy access.
-    
-    Returns:
-        A formatted string showing only pending tasks
-    """
-    return await list_tasks(status="pending")

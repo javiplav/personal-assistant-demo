@@ -24,7 +24,7 @@ from nat.data_models.function import FunctionBaseConfig
 
 # Weather tools commented out - uncomment and add OPENWEATHER_API_KEY to use
 # from .tools.weather import get_weather_info, check_weather_condition
-from .tools.tasks import add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task, assign_random_clients_to_unassigned_tasks, list_completed_tasks, list_pending_tasks
+from .tools.tasks import add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task, assign_random_clients_to_unassigned_tasks
 from .tools.calculator import add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage
 from .tools.datetime_info import (
     get_current_time, get_current_date,
@@ -96,12 +96,19 @@ class ListTasksConfig(FunctionBaseConfig, name="list_tasks"):
 
 @register_function(config_type=ListTasksConfig)
 async def list_tasks_function(config: ListTasksConfig, builder: Builder):
-    """List all tasks with their current status."""
+    """List tasks with intelligent filtering based on user requests."""
     yield FunctionInfo.from_fn(
         list_tasks,
         description=(
-            "Show all tasks in your personal task list, including both pending and completed tasks. "
-            "Use this when asked to show, list, or display tasks."
+            "List tasks with flexible filtering. Extract filter parameters from natural language:\n"
+            "- 'show all tasks' → list_tasks() [default: shows all]\n"
+            "- 'show completed tasks' → list_tasks(status='completed')\n"
+            "- 'show pending tasks' → list_tasks(status='pending')\n"
+            "- 'tasks for Sarah Johnson' → list_tasks(client_name='Sarah Johnson')\n" 
+            "- 'completed tasks for Alex' → list_tasks(status='completed', client_name='Alex Chen')\n"
+            "- 'find urgent tasks' → list_tasks(query='urgent')\n"
+            "The LLM should intelligently map user requests to appropriate parameters. "
+            "Status options: 'completed', 'pending', or '' for all."
         )
     )
 
@@ -183,40 +190,6 @@ async def assign_random_clients_function(config: AssignRandomClientsConfig, buil
             "Assign random clients to all tasks that do not have a specific client name associated with them. "
             "This helps ensure better task organization and client relationship management. "
             "Use this when you notice tasks without client assignments or when asked to organize tasks by clients."
-        )
-    )
-
-
-class ListCompletedTasksConfig(FunctionBaseConfig, name="list_completed_tasks"):
-    pass
-
-
-@register_function(config_type=ListCompletedTasksConfig)
-async def list_completed_tasks_function(config: ListCompletedTasksConfig, builder: Builder):
-    """List only completed tasks."""
-    yield FunctionInfo.from_fn(
-        list_completed_tasks,
-        description=(
-            "Show only completed tasks from your task list. "
-            "Use this when specifically asked for completed tasks only. "
-            "Example: 'Show me just the completed tasks' or 'What tasks have I finished?'"
-        )
-    )
-
-
-class ListPendingTasksConfig(FunctionBaseConfig, name="list_pending_tasks"):
-    pass
-
-
-@register_function(config_type=ListPendingTasksConfig)
-async def list_pending_tasks_function(config: ListPendingTasksConfig, builder: Builder):
-    """List only pending/incomplete tasks."""
-    yield FunctionInfo.from_fn(
-        list_pending_tasks,
-        description=(
-            "Show only pending (incomplete) tasks from your task list. "
-            "Use this when specifically asked for pending tasks only. "
-            "Example: 'Show me just the pending tasks' or 'What tasks do I still need to do?'"
         )
     )
 
