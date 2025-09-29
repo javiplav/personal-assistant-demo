@@ -113,14 +113,15 @@ async def add_task(description: str, client_name: str = "", client_id: str = "")
         })
 
 
-async def list_tasks(query: str = "", client_name: str = "", client_id: str = "") -> str:
+async def list_tasks(query: str = "", client_name: str = "", client_id: str = "", status: str = "") -> str:
     """
-    List tasks with optional filtering by client or query.
+    List tasks with optional filtering by client, query, or completion status.
     
     Args:
         query: Optional search query to filter tasks
         client_name: Filter tasks for specific client by name
         client_id: Filter tasks for specific client by ID
+        status: Filter by completion status ('completed', 'pending', or '' for all)
     
     Returns:
         A formatted string showing filtered or all tasks
@@ -151,6 +152,15 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
             filtered_tasks = [t for t in filtered_tasks if query_lower in t["description"].lower()]
             filter_description = f" matching '{query}'"
         
+        # Apply status filtering
+        if status and status.lower() in ["completed", "pending"]:
+            is_completed = status.lower() == "completed"
+            filtered_tasks = [t for t in filtered_tasks if t["completed"] == is_completed]
+            if filter_description:
+                filter_description += f" ({status.lower()})"
+            else:
+                filter_description = f" ({status.lower()} only)"
+        
         if not filtered_tasks:
             message = f"No tasks found{filter_description}." if filter_description else "You have no tasks yet."
             return json.dumps({
@@ -170,13 +180,17 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
         else:
             result = ["Here are all your tasks:"]
         
-        if pending_tasks:
+        # Show appropriate sections based on status filter
+        show_completed_only = status and status.lower() == "completed"
+        show_pending_only = status and status.lower() == "pending"
+        
+        if pending_tasks and not show_completed_only:
             result.append("\n📋 **Pending Tasks:**")
             for task in pending_tasks:
                 client_info = f" (for {task['client_name']})" if task.get('client_name') else ""
                 result.append(f"  • #{task['id']}: {task['description']}{client_info}")
         
-        if completed_tasks:
+        if completed_tasks and not show_pending_only:
             result.append("\n✅ **Completed Tasks:**")
             for task in completed_tasks:
                 client_info = f" (for {task['client_name']})" if task.get('client_name') else ""
@@ -474,3 +488,23 @@ async def assign_random_clients_to_unassigned_tasks(force_reassign: str = "false
             "success": False,
             "error": f"Failed to assign clients to tasks: {str(e)}"
         })
+
+
+async def list_completed_tasks() -> str:
+    """
+    List only completed tasks for easy access.
+    
+    Returns:
+        A formatted string showing only completed tasks
+    """
+    return await list_tasks(status="completed")
+
+
+async def list_pending_tasks() -> str:
+    """
+    List only pending/incomplete tasks for easy access.
+    
+    Returns:
+        A formatted string showing only pending tasks
+    """
+    return await list_tasks(status="pending")
