@@ -90,8 +90,10 @@ A comprehensive demonstration featuring a personal assistant agent with:
 
 This repository's setup script **automatically handles conda environment conflicts** that commonly cause `ModuleNotFoundError: No module named 'uvicorn'` errors. The script:
 
-- ✅ **Detects active conda environments** and deactivates them during setup
-- ✅ **Uses `uv pip` instead of conda's pip** to avoid package conflicts  
+- ✅ **Detects active conda environments** (checks both `CONDA_DEFAULT_ENV` and `CONDA_PREFIX`)
+- ✅ **Deactivates conda and clears environment variables** to prevent interference
+- ✅ **Uses explicit Python path** (`uv pip install --python .venv/bin/python`) to force correct environment
+- ✅ **Shows target Python path** during installation for transparency  
 - ✅ **Verifies installation** to ensure all dependencies work correctly
 - ✅ **Provides clear instructions** for proper virtual environment activation
 

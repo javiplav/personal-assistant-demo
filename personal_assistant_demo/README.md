@@ -390,11 +390,12 @@ The configuration files allow you to:
 ### Common Issues
 
 1. **Port Conflicts**: If you get "Not Found" in browser, you may have both `nat serve` and `run_web_demo.py` trying to use port 8000. See the [Port Conflicts section](#️-important-avoiding-port-conflicts) above for solutions.
-2. **Ollama Connection Issues**: Ensure Ollama is running with `ollama serve`
-3. **NVIDIA API Key Issues**: Ensure your NVIDIA_API_KEY is set correctly
-4. **Weather Not Working**: Check your OPENWEATHERMAP_API_KEY or disable weather tools
-5. **Data Path Safety**: All tools read/write via `tools/_paths.py`; ensure the `data/` directory is writable
-6. **Import Errors**: Make sure you've installed the package with `pip install -e .`
+2. **Conda Environment Conflicts**: If you get `ModuleNotFoundError: No module named 'uvicorn'`, run `../setup.sh` from the root directory - it automatically handles conda interference
+3. **Ollama Connection Issues**: Ensure Ollama is running with `ollama serve`
+4. **NVIDIA API Key Issues**: Ensure your NVIDIA_API_KEY is set correctly
+5. **Weather Not Working**: Check your OPENWEATHERMAP_API_KEY or disable weather tools
+6. **Data Path Safety**: All tools read/write via `tools/_paths.py`; ensure the `data/` directory is writable
+7. **Import Errors**: Make sure you've installed the package with `pip install -e .`
 
 ### Getting Help
 
