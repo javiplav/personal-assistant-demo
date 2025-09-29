@@ -22,8 +22,10 @@ import random
 import tempfile
 import shutil
 import uuid
+import time
+import functools
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 from pathlib import Path
 from filelock import FileLock
 from ._paths import data_path
@@ -82,6 +84,84 @@ def _create_standard_response(success: bool, data: Any = None, message: str = ""
     return json.dumps(response)
 
 
+# Performance monitoring and caching
+_task_cache = {}
+_cache_timestamps = {}
+CACHE_TTL = 30  # seconds
+
+
+def measure_performance(func: Callable) -> Callable:
+    """Decorator to measure and log function performance."""
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        start_time = time.time()
+        function_name = func.__name__
+        
+        try:
+            result = await func(*args, **kwargs)
+            execution_time = time.time() - start_time
+            
+            # Log performance metrics
+            if execution_time > 1.0:  # Log slow operations
+                logger.warning(f"{function_name} took {execution_time:.2f}s (slow)")
+            else:
+                logger.info(f"{function_name} completed in {execution_time:.2f}s")
+            
+            return result
+            
+        except Exception as e:
+            execution_time = time.time() - start_time
+            logger.error(f"{function_name} failed after {execution_time:.2f}s: {e}")
+            raise
+    
+    return wrapper
+
+
+def _get_cache_key(func_name: str, args: tuple, kwargs: dict) -> str:
+    """Generate cache key from function name and arguments."""
+    # Create a deterministic string from args and kwargs
+    args_str = str(args) + str(sorted(kwargs.items()))
+    return f"{func_name}:{hash(args_str)}"
+
+
+def _is_cache_valid(cache_key: str) -> bool:
+    """Check if cached data is still valid."""
+    if cache_key not in _cache_timestamps:
+        return False
+    
+    timestamp = _cache_timestamps[cache_key]
+    return (time.time() - timestamp) < CACHE_TTL
+
+
+def _get_from_cache(cache_key: str) -> Optional[str]:
+    """Get data from cache if valid."""
+    if _is_cache_valid(cache_key) and cache_key in _task_cache:
+        logger.info(f"Cache hit for {cache_key[:20]}...")
+        return _task_cache[cache_key]
+    return None
+
+
+def _set_cache(cache_key: str, data: str) -> None:
+    """Set data in cache with timestamp."""
+    _task_cache[cache_key] = data
+    _cache_timestamps[cache_key] = time.time()
+    
+    # Simple cache size management - keep last 50 entries
+    if len(_task_cache) > 50:
+        oldest_key = min(_cache_timestamps.keys(), key=lambda k: _cache_timestamps[k])
+        del _task_cache[oldest_key]
+        del _cache_timestamps[oldest_key]
+
+
+def _invalidate_task_cache() -> None:
+    """Clear task-related cache when data changes."""
+    keys_to_remove = [k for k in _task_cache.keys() if k.startswith('list_tasks')]
+    for key in keys_to_remove:
+        _task_cache.pop(key, None)
+        _cache_timestamps.pop(key, None)
+    logger.info(f"Invalidated {len(keys_to_remove)} cache entries")
+
+
 def _load_tasks() -> List[Dict[str, Any]]:
     """Load tasks from the JSON file."""
     try:
@@ -124,6 +204,7 @@ def _save_tasks(tasks: List[Dict[str, Any]]) -> None:
         raise TaskError(f"Failed to save tasks: {str(e)}", "SAVE_FAILED")
 
 
+@measure_performance
 async def add_task(description: str, client_name: str = "", client_id: str = "") -> str:
     """
     Add a new task to the task list, optionally associated with a client.
@@ -163,6 +244,9 @@ async def add_task(description: str, client_name: str = "", client_id: str = "")
         tasks.append(new_task)
         _save_tasks(tasks)
         
+        # Invalidate cache since data changed
+        _invalidate_task_cache()
+        
         # Create response data
         response_data = {
             "task_id": task_id,
@@ -197,6 +281,7 @@ async def add_task(description: str, client_name: str = "", client_id: str = "")
         )
 
 
+@measure_performance
 async def list_tasks(query: str = "", client_name: str = "", client_id: str = "", status: str = "") -> str:
     """
     List tasks with optional filtering by client, query, or completion status.
@@ -211,6 +296,12 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
         A formatted string showing filtered or all tasks
     """
     try:
+        # Check cache first for read-heavy operations
+        cache_key = _get_cache_key("list_tasks", (query, client_name, client_id, status), {})
+        cached_result = _get_from_cache(cache_key)
+        if cached_result:
+            return cached_result
+        
         # Input validation
         if status:
             _validate_task_input("dummy", "", status)  # Only validate status
@@ -299,11 +390,15 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
             "filter": filter_description.strip() if filter_description else None
         }
         
-        return _create_standard_response(
+        result_json = _create_standard_response(
             success=True,
             data=response_data,
             message="\n".join(result)
         )
+        
+        # Cache the result for future requests
+        _set_cache(cache_key, result_json)
+        return result_json
         
     except TaskError as e:
         return _create_standard_response(
@@ -320,6 +415,7 @@ async def list_tasks(query: str = "", client_name: str = "", client_id: str = ""
         )
 
 
+@measure_performance
 async def complete_task(task_identifier: str) -> str:
     """
     Mark a task as completed.
@@ -374,6 +470,9 @@ async def complete_task(task_identifier: str) -> str:
         task_to_complete["completed_at"] = datetime.now().isoformat()
         
         _save_tasks(tasks)
+        
+        # Invalidate cache since task status changed
+        _invalidate_task_cache()
         
         return json.dumps({
             "success": True,

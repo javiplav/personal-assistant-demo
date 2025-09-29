@@ -297,5 +297,18 @@
     "created_at": "2025-08-26T12:15:47.436711",
     "last_contact": "2025-08-26T12:15:47.436716",
     "notes": []
+  },
+  {
+    "id": "cccd0c96",
+    "name": "Test Client Performance",
+    "email": "test8577@testcorp.com",
+    "company": "Test Corp Performance",
+    "phone": "",
+    "project_requirements": "",
+    "priority": "high",
+    "status": "active",
+    "created_at": "2025-09-29T16:44:33.607140",
+    "last_contact": "2025-09-29T16:44:33.607147",
+    "notes": []
   }
 ]

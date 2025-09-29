@@ -115,5 +115,14 @@
     "completed": false,
     "created_at": "2025-09-29T16:33:25.726134",
     "completed_at": null
+  },
+  {
+    "id": "68e2824a",
+    "description": "Performance test task",
+    "client_name": "Test Client",
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-29T16:38:27.332068",
+    "completed_at": null
   }
 ]
