@@ -174,5 +174,34 @@
     "description": "High-priority client follow-up",
     "status": "scheduled",
     "created_at": "2025-08-26T12:20:46.264185"
+  },
+  {
+    "id": "e4c60a7e",
+    "title": "Test Meeting Improvement Demo",
+    "participants": [
+      "Alice",
+      "Bob"
+    ],
+    "start_time": "2025-09-30T14:00:00",
+    "end_time": "2025-09-30T15:00:00",
+    "duration_minutes": 60,
+    "description": "Testing our new best practices",
+    "status": "cancelled",
+    "created_at": "2025-09-29T17:01:50.243408",
+    "cancelled_at": "2025-09-29T17:01:50.252569",
+    "cancellation_reason": "Testing cancellation functionality"
+  },
+  {
+    "id": "bdba569d",
+    "title": "UUID Test Meeting",
+    "participants": [
+      "Test User"
+    ],
+    "start_time": "2025-09-30T10:00:00",
+    "end_time": "2025-09-30T10:30:00",
+    "duration_minutes": 30,
+    "description": "",
+    "status": "scheduled",
+    "created_at": "2025-09-29T17:01:50.260378"
   }
 ]
