@@ -1,0 +1,146 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Planner-Executor Agent Configuration (ChatGPT Option A Implementation)
+# This eliminates ReAct drift by separating planning from execution
+
+general:
+  use_uvloop: true
+  front_end:
+    _type: fastapi
+
+functions:
+  # Task Management Tools
+  add_task:
+    _type: personal_assistant/add_task
+  list_tasks:
+    _type: personal_assistant/list_tasks
+  complete_task:
+    _type: personal_assistant/complete_task
+  delete_task:
+    _type: personal_assistant/delete_task
+  list_tasks_for_client:
+    _type: personal_assistant/list_tasks_for_client
+  add_client_task:
+    _type: personal_assistant/add_client_task
+
+  # Calculator Tools
+  add_numbers:
+    _type: personal_assistant/add_numbers
+  subtract_numbers:
+    _type: personal_assistant/subtract_numbers
+  multiply_numbers:
+    _type: personal_assistant/multiply_numbers
+  divide_numbers:
+    _type: personal_assistant/divide_numbers
+  calculate_percentage:
+    _type: personal_assistant/calculate_percentage
+
+  # Date/Time Tools
+  current_time:
+    _type: personal_assistant/current_time
+  current_date:
+    _type: personal_assistant/current_date
+
+  # Enterprise Solutions Architect Tools
+  schedule_meeting:
+    _type: personal_assistant/schedule_meeting
+  list_meetings:
+    _type: personal_assistant/list_meetings
+  cancel_meeting:
+    _type: personal_assistant/cancel_meeting
+  add_client:
+    _type: personal_assistant/add_client
+  list_clients:
+    _type: personal_assistant/list_clients
+  add_client_note:
+    _type: personal_assistant/add_client_note
+  get_client_details:
+    _type: personal_assistant/get_client_details
+  find_client_by_name:
+    _type: personal_assistant/find_client_by_name
+
+llms:
+  # Planner LLM - for creating JSON execution plans
+  planner_llm:
+    _type: openai
+    api_key: "ollama"
+    base_url: "http://localhost:11434/v1"
+    model_name: "qwen2.5:7b"
+    temperature: 0.1
+    max_tokens: 200
+    stop: ["\nQuestion:", "\nAnswer:", "\nThought:"]
+
+  # Executor LLM - for JSON-only tool execution
+  executor_llm:
+    _type: openai
+    api_key: "ollama"
+    base_url: "http://localhost:11434/v1"
+    model_name: "qwen2.5:7b"
+    temperature: 0.0
+    max_tokens: 150
+    stop: ["\nQuestion:", "\nAnswer:", "\nThought:"]
+
+workflow:
+  _type: react_agent  # We'll override the behavior in our implementation
+  tool_names: [
+    add_task, list_tasks, complete_task, delete_task, list_tasks_for_client, add_client_task,
+    add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage,
+    current_time, current_date,
+    schedule_meeting, list_meetings, cancel_meeting,
+    add_client, list_clients, add_client_note, get_client_details, find_client_by_name
+  ]
+  llm_name: planner_llm
+  verbose: true
+  
+  # Keep these for compatibility
+  retry_agent_response_parsing_errors: false
+  parse_agent_response_max_retries: 1
+  tool_call_max_retries: 1
+  max_tool_calls: 6
+  recursion_limit: 10
+  pass_tool_call_errors_to_agent: false
+  use_tool_schema: true
+  max_history: 5
+  
+  # Planner system prompt - JSON only
+  planner_system_prompt: |
+    You will break the user request into an ordered plan of tool calls.
+    
+    Output ONLY valid JSON:
+    { "plan": [ { "step": 1, "tool": "<tool_name>", "input": { /* json */ } }, ... ] }
+    
+    Rules:
+    - Include every requested step in order
+    - Use only available tools: [add_task, list_tasks, complete_task, delete_task, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, current_time, current_date, schedule_meeting, list_meetings, cancel_meeting, add_client, list_clients, find_client_by_name]
+    - No extra keys. No text outside JSON
+    - For percentage calculations, use calculate_percentage with input: {"text": "X% of Y"}
+    
+    Example:
+    {
+      "plan": [
+        {"step": 1, "tool": "add_task", "input": {"description": "Demo prep"}},
+        {"step": 2, "tool": "list_tasks", "input": {}},
+        {"step": 3, "tool": "calculate_percentage", "input": {"text": "25% of 200"}}
+      ]
+    }
+
+  # Executor system prompt - JSON only
+  executor_system_prompt: |
+    Output ONLY valid JSON with this schema:
+    {
+      "next_step": integer,           // provided below
+      "remaining_steps": integer,     // provided below
+      "type": "tool_call" | "final",
+      "tool": string,                 // required if type=tool_call
+      "input": object,                // required if type=tool_call
+      "final_answer": string          // required if type=final
+    }
+    
+    Mandatory rules:
+    - If remaining_steps > 0, type MUST be "tool_call"
+    - If remaining_steps == 0, type MUST be "final"
+    - Forbidden anywhere: "Question:", "Answer:", "Thought:"
+    - No text outside JSON
+    
+    Execute exactly the tool specified in the current plan step.
