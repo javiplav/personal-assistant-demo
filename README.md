@@ -2,23 +2,44 @@
 
 A comprehensive demonstration of the NVIDIA NeMo Agent Toolkit featuring a personal assistant agent that showcases the toolkit's key capabilities for building intelligent agent workflows.
 
-## 🚀 Quick Start (Choose Your LLM Provider)
+## 🚀 Quick Start - Enhanced Personal Assistant
 
-This demo supports **two LLM providers** - choose the one that fits your needs:
+**New in this version:** Advanced filtering, intelligent task descriptions, beautiful web UI, and production-grade architecture!
 
-### 🏠 **Option A: Ollama (Local) - Recommended for Beginners**
-- ✅ **No API key required** - runs completely locally
-- ✅ **Privacy-focused** - everything stays on your machine
-- ✅ **Free to use** - no usage costs or rate limits
-- ✅ **Works offline** - no internet required after setup
-- ❌ Requires local setup and hardware resources
+### ⚡ **Instant Setup & Launch**
 
-### ☁️ **Option B: NVIDIA NIM (Cloud) - For Advanced Users**
-- ✅ **More powerful models** - higher performance
-- ✅ **No local setup** - just need an API key
-- ✅ **Always available** - no hardware limitations
-- ❌ Requires NVIDIA API key
-- ❌ Network dependency and potential costs
+**Option 1: Native Setup (Recommended)**
+```bash
+./setup.sh                    # First time setup
+./scripts/quick_start.sh       # Start web interface
+```
+
+**Option 2: Docker (One-Click Deploy)**
+```bash
+docker-compose up --build     # Build and start container
+# OR with local Ollama included:
+docker-compose --profile with-ollama up --build
+```
+
+**→ Opens at http://localhost:8000**
+
+### 🎯 **Key Features**
+- 🔍 **Smart Filtering**: `"List security tasks"` → Shows only security tasks
+- 🧠 **Intelligent Parsing**: Extracts meaningful task descriptions  
+- 🎨 **Beautiful UI**: Professional interface with animations
+- ⚡ **Multi-step Operations**: Natural language combining actions
+- 🏗️ **Production Architecture**: Enterprise-ready with error handling
+
+### 🏠 **LLM Provider Options**
+
+**Option A: Ollama (Local) - Recommended**
+- ✅ No API key required, runs locally, free
+- ✅ Privacy-focused, works offline
+- ⚠️ Requires: `ollama serve` + `ollama pull qwen2.5:7b`
+
+**Option B: NVIDIA NIM (Cloud)**  
+- ✅ More powerful models, no local setup
+- ⚠️ Requires: NVIDIA API key
 
 ---
 
@@ -26,36 +47,75 @@ This demo supports **two LLM providers** - choose the one that fits your needs:
 
 ```
 personal-assistant-demo/
-├── personal_assistant_demo/        # Personal assistant demo application
-│   ├── src/                        # Demo source code
-│   │   └── personal_assistant/     # Main package
-│   │       ├── tools/              # Custom tools (weather, tasks, calculator, datetime)
-│   │       ├── web/                # Web interface components
-│   │       └── register.py         # Function registration
-│   ├── configs/                    # Configuration files
-│   │   ├── config.yml              # NVIDIA NIM configuration (cloud)
-│   │   ├── config-ollama-react.yml # Ollama ReAct configuration
-│   │   ├── config-ollama-tool-calling.yml # Ollama tool-calling epuration
-│   │   ├── config-nim-react.yml    # NIM ReAct configuration
-│   │   └── config-nim-tool-calling.yml # NIM tool-calling configuration
-│   ├── tests/                      # Demo tests
-│   ├── data/                       # Persistent data storage
-│   ├── docs/                       # Demo documentation
-│   ├── demo/                       # Demo scripts
-│   ├── run_web_demo.py             # Web demo launcher
-│   ├── .env.example                # Environment variables template
-│   └── pyproject.toml              # Package configuration
-├── .venv/                          # Virtual environment (created by uv, not synced)
-├── .env                            # Your actual API keys (not synced)
-├── .gitignore                      # Git ignore rules
-├── setup.sh                        # Quick setup script (uses uv)
-├── dev.sh                          # Development helper script
-└── README.md                       # This file
+├── personal_assistant_demo/           # 🎯 Main demo application
+│   ├── src/personal_assistant/       # Production source code
+│   │   ├── core/                    # 🏗️ Business logic (controller, agent, registry) 
+│   │   ├── adapters/                # 🔌 Framework integrations (webui, NAT)
+│   │   ├── tools/                   # 🛠️ Task management, calculations, clients
+│   │   └── legacy/                  # 📚 Preserved old implementations
+│   ├── demos/                       # 🎨 Demo applications & beautiful web UI
+│   ├── configs/                     # ⚙️ Multiple configurations for different setups
+│   │   ├── config-planner-executor.yml # 🎯 Main config (recommended)
+│   │   ├── config-ollama-*.yml      # 🏠 Local Ollama configurations  
+│   │   └── config-nim-*.yml         # ☁️ NVIDIA NIM configurations
+│   ├── tests/                       # 🧪 Comprehensive test suite (unit/integration/e2e)
+│   ├── docs/                        # 📖 Architecture guides and examples
+│   └── data/                        # 💾 Persistent data storage
+├── scripts/                          # 🚀 Utility scripts  
+│   ├── quick_start.sh               # ⚡ One-click startup
+│   ├── start_web.py                 # 🌐 Web server with API endpoints
+│   └── test_api.sh                  # 🧪 API testing script
+├── setup.sh & dev.sh                # 🛠️ Main user scripts
+└── NeMo-Agent-Toolkit-develop/       # 📦 NVIDIA NeMo Agent Toolkit
 ```
+
+## ✨ Enhanced Features in This Demo
+
+This Personal Assistant showcases advanced capabilities built on top of the base toolkit:
+
+### 🧠 **Intelligent Natural Language Processing**
+- **Smart Task Extraction**: `"Add a task called Review architecture"` → Creates "Review Architecture" 
+- **Advanced Filtering**: `"List security tasks"` → Shows only security-related tasks from your full task list
+- **Multi-step Operations**: `"Add a task, then list all tasks"` → Executes both actions naturally
+
+### 🎨 **Beautiful Production-Ready Interface**
+- **Professional Design**: Modern UI with gradients, animations, and responsive layout
+- **Real-time Interactions**: Instant feedback with loading states and status indicators
+- **Multiple UI Options**: Beautiful, Classic, Simple, and Minimal templates
+
+### 🏗️ **Enterprise Architecture**
+- **Clean Code Organization**: Separated core logic, adapters, tools, and demos
+- **Production Error Handling**: Comprehensive validation, logging, and graceful degradation  
+- **Comprehensive Testing**: Unit, integration, and end-to-end test coverage
+- **Performance Optimizations**: Caching, atomic operations, and efficient data handling
+
+### 📊 **Advanced Task Management** 
+- **Status Filtering**: `"List completed tasks"` → Shows detailed completion history
+- **Search Capabilities**: Find tasks by keywords, client names, or content
+- **Rich Task Details**: Meaningful descriptions instead of generic placeholders
+- **Client Integration**: Associate tasks with specific clients and projects
+
+---
+
+## Configuration Guide
+
+**Quick Reference:** Use `config-planner-executor.yml` (recommended) - it's already set as default.
+
+| Config File | Best For | LLM Provider | Architecture |
+|-------------|----------|--------------|--------------|
+| **config-planner-executor.yml** | **🎯 Recommended** | Ollama | Planner-Executor (most reliable) |
+| config-ollama-tool-calling.yml | Advanced users | Ollama | Tool-calling (faster) |  
+| config-nim-tool-calling.yml | Cloud users | NVIDIA NIM | Tool-calling with cloud LLMs |
+| config-ollama-react.yml | Experimental | Ollama | ReAct (can be verbose) |
+| config-nim-react.yml | Experimental | NVIDIA NIM | ReAct with cloud LLMs |
+
+**💡 Pro Tip:** The Planner-Executor architecture (default) provides the most consistent and reliable results for complex multi-step tasks.
+
+---
 
 ## About NeMo Agent Toolkit
 
-This demo uses the **NVIDIA NeMo Agent Toolkit**, a framework-agnostic library for building intelligent agents that features:
+This enhanced demo uses the **NVIDIA NeMo Agent Toolkit**, a framework-agnostic library for building intelligent agents that features:
 
 - **Framework Agnostic**: Works with LangChain, LlamaIndex, CrewAI, Semantic Kernel, and more
 - **Reusable Components**: Composable agents, tools, and workflows
@@ -211,44 +271,68 @@ nat serve --config_file configs/config.yml
 
 ---
 
-## 🎪 Example Interactions
+## 🎯 Example Interactions - Enhanced Capabilities
 
-Try these queries with your agent:
+Experience the power of intelligent filtering and natural language processing:
 
-### Task Management
-- "Add a task to buy groceries"
-- "List all my tasks"
-- "Mark the grocery task as completed"
-- "Create a task to call mom tomorrow"
+### 🔍 **Smart Filtering (New!)**
+```
+"List security tasks"              → Shows only security-related tasks
+"Show my completed tasks"          → Detailed completion history
+"List API tasks"                  → Tasks containing "API" keyword  
+"Show pending tasks for client X" → Filtered by status and client
+```
 
-### Calculations
-- "What's 15 multiplied by 8?"
-- "Calculate 100 divided by 4"
-- "Add 25 and 37"
+### 🧠 **Intelligent Task Creation (Enhanced!)**
+```
+"Add a task called Review architecture"      → Creates: "Review Architecture"
+"Create task Security audit for enterprise" → Creates: "Security Audit For Enterprise"  
+"Add Fix login bug to my tasks"            → Creates: "Fix Login Bug"
+```
 
-### Date/Time
-- "What time is it?"
-- "What's today's date?"
-- "What timezone am I in?"
+### ⚡ **Multi-Step Operations (Improved!)**
+```
+"Add a task called Update docs, then list my tasks"
+"Create client TechCorp, then add task Review contract"
+"Calculate 25% of 200, then show current time"
+```
 
-### Complex Multi-step Queries
-- "What's the weather in Paris and add a task to pack an umbrella if it's going to rain"
-- "Calculate 20% of 150 and create a task to save that amount"
-- "What time is it and how much is 8 hours from now?"
+### 🎨 **Beautiful Interface Features**
+- **Professional Design**: Modern UI with gradients and animations
+- **Real-Time Updates**: Instant feedback with loading states
+- **Multiple Templates**: Beautiful, Classic, Simple, Minimal views
+- **Responsive Layout**: Perfect on desktop, tablet, and mobile
+
+### 📊 **Advanced Task Management**
+```
+"List my tasks"                   → Shows organized task list with status icons
+"Show completed tasks"            → ✅ Detailed completion history
+"List tasks for Microsoft"        → Client-specific task filtering
+"Add client NVIDIA"              → 👤 Professional client management
+```
+
+### 🧮 **Calculations & Utilities**
+```
+"Calculate 25% of 200"           → 🧮 25.0% of 200.0 = 50.0
+"What time is it?"               → 🕒 Current time: 03:41 PM
+"Add 15 and 27"                  → ➕ 15 + 27 = 42
+```
 
 ---
 
 ## 🔧 Configuration Options
 
-### Config File Comparison
+**Quick Start:** The demo uses `config-planner-executor.yml` by default - no configuration needed!
 
-| Config File | LLM Provider | API Key Required | Agent Type | Best For |
-|-------------|--------------|------------------|------------|----------|
-| `config-ollama-react.yml` | Ollama (Local) | ❌ None | ReAct | Beginners, privacy, offline use |
-| `config-ollama-tool-calling.yml` | Ollama (Local) | ❌ None | Tool Calling | Local development, alternative approach |
-| `config.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Tool Calling | Production, high performance |
-| `config-nim-react.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | ReAct | Cloud-based reasoning workflows |
-| `config-nim-tool-calling.yml` | NVIDIA NIM (Cloud) | ✅ NVIDIA API Key | Tool Calling | Cloud-based direct function calls |
+### 📋 **Available Configurations**
+
+| Config File | LLM Provider | Architecture | Status | Best For |
+|-------------|--------------|--------------|--------|----------|
+| **`config-planner-executor.yml`** | **Ollama** | **Planner-Executor** | **✅ Default** | **🎯 Recommended - Most reliable** |
+| `config-ollama-tool-calling.yml` | Ollama | Tool-Calling | ⚡ Fast | Advanced users who want speed |
+| `config-nim-tool-calling.yml` | NVIDIA NIM | Tool-Calling | ☁️ Cloud | Users with NVIDIA API keys |
+| `config-ollama-react.yml` | Ollama | ReAct | 🧪 Experimental | Testing and experimentation |
+| `config-nim-react.yml` | NVIDIA NIM | ReAct | 🧪 Experimental | Cloud-based ReAct workflows |
 
 ### Choosing Between Agent Types
 

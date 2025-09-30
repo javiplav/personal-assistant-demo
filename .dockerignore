@@ -1,0 +1,49 @@
+# Docker ignore file for Personal Assistant Demo
+# =============================================
+
+# Virtual environments
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Environment files (may contain secrets)
+.env
+*.env
+
+# Test and cache directories
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# Data files that might be large or sensitive
+personal_assistant_demo/data/*.json
+!personal_assistant_demo/data/.gitkeep
+
+# Documentation build artifacts
+docs/_build/
+
+# Temporary files
+*.tmp
+*.bak
+*.orig

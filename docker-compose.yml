@@ -1,0 +1,48 @@
+# Personal Assistant Demo - Docker Compose
+# =======================================
+
+version: '3.8'
+
+services:
+  personal-assistant:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount data directory for persistence
+      - "./personal_assistant_demo/data:/app/personal_assistant_demo/data"
+    environment:
+      # Default configuration (can be overridden)
+      - CONFIG_FILE=configs/config-planner-executor.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - personal-assistant-network
+
+  # Optional: Ollama service for local LLM
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - personal-assistant-network
+    profiles:
+      - with-ollama
+
+networks:
+  personal-assistant-network:
+    driver: bridge
+
+volumes:
+  ollama_data:
+    driver: local
