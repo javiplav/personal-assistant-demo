@@ -61,23 +61,25 @@ functions:
     _type: personal_assistant/find_client_by_name
 
 llms:
-  # Planner LLM - for creating JSON execution plans
+  # Planner LLM - for creating JSON execution plans (ChatGPT optimized)
   planner_llm:
     _type: openai
     api_key: "ollama"
     base_url: "http://localhost:11434/v1"
     model_name: "qwen2.5:7b"
     temperature: 0.1
-    max_tokens: 200
-    stop: ["\nQuestion:", "\nAnswer:", "\nThought:"]
+    top_p: 0.7
+    max_tokens: 220
+    # No stop tokens needed for planner with JSON response format
 
-  # Executor LLM - for JSON-only tool execution
+  # Executor LLM - for JSON-only tool execution (ChatGPT optimized)
   executor_llm:
     _type: openai
     api_key: "ollama"
     base_url: "http://localhost:11434/v1"
     model_name: "qwen2.5:7b"
-    temperature: 0.0
+    temperature: 0.1
+    top_p: 0.7
     max_tokens: 150
     stop: ["\nQuestion:", "\nAnswer:", "\nThought:"]
 
@@ -103,44 +105,148 @@ workflow:
   use_tool_schema: true
   max_history: 5
   
-  # Planner system prompt - JSON only
+  # Planner system prompt - ChatGPT tightened with JSON Schema
   planner_system_prompt: |
-    You will break the user request into an ordered plan of tool calls.
+    You will break the user's request into an ordered plan of tool calls.
+    Output ONLY valid JSON. No extra text.
     
-    Output ONLY valid JSON:
-    { "plan": [ { "step": 1, "tool": "<tool_name>", "input": { /* json */ } }, ... ] }
+    JSON Schema (MUST validate):
+    {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "required": ["plan"],
+      "additionalProperties": false,
+      "properties": {
+        "plan": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["step", "tool", "input"],
+            "additionalProperties": false,
+            "properties": {
+              "step": { "type": "integer", "minimum": 1 },
+              "tool": {
+                "type": "string",
+                "enum": [
+                  "add_task",
+                  "list_tasks",
+                  "complete_task", 
+                  "delete_task",
+                  "add_numbers",
+                  "subtract_numbers",
+                  "multiply_numbers",
+                  "divide_numbers",
+                  "calculate_percentage",
+                  "current_time",
+                  "current_date",
+                  "schedule_meeting",
+                  "list_meetings",
+                  "cancel_meeting",
+                  "add_client",
+                  "list_clients",
+                  "find_client_by_name"
+                ]
+              },
+              "input": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
     
-    Rules:
-    - Include every requested step in order
-    - Use only available tools: [add_task, list_tasks, complete_task, delete_task, add_numbers, subtract_numbers, multiply_numbers, divide_numbers, calculate_percentage, current_time, current_date, schedule_meeting, list_meetings, cancel_meeting, add_client, list_clients, find_client_by_name]
-    - No extra keys. No text outside JSON
-    - For percentage calculations, use calculate_percentage with input: {"text": "X% of Y"}
+    Tool input contracts (for your reference—use them when deciding inputs):
+    - add_task:            { "description": string, "client_name": string?, "client_id": string? }
+    - list_tasks:          { "status": string?, "query": string?, "client_name": string? }
+    - calculate_percentage:{ "text": string }  # e.g., "25% of 200"
+    - current_time:        { "query": string? }
+    - add_client:          { "name": string, "company": string, "email": string?, "priority": "low"|"medium"|"high"? }
+    - schedule_meeting:    { "title": string, "participants": array, "duration_minutes": integer?, "preferred_times": array? }
     
-    Example:
+    Planning rules (apply strictly):
+    - Include every requested step in order; do not add speculative steps.
+    - Prefer the minimal sequence to satisfy the request (no redundant list/read calls).
+    - If a percentage is requested, ALWAYS use calculate_percentage with {"text":"X% of Y"}.
+    - If a meeting is requested, use schedule_meeting exactly once unless the user asks for multiples.
+    - Steps MUST be 1..N with no gaps; do not duplicate step numbers.
+    
+    OUTPUT REQUIREMENT:
+    - Return ONLY the JSON object that conforms to the schema above—no prose, no markdown.
+    
+    Example (illustrative only):
     {
       "plan": [
-        {"step": 1, "tool": "add_task", "input": {"description": "Demo prep"}},
-        {"step": 2, "tool": "list_tasks", "input": {}},
-        {"step": 3, "tool": "calculate_percentage", "input": {"text": "25% of 200"}}
+        { "step": 1, "tool": "add_task", "input": { "description": "Demo prep" } },
+        { "step": 2, "tool": "list_tasks", "input": {} },
+        { "step": 3, "tool": "calculate_percentage", "input": { "text": "25% of 200" } }
       ]
     }
 
-  # Executor system prompt - JSON only
+  # Executor system prompt - ChatGPT tightened with JSON Schema
   executor_system_prompt: |
-    Output ONLY valid JSON with this schema:
+    You will execute the plan step-by-step. Output ONLY valid JSON (no extra text).
+    Use the plan provided in the conversation. Execute EXACTLY the tool for the current step.
+    
+    JSON Schema (MUST validate):
     {
-      "next_step": integer,           // provided below
-      "remaining_steps": integer,     // provided below
-      "type": "tool_call" | "final",
-      "tool": string,                 // required if type=tool_call
-      "input": object,                // required if type=tool_call
-      "final_answer": string          // required if type=final
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "required": ["next_step","remaining_steps","type"],
+      "additionalProperties": false,
+      "properties": {
+        "next_step": { "type": "integer", "minimum": 1 },
+        "remaining_steps": { "type": "integer", "minimum": 0 },
+        "type": { "type": "string", "enum": ["tool_call", "final"] },
+        "tool": {
+          "type": "string",
+          "enum": [
+            "add_task",
+            "list_tasks",
+            "complete_task",
+            "delete_task",
+            "add_numbers",
+            "subtract_numbers",
+            "multiply_numbers",
+            "divide_numbers",
+            "calculate_percentage",
+            "current_time",
+            "current_date",
+            "schedule_meeting",
+            "list_meetings",
+            "cancel_meeting",
+            "add_client",
+            "list_clients",
+            "find_client_by_name"
+          ]
+        },
+        "input": { "type": "object" },
+        "final_answer": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "tool_call" } } },
+          "then": { "required": ["tool","input"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "final" } } },
+          "then": { "required": ["final_answer"] }
+        }
+      ]
     }
     
-    Mandatory rules:
-    - If remaining_steps > 0, type MUST be "tool_call"
-    - If remaining_steps == 0, type MUST be "final"
-    - Forbidden anywhere: "Question:", "Answer:", "Thought:"
-    - No text outside JSON
+    Execution rules (strict):
+    - If remaining_steps > 0, you MUST return: {"type":"tool_call", "tool": <exact tool from plan at index next_step>, "input": <json>}.
+    - The "tool" MUST match the tool specified for step = next_step in the provided plan.
+    - The "input" MUST contain only fields required/optional by that tool; do not invent fields.
+    - If remaining_steps == 0, you MUST return: {"type":"final", "final_answer": "..."} summarizing results succinctly.
+    - Forbidden anywhere: "Question:", "Answer:", "Thought:" (do not output or include these words).
+    - No text outside JSON.
     
-    Execute exactly the tool specified in the current plan step.
+    Notes:
+    - Use only the latest Observation provided to you to decide inputs for this step.
+    - Do not repeat or analyze historical observations; progress to the next step deterministically.
+    - If the plan requests a percentage, call calculate_percentage with {"text":"X% of Y"} exactly.
+    
+    OUTPUT REQUIREMENT:
+    Return ONLY the JSON object that conforms to the schema above—no prose, no markdown.

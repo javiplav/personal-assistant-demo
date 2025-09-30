@@ -21,13 +21,13 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from nat.builder.workflow_builder import WorkflowBuilder
-from nat.data_models.config import Config
-from nat.cli.cli_utils.config_override import load_and_override_config
-from nat.utils.data_models.schema_validator import validate_schema
-from nat.runtime.loader import discover_and_register_plugins, PluginTypes
-from .enhanced_react_handler import EnhancedReActHandler, ToolCallingHandler
-from .tools._paths import DATA_DIR, data_path
+# Import from reorganized structure
+import sys
+import os
+sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
+
+from personal_assistant.core.agent import PersonalAssistantAgent
+from personal_assistant.adapters.webui import create_web_app
 
 logger = logging.getLogger(__name__)
 

@@ -205,5 +205,401 @@
     "completed": false,
     "created_at": "2025-09-30T12:05:49.548484",
     "completed_at": null
+  },
+  {
+    "id": "43cb978e",
+    "description": "Enhanced Production Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:31:16.893776",
+    "completed_at": null
+  },
+  {
+    "id": "e17f51c3",
+    "description": "Production Test #1",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:33:09.715678",
+    "completed_at": null
+  },
+  {
+    "id": "c5e7f3de",
+    "description": "Complex Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:33:10.490052",
+    "completed_at": null
+  },
+  {
+    "id": "5a68e7e8",
+    "description": "Enhanced Production Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:34:06.711618",
+    "completed_at": null
+  },
+  {
+    "id": "5f139ac2",
+    "description": "Production Test #1",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:34:35.799868",
+    "completed_at": null
+  },
+  {
+    "id": "95e46b53",
+    "description": "Schema Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:34:36.558208",
+    "completed_at": null
+  },
+  {
+    "id": "3ab0fb52",
+    "description": "Retry Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:34:37.323627",
+    "completed_at": null
+  },
+  {
+    "id": "667ecf4b",
+    "description": "Complex Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:34:39.592081",
+    "completed_at": null
+  },
+  {
+    "id": "80b200cc",
+    "description": "Enhanced Production Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:35:44.128369",
+    "completed_at": null
+  },
+  {
+    "id": "4eae3035",
+    "description": "Enhanced Production Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:50:39.429349",
+    "completed_at": null
+  },
+  {
+    "id": "de264e2f",
+    "description": "Idempotency Test Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:52:31.913696",
+    "completed_at": null
+  },
+  {
+    "id": "95bc098e",
+    "description": "Production Demo Final",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T12:52:31.935409",
+    "completed_at": null
+  },
+  {
+    "id": "c50b316b",
+    "description": "DAG Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T13:04:53.137852",
+    "completed_at": null
+  },
+  {
+    "id": "3d2f66bc",
+    "description": "Parallel Demo",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T13:11:12.204745",
+    "completed_at": null
+  },
+  {
+    "id": "f58f7362",
+    "description": "Feature Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T13:11:12.214093",
+    "completed_at": null
+  },
+  {
+    "id": "c9cd000c",
+    "description": "Test task for integration",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T14:20:46.669676",
+    "completed_at": null
+  },
+  {
+    "id": "690edcdd",
+    "description": "Test task for integration",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T14:21:29.404317",
+    "completed_at": null
+  },
+  {
+    "id": "b76cfeb4",
+    "description": "Integration test task 9178",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T14:21:49.179003",
+    "completed_at": null
+  },
+  {
+    "id": "5ac30ffc",
+    "description": "Final validation test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T14:24:10.212071",
+    "completed_at": null
+  },
+  {
+    "id": "104c455b",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:04:43.945714",
+    "completed_at": null
+  },
+  {
+    "id": "286e0476",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:05:17.222122",
+    "completed_at": null
+  },
+  {
+    "id": "1a9ee71f",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:14:34.017153",
+    "completed_at": null
+  },
+  {
+    "id": "6e854d3a",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:15:02.713413",
+    "completed_at": null
+  },
+  {
+    "id": "9cc423d6",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:15:23.804649",
+    "completed_at": null
+  },
+  {
+    "id": "700988c7",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:20:15.840674",
+    "completed_at": null
+  },
+  {
+    "id": "a304c57f",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:20:29.021901",
+    "completed_at": null
+  },
+  {
+    "id": "0cdb9e9a",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:21:04.763399",
+    "completed_at": null
+  },
+  {
+    "id": "68041885",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:21:17.189281",
+    "completed_at": null
+  },
+  {
+    "id": "19a4c115",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:23:32.713949",
+    "completed_at": null
+  },
+  {
+    "id": "9f4dd874",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:25:35.605066",
+    "completed_at": null
+  },
+  {
+    "id": "77967a47",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:41:47.271339",
+    "completed_at": null
+  },
+  {
+    "id": "f8c66acc",
+    "description": "Demo Task",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:41:47.409231",
+    "completed_at": null
+  },
+  {
+    "id": "a0af0e23",
+    "description": "Review Code Architecture",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:44:24.480566",
+    "completed_at": null
+  },
+  {
+    "id": "e6c75b9c",
+    "description": "Prepare Presentation Slides",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:44:24.515406",
+    "completed_at": null
+  },
+  {
+    "id": "fb748dbf",
+    "description": "Update Documentation",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:44:24.537652",
+    "completed_at": null
+  },
+  {
+    "id": "90644514",
+    "description": "Fix The Login Bug",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:44:52.898360",
+    "completed_at": null
+  },
+  {
+    "id": "832d8298",
+    "description": "Test The New Api Endpoints",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T15:44:52.935247",
+    "completed_at": null
+  },
+  {
+    "id": "28d52c5f",
+    "description": "Review Testcorp Contract",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T16:00:44.770716",
+    "completed_at": null
+  },
+  {
+    "id": "eeb0ff81",
+    "description": "Review Microsoft Contract Terms",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T16:03:53.184900",
+    "completed_at": null
+  },
+  {
+    "id": "789c17e0",
+    "description": "Design Apple Ios Integration",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T16:03:53.207225",
+    "completed_at": null
+  },
+  {
+    "id": "4e02e476",
+    "description": "Security Audit For Enterprise Systems",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T16:03:53.230496",
+    "completed_at": null
+  },
+  {
+    "id": "533e2d19",
+    "description": "Api Documentation Update",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T16:03:53.253701",
+    "completed_at": null
+  },
+  {
+    "id": "45ec470d",
+    "description": "Test Microsoft Task For Microsoft Client",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T16:04:19.525516",
+    "completed_at": null
+  },
+  {
+    "id": "3fa01820",
+    "description": "Multi-Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T16:13:10.007482",
+    "completed_at": null
   }
 ]

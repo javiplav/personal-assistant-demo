@@ -40,7 +40,7 @@
     <!-- Design Toggle Button -->
     <button @click="toggleDesign" class="fixed top-4 right-4 z-50 px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
         <i class="fas fa-palette mr-2"></i>
-        {{ designMode === 'classic' ? 'Modern Design' : 'Classic Design' }}
+        Modern Design
     </button>
     
     <div id="app" class="min-h-screen flex flex-col">
@@ -198,7 +198,7 @@
                                                 </div>
                                                 <div><strong>Handler:</strong> {{ message.profiling.handler_type }}</div>
                                                 <div><strong>Model:</strong> {{ message.profiling.model_info }}</div>
-                                                <div><strong>Timestamp:</strong> {{ new Date(message.profiling.timestamp).toLocaleString() }}</div>
+                                                <div><strong>Timestamp:</strong> {{ message.profiling.timestamp }}</div>
                                             </div>
                                         </details>
                                     </div>
@@ -368,6 +368,20 @@
                         // Switch to modern design template
                         window.location.href = '/';
                     }
+                },
+                
+                switchDesignText() {
+                    return this.designMode === 'classic' ? 'Modern Design' : 'Classic Design';
+                },
+                
+                formatDateTime(timestamp) {
+                    if (!timestamp) return '';
+                    return new Date(timestamp).toLocaleString();
+                },
+                
+                formatTime(seconds) {
+                    if (seconds < 1) return `${(seconds * 1000).toFixed(0)}ms`;
+                    return `${seconds.toFixed(2)}s`;
                 },
                 
                 async sendMessage(text) {

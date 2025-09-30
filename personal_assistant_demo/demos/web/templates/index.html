@@ -331,7 +331,7 @@
                                     <div class="bg-blue-600 text-white rounded-lg px-4 py-2">
                                         {{ message.content }}
                                     </div>
-                                    <div class="text-xs text-slate-500 mt-1 text-right">{{ new Date(message.timestamp).toLocaleTimeString() }}</div>
+                                    <div class="text-xs text-slate-500 mt-1 text-right">{{ formatTime(message.timestamp) }}</div>
                                 </div>
                             </div>
 
@@ -359,15 +359,13 @@
                                                 <div class="flex items-center space-x-2">
                                                     <div class="group relative">
                                                         <div class="text-xs px-2 py-1 rounded-full cursor-help bg-blue-500/10 text-blue-400">
-                                                            {{ message.profiling.model === 'nim' ? 'NIM' : 'Ollama' }}
+                                                            {{ 'NIM' if message.profiling.model == 'nim' else 'Ollama' }}
                                                         </div>
                                                         <!-- Tooltip -->
                                                         <div class="absolute bottom-full mb-2 hidden group-hover:block w-48 bg-slate-900 text-white text-xs rounded-lg p-2 left-0 z-10 border border-slate-700">
-                                                            <div class="font-medium mb-1 text-blue-400">{{ message.profiling.model === 'nim' ? 'NVIDIA NIM' : 'Ollama' }}</div>
+                                                            <div class="font-medium mb-1 text-blue-400">{{ 'NVIDIA NIM' if message.profiling.model == 'nim' else 'Ollama' }}</div>
                                                             <div class="text-slate-300">
-                                                                {{ message.profiling.model === 'nim' ? 
-                                                                    'Cloud-based LLM service optimized for enterprise use' : 
-                                                                    'Local LLM running on your machine for faster responses' }}
+                                                                {{ 'Cloud-based LLM service optimized for enterprise use' if message.profiling.model == 'nim' else 'Local LLM running on your machine for faster responses' }}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -404,7 +402,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="text-xs text-slate-500 mt-1">{{ new Date(message.timestamp).toLocaleTimeString() }}</div>
+                                    <div class="text-xs text-slate-500 mt-1">{{ formatTime(message.timestamp) }}</div>
                                 </div>
                             </div>
 
@@ -588,7 +586,10 @@
                 }
             },
             methods: {
-
+                formatTime(timestamp) {
+                    if (!timestamp) return '';
+                    return new Date(timestamp).toLocaleTimeString();
+                },
                 
                 async sendMessage(text) {
                     if (!text.trim()) return;
