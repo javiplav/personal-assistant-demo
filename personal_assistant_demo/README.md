@@ -230,7 +230,36 @@ python run_web_demo.py --port 3000       # Web UI on port 3000
 
 ---
 
-## Example Interactions
+## Example Interactions & Usage Recommendations
+
+### ✅ **Optimal Performance (Highly Recommended)**
+The agent delivers **excellent performance** with 1-2 step requests:
+
+**Single-step examples:**
+- `"Calculate 25% of 200"`
+- `"Add a task to prepare the quarterly presentation"`
+- `"List all my high priority clients"`
+- `"Schedule a meeting with Sarah Johnson"`
+- `"What's the current time?"`
+
+**Two-step examples:**
+- `"Add a task called 'Demo prep' and then list all my tasks"`
+- `"Create a client for Microsoft and then schedule a meeting"`
+- `"List pending tasks and get the current time"`
+
+### ⚠️ **Complex Multi-Step Requests**
+For 3+ step workflows, **break them into separate interactions** for optimal results:
+
+**Instead of:** *"Add task, list tasks, schedule meeting, calculate percentage"*
+
+**Use sequential interactions:** 
+1. *"Add task and list all my tasks"* ✅
+2. *"Schedule a meeting with John Doe"* ✅  
+3. *"Calculate 25% of 200"* ✅
+
+**Why:** This provides better error handling, user feedback, and more reliable execution.
+
+---
 
 For comprehensive examples, see `docs/examples.md`.
 
