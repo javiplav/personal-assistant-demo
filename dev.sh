@@ -28,13 +28,10 @@ show_usage() {
     echo "Commands:"
     echo "  setup     - Initial setup (create venv, install deps)"
     echo "  install   - Install/reinstall the demo package"
-    echo "  test      - Run tests"
-    echo "  run       - Run the demo with a sample query (NVIDIA NIM)"
-    echo "  run-ollama - Run the demo with Ollama local LLM"
-    echo "  serve     - Start the web UI (NVIDIA NIM)"
-    echo "  serve-ollama - Start the web UI with Ollama local LLM"
-    echo "  ui        - Start the web UI (requires backend running)"
-    echo "  ui-setup  - Set up the web UI (install dependencies)"
+    echo "  test      - Run API tests (requires web server running)"
+    echo "  run       - Start Personal Assistant web interface"
+    echo "  run-ollama - Start Personal Assistant with Ollama"
+    echo "  serve     - Start the web UI (same as run)"
     echo "  shell     - Activate the virtual environment"
     echo "  clean     - Clean up virtual environment"
     echo "  deps      - Show installed dependencies"
@@ -70,35 +67,31 @@ case "${1:-help}" in
         ;;
     
     "run")
-        echo -e "${GREEN}🤖 Running demo...${NC}"
-        cd personal_assistant_demo
-        uv run nat run --config_file configs/config.yml --input "What time is it and what's 15 + 27?"
-        cd ..
+        echo -e "${GREEN}🤖 Starting Personal Assistant Web Demo...${NC}"
+        echo -e "${YELLOW}💡 Web interface will be available at http://localhost:8000${NC}"
+        source .venv/bin/activate
+        python scripts/start_web.py
         ;;
     
     "run-ollama")
-        echo -e "${GREEN}🤖 Running demo with Ollama...${NC}"
+        echo -e "${GREEN}🤖 Starting Personal Assistant with Ollama...${NC}"
         echo -e "${YELLOW}💡 Make sure Ollama is running: ollama serve${NC}"
-        cd personal_assistant_demo
-        uv run nat run --config_file configs/config-ollama.yml --input "What time is it and what's 15 + 27?"
-        cd ..
+        echo -e "${YELLOW}💡 Web interface will be available at http://localhost:8000${NC}"
+        source .venv/bin/activate
+        python scripts/start_web.py
         ;;
     
     "serve")
-        echo -e "${GREEN}🌐 Starting web UI...${NC}"
+        echo -e "${GREEN}🌐 Starting Personal Assistant Web UI...${NC}"
         echo -e "${YELLOW}💡 Open http://localhost:8000 in your browser${NC}"
-        cd personal_assistant_demo
-        uv run nat serve --config_file configs/config.yml
-        cd ..
+        source .venv/bin/activate
+        python scripts/start_web.py
         ;;
     
-    "serve-ollama")
-        echo -e "${GREEN}🌐 Starting web UI with Ollama...${NC}"
-        echo -e "${YELLOW}💡 Make sure Ollama is running: ollama serve${NC}"
-        echo -e "${YELLOW}💡 Open http://localhost:8000 in your browser${NC}"
-        cd personal_assistant_demo
-        uv run nat serve --config_file configs/config-ollama.yml
-        cd ..
+    "test")
+        echo -e "${GREEN}🧪 Running API tests...${NC}"
+        echo -e "${YELLOW}💡 Make sure web server is running first: ./dev.sh serve${NC}"
+        ./scripts/test_api.sh
         ;;
     
     "shell")

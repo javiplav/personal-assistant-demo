@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Quick API Testing Script for Personal Assistant Agent
-# =====================================================
+# API Testing Script for Personal Assistant Agent
+# ===============================================
+# Tests the web interface API endpoints
+# Make sure the web server is running first: ./dev.sh serve
 
-echo "🧪 QUICK API TESTING FOR REORGANIZED AGENT"
-echo "==========================================="
+echo "🧪 API TESTING FOR PERSONAL ASSISTANT"
+echo "======================================"
 echo ""
 
 BASE_URL="http://localhost:8000"
