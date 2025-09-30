@@ -65,12 +65,13 @@ llms:
     _type: openai
     api_key: "ollama"
     base_url: "http://localhost:11434/v1"
-    model_name: "qwen2.5:7b"
+    model_name: "llama3.1:8b-instruct"
     temperature: 0.1   # Lower temperature for more consistent formatting
     top_p: 0.7         # Constrain sampling to reduce rambling
-    max_tokens: 384    # Balanced for multi-step without over-thinking
+    max_tokens: 180    # Balanced: enough context, prevents overthinking
     timeout: 20        # Ensure second-turn completions don't hang
-    # Removed model_kwargs to avoid parameter conflicts with Ollama
+    # Using OpenAI-compatible parameters for Ollama
+    stop: ["\nQuestion:", "\nAnswer:", "\nThought:"]  # Hard stops for Q&A drift
 
 workflow:
   _type: react_agent
@@ -94,22 +95,22 @@ workflow:
   use_tool_schema: true                       # Include detailed tool descriptions
   max_history: 20                             # Longer history for better context understanding
   
-  # Simplified ReAct prompt to prevent infinite loops
+  # Anti-drift ReAct prompt - removes Q&A triggers
   system_prompt: |
-    Answer the following questions as best you can. You have access to the following tools:
+    You are a tool-calling assistant. You have access to these tools:
 
     {tools}
 
-    Use the following format:
+    STRICT FORMAT - Follow this pattern exactly:
 
-    Question: the input question you must answer
-    Thought: you should always think about what to do
-    Action: the action to take, should be one of [{tool_names}]
-    Action Input: the input to the action
-    Observation: the result of the action
-    ... (this Thought/Action/Action Input/Observation can repeat N times)
-    Thought: I now know the final answer
-    Final Answer: the final answer to the original input question
+    User Request: [the user's request]
+    Thought: [what you need to do next]
+    Action: [tool name from {tool_names}]
+    Action Input: [JSON input for the tool]
+    Observation: [tool result will appear here]
+    ... (repeat Thought/Action/Action Input/Observation as needed)
+    Thought: [when all steps are complete]
+    Final Answer: [complete response to user]
 
     IMPORTANT: 
     - For multi-step requests (e.g., "do X, then Y, then Z"), complete EACH step in order
@@ -139,23 +140,26 @@ workflow:
       Action: cancel_meeting -> Action Input: {{"meeting_id": 10, "reason": ""}}
     - Never place two JSON objects into a single Action Input string
     
-    MULTI-STEP EXAMPLE:
-    Question: Add a task called 'Demo prep', then list all tasks, then calculate 10% of 500
+    FORBIDDEN: Never output "Question:", "Answer:", or internal analysis.
+    STAY FOCUSED: Always remember the original user request. Do not get distracted by data you see.
     
-    Thought: Step 1 - I need to add a task called 'Demo prep'
+    MULTI-STEP EXAMPLE:
+    User Request: Add task 'Demo prep', then list all tasks, then calculate 10% of 500
+    
+    Thought: Step 1 - Adding task 'Demo prep'
     Action: add_task
     Action Input: {{"description": "Demo prep"}}
     Observation: Added task abc123: 'Demo prep'
     
-    Thought: Step 2 - Now I need to list all tasks
+    Thought: Step 2 - Listing all tasks
     Action: list_tasks  
     Action Input: {{}}
     Observation: Found 8 tasks: [task details...]
     
-    Thought: Step 3 - Finally I need to calculate 10% of 500
+    Thought: Step 3 - Calculating 10% of 500
     Action: calculate_percentage
     Action Input: {{"text": "10% of 500"}}
     Observation: 10% of 500 = 50
     
-    Thought: I now know the final answer - all 3 steps complete
-    Final Answer: I added the 'Demo prep' task, listed all 8 tasks, and calculated that 10% of 500 is 50.
+    Thought: All 3 steps complete
+    Final Answer: Added 'Demo prep' task, listed 8 tasks, and calculated 10% of 500 = 50.

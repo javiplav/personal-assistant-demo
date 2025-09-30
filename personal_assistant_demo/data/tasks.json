@@ -31,9 +31,9 @@
     "description": "Schedule meeting with Sarah Johnson for next week at 10 AM",
     "client_name": "Sarah Johnson",
     "client_id": 6,
-    "completed": false,
+    "completed": true,
     "created_at": "2025-08-24T21:28:09.811196",
-    "completed_at": null
+    "completed_at": "2025-09-30T11:47:29.502851"
   },
   {
     "id": 5,
@@ -150,6 +150,33 @@
     "client_id": null,
     "completed": false,
     "created_at": "2025-09-29T17:13:34.737762",
+    "completed_at": null
+  },
+  {
+    "id": "edc95556",
+    "description": "Final Loop Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-29T17:21:53.224408",
+    "completed_at": null
+  },
+  {
+    "id": "d5e10ae3",
+    "description": "Compatible Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T11:45:55.940706",
+    "completed_at": null
+  },
+  {
+    "id": "0f47ad95",
+    "description": "Balanced Test",
+    "client_name": null,
+    "client_id": null,
+    "completed": false,
+    "created_at": "2025-09-30T11:48:19.949942",
     "completed_at": null
   }
 ]
